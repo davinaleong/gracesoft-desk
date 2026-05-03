@@ -243,7 +243,7 @@
 
 * [x] One-user enforcement
 * [ ] Duration calculation
-* [ ] Billable cost calculation
+* [x] Billable cost calculation
 * [ ] GST calculation
 * [x] Net amount calculation
 * [x] transaction type validation
@@ -327,10 +327,10 @@
 
 ## Time Entries
 
-* [ ] Time entries index
-* [ ] Create time entry
-* [ ] Edit time entry
-* [ ] Delete time entry
+* [x] Time entries index
+* [x] Create time entry
+* [x] Edit time entry
+* [x] Delete time entry
 
 ## Transactions
 
@@ -347,7 +347,7 @@
 
 ## CRUD Rules
 
-* [ ] All CRUD routes resolve via UUID
+* [x] All CRUD routes resolve via UUID
 * [ ] All UI tables display human-readable references
 * [x] Projects display `code`
 * [x] Transactions display `transaction_code`
