@@ -88,23 +88,46 @@ test('finance, project, and monthly reports can be exported as csv', function ()
     $user = readyUserForReportExports();
     seedExportData($user);
 
-    $this->actingAs($user)
+    $financeResponse = $this->actingAs($user)
         ->get(route('reports.finance.export'))
         ->assertOk()
         ->assertHeader('content-type', 'text/csv; charset=UTF-8')
         ->assertHeader('content-disposition', 'attachment; filename=finance-report.csv');
 
-    $this->actingAs($user)
+    $projectResponse = $this->actingAs($user)
         ->get(route('reports.projects.export'))
         ->assertOk()
         ->assertHeader('content-type', 'text/csv; charset=UTF-8')
         ->assertHeader('content-disposition', 'attachment; filename=project-report.csv');
 
-    $this->actingAs($user)
+    $monthlyResponse = $this->actingAs($user)
         ->get(route('reports.monthly-summary.export'))
         ->assertOk()
         ->assertHeader('content-type', 'text/csv; charset=UTF-8')
         ->assertHeader('content-disposition', 'attachment; filename=monthly-summary-report.csv');
+
+    $financeCsv = $financeResponse->streamedContent();
+    $projectCsv = $projectResponse->streamedContent();
+    $monthlyCsv = $monthlyResponse->streamedContent();
+
+    expect($financeCsv)
+        ->toContain('"Transaction Code","Transaction UUID"')
+        ->toContain('"Project Code","Project UUID"')
+        ->toContain('PRJ-EXP-001')
+        ->not->toContain('account_id')
+        ->not->toContain('project_id')
+        ->not->toContain('transaction_id');
+
+    expect($projectCsv)
+        ->toContain('"Project Code","Project UUID","Project Name"')
+        ->toContain('PRJ-EXP-001')
+        ->not->toContain(',id,')
+        ->not->toContain('project_id');
+
+    expect($monthlyCsv)
+        ->toContain('Month,Income,Expense,Pending')
+        ->not->toContain('_id')
+        ->not->toContain(',id,');
 });
 
 test('report export routes require authentication', function () {

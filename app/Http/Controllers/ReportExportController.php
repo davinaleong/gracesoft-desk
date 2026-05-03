@@ -22,15 +22,28 @@ class ReportExportController extends Controller
         $report = $this->financeReportService->build($fromDate, $toDate);
 
         return $this->csvResponse('finance-report.csv', [
-            ['Transaction Code', 'Date', 'Type', 'Direction', 'Status', 'Category', 'Project', 'Net Amount'],
+            [
+                'Transaction Code',
+                'Transaction UUID',
+                'Date',
+                'Type',
+                'Direction',
+                'Status',
+                'Category',
+                'Project Code',
+                'Project UUID',
+                'Net Amount',
+            ],
             ...collect($report['transactions'])->map(fn ($row): array => [
                 $row->transaction_code,
+                $row->uuid,
                 $row->transaction_date?->toDateString(),
                 $row->type,
                 $row->direction,
                 $row->status,
                 $row->category?->name,
                 $row->project?->code,
+                $row->project?->uuid,
                 number_format((float) $row->net_amount, 2, '.', ''),
             ])->all(),
         ]);
@@ -42,9 +55,10 @@ class ReportExportController extends Controller
         $report = $this->projectReportService->build($fromDate, $toDate);
 
         return $this->csvResponse('project-report.csv', [
-            ['Project Code', 'Project Name', 'Hours', 'Billable Amount'],
+            ['Project Code', 'Project UUID', 'Project Name', 'Hours', 'Billable Amount'],
             ...collect($report['project_summary'])->map(fn ($row): array => [
                 $row->code,
+                $row->uuid,
                 $row->name,
                 number_format(((int) $row->duration_minutes) / 60, 2, '.', ''),
                 number_format((float) $row->billable_amount, 2, '.', ''),

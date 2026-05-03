@@ -443,10 +443,10 @@
 * [x] Export finance report
 * [x] Export project report
 * [x] Export monthly summary
-* [ ] never export SQL `id`
-* [ ] export UUID only where needed
-* [ ] export `transaction_code` as transaction reference
-* [ ] export `projects.code` as project reference
+* [x] never export SQL `id`
+* [x] export UUID only where needed
+* [x] export `transaction_code` as transaction reference
+* [x] export `projects.code` as project reference
 
 ---
 

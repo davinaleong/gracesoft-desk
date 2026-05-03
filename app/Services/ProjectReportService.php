@@ -16,10 +16,10 @@ class ProjectReportService
         $projectSummary = TimeEntry::query()
             ->join('projects', 'time_entries.project_id', '=', 'projects.id')
             ->whereBetween('time_entries.entry_date', [$fromDate, $toDate])
-            ->select('projects.code', 'projects.name')
+            ->select('projects.code', 'projects.uuid', 'projects.name')
             ->selectRaw('COALESCE(SUM(time_entries.duration_minutes), 0) as duration_minutes')
             ->selectRaw('COALESCE(SUM(time_entries.billable_amount), 0) as billable_amount')
-            ->groupBy('projects.id', 'projects.code', 'projects.name')
+            ->groupBy('projects.id', 'projects.code', 'projects.uuid', 'projects.name')
             ->orderByDesc('billable_amount')
             ->get();
 
