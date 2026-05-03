@@ -2,10 +2,16 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-4">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Monthly Summary') }}</h2>
-            <a href="{{ route('reports.monthly-summary.print', request()->only(['from', 'to'])) }}" target="_blank"
-                class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
-                {{ __('Print') }}
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('reports.monthly-summary.export', request()->only(['from', 'to'])) }}"
+                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                    {{ __('Export CSV') }}
+                </a>
+                <a href="{{ route('reports.monthly-summary.print', request()->only(['from', 'to'])) }}" target="_blank"
+                    class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                    {{ __('Print') }}
+                </a>
+            </div>
         </div>
     </x-slot>
 

@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\TimeEntryController;
 use App\Http\Controllers\TransactionController;
@@ -29,6 +30,10 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured'])->group(f
     Route::get('/reports/finance/print', [ReportController::class, 'printFinance'])->name('reports.finance.print');
     Route::get('/reports/projects/print', [ReportController::class, 'printProjects'])->name('reports.projects.print');
     Route::get('/reports/monthly-summary/print', [ReportController::class, 'printMonthlySummary'])->name('reports.monthly-summary.print');
+
+    Route::get('/reports/finance/export', [ReportExportController::class, 'finance'])->name('reports.finance.export');
+    Route::get('/reports/projects/export', [ReportExportController::class, 'projects'])->name('reports.projects.export');
+    Route::get('/reports/monthly-summary/export', [ReportExportController::class, 'monthlySummary'])->name('reports.monthly-summary.export');
 
     Route::get('/settings/system', [SystemSettingsController::class, 'edit'])->name('settings.system.edit');
     Route::put('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');

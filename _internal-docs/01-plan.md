@@ -439,10 +439,10 @@
 
 ## Export
 
-* [ ] Export CSV
-* [ ] Export finance report
-* [ ] Export project report
-* [ ] Export monthly summary
+* [x] Export CSV
+* [x] Export finance report
+* [x] Export project report
+* [x] Export monthly summary
 * [ ] never export SQL `id`
 * [ ] export UUID only where needed
 * [ ] export `transaction_code` as transaction reference
