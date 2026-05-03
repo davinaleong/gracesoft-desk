@@ -84,6 +84,20 @@ test('dashboard displays aggregated metrics', function () {
         'net_amount' => 500,
     ]);
 
+    Transaction::query()->create([
+        'account_id' => $account->id,
+        'transaction_category_id' => $category->id,
+        'payment_method_id' => $paymentMethod->id,
+        'project_id' => $project->id,
+        'type' => 'expense',
+        'direction' => 'out',
+        'status' => 'pending',
+        'transaction_date' => now()->toDateString(),
+        'amount' => 100,
+        'gst_amount' => 0,
+        'net_amount' => 100,
+    ]);
+
     $response = $this->actingAs($user)->get(route('dashboard'));
 
     $response->assertOk()
@@ -91,6 +105,11 @@ test('dashboard displays aggregated metrics', function () {
         ->assertSee('Total Logged Hours')
         ->assertSee('Total Billable Value')
         ->assertSee('Monthly Net Cashflow')
+        ->assertSee('Expense Breakdown')
+        ->assertSee('Income Breakdown')
+        ->assertSee('Pending / Outstanding Transactions')
+        ->assertSee('Billable by Project')
+        ->assertSee('Billable by Stage')
         ->assertSee('PRJ-DB-001');
 });
 

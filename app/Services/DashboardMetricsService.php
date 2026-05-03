@@ -35,7 +35,12 @@ class DashboardMetricsService
                 'net_cashflow_this_month' => round($netCashflowThisMonth, 2),
             ],
             'monthly_cashflow' => $this->monthlyCashflowSeries(),
+            'expense_breakdown' => $this->breakdownByCategory('out'),
+            'income_breakdown' => $this->breakdownByCategory('in'),
+            'pending_transactions' => $this->pendingTransactionsRows(),
             'project_overview' => $this->projectOverviewRows(),
+            'billable_by_project' => $this->billableByProject(),
+            'billable_by_stage' => $this->billableByStage(),
         ];
     }
 
@@ -96,5 +101,88 @@ class DashboardMetricsService
                 'billable_amount' => round((float) $row->billable_amount, 2),
             ])
             ->all();
+    }
+
+    /**
+     * @return array{labels: array<int, string>, values: array<int, float>}
+     */
+    private function breakdownByCategory(string $direction): array
+    {
+        $rows = Transaction::query()
+            ->leftJoin('transaction_categories', 'transactions.transaction_category_id', '=', 'transaction_categories.id')
+            ->selectRaw("COALESCE(transaction_categories.name, 'Uncategorized') as label")
+            ->selectRaw('COALESCE(SUM(transactions.net_amount), 0) as total_amount')
+            ->where('transactions.status', 'completed')
+            ->where('transactions.direction', $direction)
+            ->whereDate('transactions.transaction_date', '>=', now()->startOfMonth()->toDateString())
+            ->groupBy('label')
+            ->orderByDesc('total_amount')
+            ->limit(6)
+            ->get();
+
+        return [
+            'labels' => $rows->pluck('label')->map(fn ($value): string => (string) $value)->all(),
+            'values' => $rows->pluck('total_amount')->map(fn ($value): float => round((float) $value, 2))->all(),
+        ];
+    }
+
+    /**
+     * @return array<int, array{code: string, date: string, direction: string, net_amount: float, status: string}>
+     */
+    private function pendingTransactionsRows(): array
+    {
+        return Transaction::query()
+            ->where('status', 'pending')
+            ->latest('transaction_date')
+            ->limit(6)
+            ->get()
+            ->map(fn (Transaction $transaction): array => [
+                'code' => (string) $transaction->transaction_code,
+                'date' => (string) $transaction->transaction_date?->toDateString(),
+                'direction' => (string) $transaction->direction,
+                'net_amount' => round((float) $transaction->net_amount, 2),
+                'status' => (string) $transaction->status,
+            ])
+            ->all();
+    }
+
+    /**
+     * @return array{labels: array<int, string>, values: array<int, float>}
+     */
+    private function billableByProject(): array
+    {
+        $rows = TimeEntry::query()
+            ->join('projects', 'time_entries.project_id', '=', 'projects.id')
+            ->select('projects.code')
+            ->selectRaw('COALESCE(SUM(time_entries.billable_amount), 0) as total_amount')
+            ->groupBy('projects.id', 'projects.code')
+            ->orderByDesc('total_amount')
+            ->limit(6)
+            ->get();
+
+        return [
+            'labels' => $rows->pluck('code')->map(fn ($value): string => (string) $value)->all(),
+            'values' => $rows->pluck('total_amount')->map(fn ($value): float => round((float) $value, 2))->all(),
+        ];
+    }
+
+    /**
+     * @return array{labels: array<int, string>, values: array<int, float>}
+     */
+    private function billableByStage(): array
+    {
+        $rows = TimeEntry::query()
+            ->leftJoin('project_stages', 'time_entries.project_stage_id', '=', 'project_stages.id')
+            ->selectRaw("COALESCE(project_stages.name, 'No Stage') as label")
+            ->selectRaw('COALESCE(SUM(time_entries.billable_amount), 0) as total_amount')
+            ->groupBy('label')
+            ->orderByDesc('total_amount')
+            ->limit(8)
+            ->get();
+
+        return [
+            'labels' => $rows->pluck('label')->map(fn ($value): string => (string) $value)->all(),
+            'values' => $rows->pluck('total_amount')->map(fn ($value): float => round((float) $value, 2))->all(),
+        ];
     }
 }

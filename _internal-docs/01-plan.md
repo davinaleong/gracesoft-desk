@@ -367,12 +367,12 @@
 ## SQL Aggregation
 
 * [x] Monthly cashflow query
-* [ ] Expense breakdown query
-* [ ] Income breakdown query
-* [ ] Pending / outstanding query
+* [x] Expense breakdown query
+* [x] Income breakdown query
+* [x] Pending / outstanding query
 * [x] Project overview query
-* [ ] Billable by project query
-* [ ] Billable by stage query
+* [x] Billable by project query
+* [x] Billable by stage query
 
 ## Optimization
 
@@ -394,9 +394,9 @@
 ## Finance Widgets
 
 * [x] Monthly cashflow chart
-* [ ] Expense breakdown donut
-* [ ] Income breakdown donut
-* [ ] Pending / outstanding table
+* [x] Expense breakdown donut
+* [x] Income breakdown donut
+* [x] Pending / outstanding table
 
 ## Project Widgets
 
@@ -404,8 +404,8 @@
 * [x] Total logged hours card
 * [x] Total billable value card
 * [x] Project overview table
-* [ ] Billable by project donut
-* [ ] Billable by stage chart
+* [x] Billable by project donut
+* [x] Billable by stage chart
 
 ---
 
