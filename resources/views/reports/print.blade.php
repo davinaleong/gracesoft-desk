@@ -62,11 +62,11 @@
             <tbody>
                 @foreach ($report['transactions'] as $transaction)
                     <tr>
-                        <td>{{ $transaction->transaction_code }}</td>
-                        <td>{{ $transaction->transaction_date?->toDateString() }}</td>
+                        <td><span style="font-family: monospace;">{{ $transaction->transaction_code }}</span></td>
+                        <td>@deskDate($transaction->transaction_date)</td>
                         <td>{{ $transaction->type }} / {{ $transaction->direction }}</td>
                         <td>{{ $transaction->status }}</td>
-                        <td>{{ number_format((float) $transaction->net_amount, 2) }}</td>
+                        <td>@deskMoney((float) $transaction->net_amount)</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -85,9 +85,9 @@
             <tbody>
                 @foreach ($report['project_summary'] as $row)
                     <tr>
-                        <td>{{ $row->code }} - {{ $row->name }}</td>
-                        <td>{{ number_format(((int) $row->duration_minutes) / 60, 2) }}</td>
-                        <td>{{ number_format((float) $row->billable_amount, 2) }}</td>
+                        <td><span style="font-family: monospace;">{{ $row->code }}</span> - {{ $row->name }}</td>
+                        <td>@deskDuration((int) $row->duration_minutes)</td>
+                        <td>@deskMoney((float) $row->billable_amount)</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -108,9 +108,9 @@
                 @foreach ($report['monthly_summary'] as $row)
                     <tr>
                         <td>{{ $row['month_label'] }}</td>
-                        <td>{{ number_format((float) $row['income_total'], 2) }}</td>
-                        <td>{{ number_format((float) $row['expense_total'], 2) }}</td>
-                        <td>{{ number_format((float) $row['pending_total'], 2) }}</td>
+                        <td>@deskMoney((float) $row['income_total'])</td>
+                        <td>@deskMoney((float) $row['expense_total'])</td>
+                        <td>@deskMoney((float) $row['pending_total'])</td>
                     </tr>
                 @endforeach
             </tbody>

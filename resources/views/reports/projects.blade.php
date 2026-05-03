@@ -44,12 +44,12 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
                     <p class="text-sm text-gray-500">{{ __('Total Hours') }}</p>
                     <p class="mt-2 text-2xl font-semibold">
-                        {{ number_format((float) $report['totals']['total_hours'], 2) }}</p>
+                        {{ number_format((float) $report['totals']['total_hours'], 2) }}h</p>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
                     <p class="text-sm text-gray-500">{{ __('Total Billable') }}</p>
                     <p class="mt-2 text-2xl font-semibold">
-                        {{ number_format((float) $report['totals']['total_billable'], 2) }}</p>
+                        @deskMoney((float) $report['totals']['total_billable'])</p>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
                     <p class="text-sm text-gray-500">{{ __('Total Stages') }}</p>
@@ -76,9 +76,8 @@
                                 <tr>
                                     <td class="px-3 py-2 text-sm"><span class="font-mono">{{ $row->code }}</span> -
                                         {{ $row->name }}</td>
-                                    <td class="px-3 py-2 text-sm">
-                                        {{ number_format(((int) $row->duration_minutes) / 60, 2) }}</td>
-                                    <td class="px-3 py-2 text-sm">{{ number_format((float) $row->billable_amount, 2) }}
+                                    <td class="px-3 py-2 text-sm">@deskDuration((int) $row->duration_minutes)</td>
+                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row->billable_amount)
                                     </td>
                                 </tr>
                             @empty

@@ -36,13 +36,12 @@
                             <tbody class="divide-y divide-gray-100">
                                 @forelse ($timeEntries as $timeEntry)
                                     <tr>
-                                        <td class="px-4 py-3 text-sm">{{ $timeEntry->entry_date?->toDateString() }}</td>
+                                        <td class="px-4 py-3 text-sm">@deskDate($timeEntry->entry_date)</td>
                                         <td class="px-4 py-3 text-sm">{{ $timeEntry->project?->code }}</td>
                                         <td class="px-4 py-3 text-sm">{{ $timeEntry->stage?->name ?? 'N/A' }}</td>
-                                        <td class="px-4 py-3 text-sm">{{ $timeEntry->duration_minutes }}
-                                            {{ __('mins') }}</td>
+                                        <td class="px-4 py-3 text-sm">@deskDuration($timeEntry->duration_minutes)</td>
                                         <td class="px-4 py-3 text-sm">
-                                            {{ number_format((float) $timeEntry->billable_amount, 2) }}</td>
+                                            @deskMoney((float) $timeEntry->billable_amount)</td>
                                         <td class="px-4 py-3 text-right text-sm">
                                             <a href="{{ route('time-entries.show', $timeEntry) }}"
                                                 class="text-blue-600 hover:text-blue-800">{{ __('View') }}</a>

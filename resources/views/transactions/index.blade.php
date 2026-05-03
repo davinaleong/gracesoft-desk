@@ -39,12 +39,12 @@
                                         <td class="px-4 py-3 font-mono text-sm">{{ $transaction->transaction_code }}
                                         </td>
                                         <td class="px-4 py-3 text-sm">
-                                            {{ $transaction->transaction_date?->toDateString() }}</td>
+                                            @deskDate($transaction->transaction_date)</td>
                                         <td class="px-4 py-3 text-sm">{{ $transaction->type }} /
                                             {{ $transaction->direction }}</td>
                                         <td class="px-4 py-3 text-sm">{{ $transaction->status }}</td>
                                         <td class="px-4 py-3 text-sm">
-                                            {{ number_format((float) $transaction->amount, 2) }}</td>
+                                            @deskMoney((float) $transaction->amount)</td>
                                         <td class="px-4 py-3 text-right text-sm">
                                             <a href="{{ route('transactions.show', $transaction) }}"
                                                 class="text-blue-600 hover:text-blue-800">{{ __('View') }}</a>

@@ -40,19 +40,19 @@
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">{{ __('Entry Date') }}</dt>
-                            <dd class="text-base">{{ $timeEntry->entry_date?->toDateString() }}</dd>
+                            <dd class="text-base">@deskDate($timeEntry->entry_date)</dd>
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">{{ __('Duration') }}</dt>
-                            <dd class="text-base">{{ $timeEntry->duration_minutes }} {{ __('minutes') }}</dd>
+                            <dd class="text-base">@deskDuration($timeEntry->duration_minutes)</dd>
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">{{ __('Hourly Rate') }}</dt>
-                            <dd class="text-base">{{ number_format((float) ($timeEntry->hourly_rate ?? 0), 2) }}</dd>
+                            <dd class="text-base">@deskMoney((float) ($timeEntry->hourly_rate ?? 0))</dd>
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">{{ __('Billable Amount') }}</dt>
-                            <dd class="text-base">{{ number_format((float) $timeEntry->billable_amount, 2) }}</dd>
+                            <dd class="text-base">@deskMoney((float) $timeEntry->billable_amount)</dd>
                         </div>
                         <div class="sm:col-span-2">
                             <dt class="text-sm text-gray-500">{{ __('Notes') }}</dt>

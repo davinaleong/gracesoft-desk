@@ -465,10 +465,10 @@
 
 ## Data Formatting
 
-* [ ] SGD formatting
-* [ ] date formatting
-* [ ] duration formatting
-* [ ] mono formatting for refs / IDs
+* [x] SGD formatting
+* [x] date formatting
+* [x] duration formatting
+* [x] mono formatting for refs / IDs
 
 ---
 

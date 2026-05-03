@@ -26,12 +26,12 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
                     <p class="text-sm text-gray-500">{{ __('Total Billable Value') }}</p>
                     <p class="mt-2 text-2xl font-semibold text-gray-900">
-                        {{ number_format((float) $dashboard['kpis']['total_billable_value'], 2) }}</p>
+                        @deskMoney((float) $dashboard['kpis']['total_billable_value'])</p>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
                     <p class="text-sm text-gray-500">{{ __('Net Cashflow (This Month)') }}</p>
                     <p class="mt-2 text-2xl font-semibold text-gray-900">
-                        {{ number_format((float) $dashboard['kpis']['net_cashflow_this_month'], 2) }}</p>
+                        @deskMoney((float) $dashboard['kpis']['net_cashflow_this_month'])</p>
                 </div>
             </div>
 
@@ -94,10 +94,10 @@
                                     @forelse ($dashboard['pending_transactions'] as $row)
                                         <tr>
                                             <td class="px-3 py-2 text-sm font-mono">{{ $row['code'] }}</td>
-                                            <td class="px-3 py-2 text-sm">{{ $row['date'] }}</td>
+                                            <td class="px-3 py-2 text-sm">@deskDate($row['date'])</td>
                                             <td class="px-3 py-2 text-sm">{{ strtoupper($row['direction']) }}</td>
                                             <td class="px-3 py-2 text-sm">
-                                                {{ number_format((float) $row['net_amount'], 2) }}</td>
+                                                @deskMoney((float) $row['net_amount'])</td>
                                         </tr>
                                     @empty
                                         <tr>
@@ -136,9 +136,9 @@
                                                 <div>{{ $project['name'] }}</div>
                                             </td>
                                             <td class="px-3 py-2 text-sm">
-                                                {{ number_format($project['duration_minutes'] / 60, 2) }}</td>
+                                                @deskDuration($project['duration_minutes'])</td>
                                             <td class="px-3 py-2 text-sm">
-                                                {{ number_format((float) $project['billable_amount'], 2) }}</td>
+                                                @deskMoney((float) $project['billable_amount'])</td>
                                         </tr>
                                     @empty
                                         <tr>

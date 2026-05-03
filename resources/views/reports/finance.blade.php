@@ -39,22 +39,22 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
                     <p class="text-sm text-gray-500">{{ __('Income') }}</p>
-                    <p class="mt-2 text-2xl font-semibold">{{ number_format((float) $report['totals']['income'], 2) }}
+                    <p class="mt-2 text-2xl font-semibold">@deskMoney((float) $report['totals']['income'])
                     </p>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
                     <p class="text-sm text-gray-500">{{ __('Expense') }}</p>
-                    <p class="mt-2 text-2xl font-semibold">{{ number_format((float) $report['totals']['expense'], 2) }}
+                    <p class="mt-2 text-2xl font-semibold">@deskMoney((float) $report['totals']['expense'])
                     </p>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
                     <p class="text-sm text-gray-500">{{ __('Pending') }}</p>
-                    <p class="mt-2 text-2xl font-semibold">{{ number_format((float) $report['totals']['pending'], 2) }}
+                    <p class="mt-2 text-2xl font-semibold">@deskMoney((float) $report['totals']['pending'])
                     </p>
                 </div>
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
                     <p class="text-sm text-gray-500">{{ __('Net') }}</p>
-                    <p class="mt-2 text-2xl font-semibold">{{ number_format((float) $report['totals']['net'], 2) }}</p>
+                    <p class="mt-2 text-2xl font-semibold">@deskMoney((float) $report['totals']['net'])</p>
                 </div>
             </div>
 
@@ -65,7 +65,7 @@
                         @forelse ($report['expense_by_category'] as $row)
                             <li class="flex justify-between text-sm">
                                 <span>{{ $row->category_name }}</span>
-                                <span class="font-medium">{{ number_format((float) $row->total_amount, 2) }}</span>
+                                <span class="font-medium">@deskMoney((float) $row->total_amount)</span>
                             </li>
                         @empty
                             <li class="text-sm text-gray-500">{{ __('No expense data in selected range.') }}</li>
@@ -79,7 +79,7 @@
                         @forelse ($report['income_by_category'] as $row)
                             <li class="flex justify-between text-sm">
                                 <span>{{ $row->category_name }}</span>
-                                <span class="font-medium">{{ number_format((float) $row->total_amount, 2) }}</span>
+                                <span class="font-medium">@deskMoney((float) $row->total_amount)</span>
                             </li>
                         @empty
                             <li class="text-sm text-gray-500">{{ __('No income data in selected range.') }}</li>

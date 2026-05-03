@@ -23,7 +23,7 @@
 
                     <div>
                         <p class="text-xs text-gray-500 uppercase">{{ __('Date') }}</p>
-                        <p class="text-base">{{ $transaction->transaction_date?->toDateString() }}</p>
+                        <p class="text-base">@deskDate($transaction->transaction_date)</p>
                     </div>
 
                     <div>
@@ -40,9 +40,9 @@
                     <div>
                         <p class="text-xs text-gray-500 uppercase">{{ __('Amount / GST / Net') }}</p>
                         <p class="text-base">
-                            {{ number_format((float) $transaction->amount, 2) }} /
-                            {{ number_format((float) $transaction->gst_amount, 2) }} /
-                            {{ number_format((float) $transaction->net_amount, 2) }}
+                            @deskMoney((float) $transaction->amount) /
+                            @deskMoney((float) $transaction->gst_amount) /
+                            @deskMoney((float) $transaction->net_amount)
                         </p>
                     </div>
 

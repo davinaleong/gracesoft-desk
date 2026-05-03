@@ -56,12 +56,9 @@
                             @forelse ($report['monthly_summary'] as $row)
                                 <tr>
                                     <td class="px-3 py-2 text-sm">{{ $row['month_label'] }}</td>
-                                    <td class="px-3 py-2 text-sm">{{ number_format((float) $row['income_total'], 2) }}
-                                    </td>
-                                    <td class="px-3 py-2 text-sm">{{ number_format((float) $row['expense_total'], 2) }}
-                                    </td>
-                                    <td class="px-3 py-2 text-sm">{{ number_format((float) $row['pending_total'], 2) }}
-                                    </td>
+                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row['income_total'])</td>
+                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row['expense_total'])</td>
+                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row['pending_total'])</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -93,10 +90,8 @@
                                 <tr>
                                     <td class="px-3 py-2 text-sm"><span class="font-mono">{{ $row->code }}</span> -
                                         {{ $row->name }}</td>
-                                    <td class="px-3 py-2 text-sm">{{ number_format((float) $row->income_total, 2) }}
-                                    </td>
-                                    <td class="px-3 py-2 text-sm">{{ number_format((float) $row->expense_total, 2) }}
-                                    </td>
+                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row->income_total)</td>
+                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row->expense_total)</td>
                                 </tr>
                             @empty
                                 <tr>
