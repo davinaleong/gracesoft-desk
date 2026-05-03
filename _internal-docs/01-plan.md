@@ -366,11 +366,11 @@
 
 ## SQL Aggregation
 
-* [ ] Monthly cashflow query
+* [x] Monthly cashflow query
 * [ ] Expense breakdown query
 * [ ] Income breakdown query
 * [ ] Pending / outstanding query
-* [ ] Project overview query
+* [x] Project overview query
 * [ ] Billable by project query
 * [ ] Billable by stage query
 
@@ -387,23 +387,23 @@
 
 ## Dashboard Shell
 
-* [ ] Dashboard header
-* [ ] reporting month badge
-* [ ] KPI row
+* [x] Dashboard header
+* [x] reporting month badge
+* [x] KPI row
 
 ## Finance Widgets
 
-* [ ] Monthly cashflow chart
+* [x] Monthly cashflow chart
 * [ ] Expense breakdown donut
 * [ ] Income breakdown donut
 * [ ] Pending / outstanding table
 
 ## Project Widgets
 
-* [ ] Total projects card
-* [ ] Total logged hours card
-* [ ] Total billable value card
-* [ ] Project overview table
+* [x] Total projects card
+* [x] Total logged hours card
+* [x] Total billable value card
+* [x] Project overview table
 * [ ] Billable by project donut
 * [ ] Billable by stage chart
 
