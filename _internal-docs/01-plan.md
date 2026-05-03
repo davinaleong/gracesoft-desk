@@ -74,14 +74,14 @@
 
 ## Frontend Foundation
 
-* [ ] Install Bootstrap 5.3
-* [ ] Setup SCSS / CSS build
-* [ ] Setup app JS bundle
-* [ ] Install ApexCharts
-* [ ] Setup asset pipeline
-* [ ] Add Montserrat
-* [ ] Add Playfair Display
-* [ ] Add Source Code Pro
+* [x] Install Bootstrap 5.3
+* [x] Setup SCSS / CSS build
+* [x] Setup app JS bundle
+* [x] Install ApexCharts
+* [x] Setup asset pipeline
+* [x] Add Montserrat
+* [x] Add Playfair Display
+* [x] Add Source Code Pro
 
 ## Security Foundation
 

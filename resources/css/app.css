@@ -1,3 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@600;700&family=Source+Code+Pro:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+	--font-sans: 'Montserrat', sans-serif;
+	--font-serif: 'Playfair Display', serif;
+	--font-mono: 'Source Code Pro', monospace;
+}
+
+body {
+	font-family: var(--font-sans);
+}

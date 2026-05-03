@@ -18,6 +18,9 @@
         "vite": "^8.0.0"
     },
     "dependencies": {
-        "axios": "^1.16.0"
+        "@popperjs/core": "^2.11.8",
+        "apexcharts": "^5.10.6",
+        "axios": "^1.16.0",
+        "bootstrap": "^5.3.3"
     }
 }
