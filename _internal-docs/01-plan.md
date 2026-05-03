@@ -343,7 +343,7 @@
 
 * [x] Profile & Security
 * [x] 2FA management
-* [ ] system settings
+* [x] system settings
 
 ## CRUD Rules
 

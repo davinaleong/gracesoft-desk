@@ -24,6 +24,9 @@
                     <x-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.*')">
                         {{ __('Transactions') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('settings.system.edit')" :active="request()->routeIs('settings.system.*')">
+                        {{ __('System Settings') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -95,6 +98,9 @@
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.*')">
                 {{ __('Transactions') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('settings.system.edit')" :active="request()->routeIs('settings.system.*')">
+                {{ __('System Settings') }}
             </x-responsive-nav-link>
         </div>
 
