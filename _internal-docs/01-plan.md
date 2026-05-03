@@ -454,7 +454,7 @@
 
 ## UX
 
-* [ ] flash alerts
+* [x] flash alerts
 * [ ] validation states
 * [ ] success states
 * [ ] empty states
