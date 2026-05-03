@@ -360,9 +360,9 @@
 ## Reporting Services
 
 * [ ] Build DashboardService
-* [ ] Build FinanceReportService
-* [ ] Build ProjectReportService
-* [ ] Build LedgerSummaryService
+* [x] Build FinanceReportService
+* [x] Build ProjectReportService
+* [x] Build LedgerSummaryService
 
 ## SQL Aggregation
 
@@ -413,11 +413,11 @@
 
 ## Reports
 
-* [ ] Finance reports page
-* [ ] Project reports page
-* [ ] Monthly summary page
-* [ ] report filters
-* [ ] printable summaries
+* [x] Finance reports page
+* [x] Project reports page
+* [x] Monthly summary page
+* [x] report filters
+* [x] printable summaries
 
 ---
 
