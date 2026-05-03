@@ -14,6 +14,7 @@ class Transaction extends Model
     use HasPublicUuid;
 
     protected $fillable = [
+        'transaction_code',
         'account_id',
         'transaction_category_id',
         'payment_method_id',

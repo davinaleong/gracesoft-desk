@@ -427,7 +427,7 @@
 
 * [x] Import projects CSV
 * [x] Import time entries CSV
-* [ ] Import transactions CSV
+* [x] Import transactions CSV
 * [x] import validation
 * [x] import preview
 * [x] import mapping
@@ -435,7 +435,7 @@
 * [x] map by UUID where valid
 * [x] generate UUID where absent
 * [x] map projects by manual `code`
-* [ ] map transactions by `transaction_code`
+* [x] map transactions by `transaction_code`
 
 ## Export
 

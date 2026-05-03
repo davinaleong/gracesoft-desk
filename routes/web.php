@@ -10,6 +10,7 @@ use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\TimeEntryController;
 use App\Http\Controllers\TimeEntryImportController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\TransactionImportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,6 +32,11 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured'])->group(f
 
     Route::resource('projects', ProjectController::class)->except('destroy');
     Route::resource('time-entries', TimeEntryController::class);
+
+    Route::get('/transactions/import', [TransactionImportController::class, 'create'])->name('transactions.import.create');
+    Route::post('/transactions/import/preview', [TransactionImportController::class, 'preview'])->name('transactions.import.preview');
+    Route::post('/transactions/import/commit', [TransactionImportController::class, 'commit'])->name('transactions.import.commit');
+
     Route::resource('transactions', TransactionController::class)->except('destroy');
 
     Route::get('/reports/finance', [ReportController::class, 'finance'])->name('reports.finance');
