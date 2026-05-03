@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectImportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\SystemSettingsController;
@@ -19,6 +20,10 @@ Route::get('/dashboard', DashboardController::class)
     ->name('dashboard');
 
 Route::middleware(['auth', 'password.changed', 'twofactor.configured'])->group(function () {
+    Route::get('/projects/import', [ProjectImportController::class, 'create'])->name('projects.import.create');
+    Route::post('/projects/import/preview', [ProjectImportController::class, 'preview'])->name('projects.import.preview');
+    Route::post('/projects/import/commit', [ProjectImportController::class, 'commit'])->name('projects.import.commit');
+
     Route::resource('projects', ProjectController::class)->except('destroy');
     Route::resource('time-entries', TimeEntryController::class);
     Route::resource('transactions', TransactionController::class)->except('destroy');

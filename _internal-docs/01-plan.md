@@ -425,16 +425,16 @@
 
 ## Import
 
-* [ ] Import projects CSV
+* [x] Import projects CSV
 * [ ] Import time entries CSV
 * [ ] Import transactions CSV
-* [ ] import validation
-* [ ] import preview
-* [ ] import mapping
-* [ ] ignore incoming SQL IDs
+* [x] import validation
+* [x] import preview
+* [x] import mapping
+* [x] ignore incoming SQL IDs
 * [ ] map by UUID where valid
-* [ ] generate UUID where absent
-* [ ] map projects by manual `code`
+* [x] generate UUID where absent
+* [x] map projects by manual `code`
 * [ ] map transactions by `transaction_code`
 
 ## Export

@@ -5,10 +5,16 @@
                 {{ __('Projects') }}
             </h2>
 
-            <a href="{{ route('projects.create') }}"
-                class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
-                {{ __('New Project') }}
-            </a>
+            <div class="flex items-center gap-2">
+                <a href="{{ route('projects.import.create') }}"
+                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                    {{ __('Import CSV') }}
+                </a>
+                <a href="{{ route('projects.create') }}"
+                    class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                    {{ __('New Project') }}
+                </a>
+            </div>
         </div>
     </x-slot>
 
