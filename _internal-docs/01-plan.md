@@ -85,13 +85,13 @@
 
 ## Security Foundation
 
-* [ ] Install Laravel Breeze (Blade)
-* [ ] Remove registration routes
-* [ ] Remove forgot password flow (or restrict)
-* [ ] Disable public user creation
+* [x] Install Laravel Breeze (Blade)
+* [x] Remove registration routes
+* [x] Remove forgot password flow (or restrict)
+* [x] Disable public user creation
 * [ ] Configure auth guard
 * [ ] Configure session security
-* [ ] Configure login throttling
+* [x] Configure login throttling
 
 ---
 
