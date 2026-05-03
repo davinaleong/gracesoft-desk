@@ -116,10 +116,10 @@
 
 * [x] Add `must_change_password` to users table
 * [x] Add `password_changed_at`
-* [ ] Create force password change screen
-* [ ] Create password rotation flow
-* [ ] Block dashboard until password updated
-* [ ] Add `EnsurePasswordChanged` middleware
+* [x] Create force password change screen
+* [x] Create password rotation flow
+* [x] Block dashboard until password updated
+* [x] Add `EnsurePasswordChanged` middleware
 
 ## Mandatory QR 2FA
 
