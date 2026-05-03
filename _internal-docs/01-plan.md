@@ -37,20 +37,20 @@
 
 ## Core Data Rules (Non-Negotiable)
 
-* [ ] Keep `id` as internal SQL PK on all core tables
-* [ ] Add `uuid` to all public-facing tables
-* [ ] Use `uuid` for route model binding
+* [x] Keep `id` as internal SQL PK on all core tables
+* [x] Add `uuid` to all public-facing tables
+* [x] Use `uuid` for route model binding
 * [ ] Never expose SQL `id` in UI / URLs / exports
-* [ ] Use `uuid` for forms, URLs, route actions, exports
-* [ ] Use `id` for joins, FKs, indexing, SQL performance
-* [ ] Add UUID generation to all public models
-* [ ] Enforce UUID route binding globally
-* [ ] Add `transaction_code` to transactions
-* [ ] Use `transaction_code` as visible transaction identifier
-* [ ] Keep `projects.code` manually controlled
-* [ ] Never auto-generate project codes
-* [ ] Auto-generate UUIDs on create
-* [ ] Auto-generate `transaction_code` on create
+* [x] Use `uuid` for forms, URLs, route actions, exports
+* [x] Use `id` for joins, FKs, indexing, SQL performance
+* [x] Add UUID generation to all public models
+* [x] Enforce UUID route binding globally
+* [x] Add `transaction_code` to transactions
+* [x] Use `transaction_code` as visible transaction identifier
+* [x] Keep `projects.code` manually controlled
+* [x] Never auto-generate project codes
+* [x] Auto-generate UUIDs on create
+* [x] Auto-generate `transaction_code` on create
 
 ---
 
@@ -58,9 +58,9 @@
 
 ## Laravel Foundation
 
-* [ ] Create Laravel 12 project
+* [x] Create Laravel 12 project
 * [ ] Configure environment
-* [ ] Configure MySQL
+* [x] Configure MySQL
 * [ ] Setup app branding:
 
   * [ ] app name
@@ -99,23 +99,23 @@
 
 ## Single-Seat Admin Auth
 
-* [ ] Create single-user auth rules
-* [ ] Enforce only one user may exist
-* [ ] Prevent second user creation
+* [x] Create single-user auth rules
+* [x] Enforce only one user may exist
+* [x] Prevent second user creation
 * [ ] Remove user CRUD
-* [ ] Seed default admin account
+* [x] Seed default admin account
 
 ## Seeded Admin Security
 
-* [ ] Create `AdminUserSeeder`
-* [ ] Seed one default admin
-* [ ] Seed default temp password
-* [ ] Set `must_change_password = true`
+* [x] Create `AdminUserSeeder`
+* [x] Seed one default admin
+* [x] Seed default temp password
+* [x] Set `must_change_password = true`
 
 ## Forced Password Rotation
 
-* [ ] Add `must_change_password` to users table
-* [ ] Add `password_changed_at`
+* [x] Add `must_change_password` to users table
+* [x] Add `password_changed_at`
 * [ ] Create force password change screen
 * [ ] Create password rotation flow
 * [ ] Block dashboard until password updated
@@ -127,7 +127,7 @@
 * [ ] Enable TOTP
 * [ ] Enable QR setup
 * [ ] Enable recovery codes
-* [ ] Add `two_factor_confirmed_at`
+* [x] Add `two_factor_confirmed_at`
 * [ ] Create QR setup screen
 * [ ] Create TOTP confirm flow
 * [ ] Block dashboard until 2FA confirmed
@@ -149,43 +149,43 @@
 
 * [ ] Finalize normalized schema
 * [ ] Define naming conventions
-* [ ] Define FK rules
-* [ ] Define enum strategy
-* [ ] Define soft delete strategy
+* [x] Define FK rules
+* [x] Define enum strategy
+* [x] Define soft delete strategy
 * [ ] Define audit strategy
-* [ ] Define UUID strategy
-* [ ] Define public vs internal identifier rules
+* [x] Define UUID strategy
+* [x] Define public vs internal identifier rules
 
 ## Tables — Core
 
-* [ ] Create `users`
-* [ ] Create `projects`
-* [ ] Create `project_stages`
-* [ ] Create `time_entries`
-* [ ] Create `transaction_categories`
-* [ ] Create `payment_methods`
-* [ ] Create `accounts`
-* [ ] Create `transactions`
+* [x] Create `users`
+* [x] Create `projects`
+* [x] Create `project_stages`
+* [x] Create `time_entries`
+* [x] Create `transaction_categories`
+* [x] Create `payment_methods`
+* [x] Create `accounts`
+* [x] Create `transactions`
 
 ## Core Table Rules
 
-* [ ] All public-facing tables use `id` + `uuid`
-* [ ] All public-facing tables index `uuid`
-* [ ] All public-facing tables keep integer `id`
-* [ ] All public-facing tables use timestamps
+* [x] All public-facing tables use `id` + `uuid`
+* [x] All public-facing tables index `uuid`
+* [x] All public-facing tables keep integer `id`
+* [x] All public-facing tables use timestamps
 * [ ] Never expose SQL `id` publicly
 
 ## Constraints & Indexing
 
-* [ ] Add unique constraints
-* [ ] Add FK constraints
-* [ ] Add composite indexes
-* [ ] Add reporting indexes
-* [ ] Add transaction date indexes
-* [ ] Add project aggregation indexes
-* [ ] Add UUID indexes
-* [ ] Add `transaction_code` unique index
-* [ ] Add `projects.code` unique index
+* [x] Add unique constraints
+* [x] Add FK constraints
+* [x] Add composite indexes
+* [x] Add reporting indexes
+* [x] Add transaction date indexes
+* [x] Add project aggregation indexes
+* [x] Add UUID indexes
+* [x] Add `transaction_code` unique index
+* [x] Add `projects.code` unique index
 
 ---
 
@@ -193,21 +193,21 @@
 
 ## Seeders
 
-* [ ] Seed project stages
-* [ ] Seed transaction categories
-* [ ] Seed payment methods
-* [ ] Seed accounts
-* [ ] Seed starter projects
-* [ ] Seed admin user
+* [x] Seed project stages
+* [x] Seed transaction categories
+* [x] Seed payment methods
+* [x] Seed accounts
+* [x] Seed starter projects
+* [x] Seed admin user
 
 ## Static Reference Sets
 
-* [ ] SDLC stages
-* [ ] transaction types
-* [ ] transaction statuses
-* [ ] payment methods
-* [ ] account types
-* [ ] starter project codes
+* [x] SDLC stages
+* [x] transaction types
+* [x] transaction statuses
+* [x] payment methods
+* [x] account types
+* [x] starter project codes
 
 ---
 
@@ -215,41 +215,41 @@
 
 ## Models
 
-* [ ] Build User model
-* [ ] Build Project model
-* [ ] Build ProjectStage model
-* [ ] Build TimeEntry model
-* [ ] Build Transaction model
-* [ ] Build TransactionCategory model
-* [ ] Build PaymentMethod model
-* [ ] Build Account model
+* [x] Build User model
+* [x] Build Project model
+* [x] Build ProjectStage model
+* [x] Build TimeEntry model
+* [x] Build Transaction model
+* [x] Build TransactionCategory model
+* [x] Build PaymentMethod model
+* [x] Build Account model
 
 ## Model Rules
 
-* [ ] Add UUID generation trait to all public models
-* [ ] Override route model binding to UUID
+* [x] Add UUID generation trait to all public models
+* [x] Override route model binding to UUID
 * [ ] Hide SQL `id` in public-facing payloads where appropriate
 
 ## Relationships
 
-* [ ] Project → TimeEntries
-* [ ] TimeEntry → Project
-* [ ] TimeEntry → Stage
-* [ ] Transaction → Category
-* [ ] Transaction → PaymentMethod
-* [ ] Transaction → Account
+* [x] Project → TimeEntries
+* [x] TimeEntry → Project
+* [x] TimeEntry → Stage
+* [x] Transaction → Category
+* [x] Transaction → PaymentMethod
+* [x] Transaction → Account
 
 ## Domain Rules
 
-* [ ] One-user enforcement
+* [x] One-user enforcement
 * [ ] Duration calculation
 * [ ] Billable cost calculation
 * [ ] GST calculation
 * [ ] Net amount calculation
-* [ ] transaction type validation
+* [x] transaction type validation
 * [ ] money in/out integrity rules
-* [ ] manual project code enforcement
-* [ ] auto transaction code generation
+* [x] manual project code enforcement
+* [x] auto transaction code generation
 
 ---
 
