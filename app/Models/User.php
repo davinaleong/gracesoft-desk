@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Validation\ValidationException;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 
 #[Fillable([
     'name',
@@ -22,7 +23,7 @@ use Illuminate\Validation\ValidationException;
     'two_factor_confirmed_at',
     'last_login_at',
 ])]
-#[Hidden(['id', 'password', 'remember_token'])]
+#[Hidden(['id', 'password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -30,6 +31,7 @@ class User extends Authenticatable
 
     use HasPublicUuid;
     use Notifiable;
+    use TwoFactorAuthenticatable;
 
     protected static function booted(): void
     {

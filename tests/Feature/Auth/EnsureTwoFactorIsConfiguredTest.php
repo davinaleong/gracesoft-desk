@@ -2,10 +2,11 @@
 
 use App\Models\User;
 
-test('dashboard is blocked until password is changed', function () {
+test('dashboard is blocked until two-factor is confirmed', function () {
     $user = User::factory()->create([
-        'must_change_password' => true,
-        'password_changed_at' => null,
+        'must_change_password' => false,
+        'password_changed_at' => now(),
+        'two_factor_confirmed_at' => null,
     ]);
 
     $this->actingAs($user)
@@ -13,7 +14,7 @@ test('dashboard is blocked until password is changed', function () {
         ->assertRedirect(route('profile.edit'));
 });
 
-test('dashboard is accessible after password is changed', function () {
+test('dashboard is accessible after two-factor confirmation', function () {
     $user = User::factory()->create([
         'must_change_password' => false,
         'password_changed_at' => now(),

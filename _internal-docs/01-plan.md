@@ -123,23 +123,23 @@
 
 ## Mandatory QR 2FA
 
-* [ ] Install Fortify 2FA
-* [ ] Enable TOTP
-* [ ] Enable QR setup
-* [ ] Enable recovery codes
+* [x] Install Fortify 2FA
+* [x] Enable TOTP
+* [x] Enable QR setup
+* [x] Enable recovery codes
 * [x] Add `two_factor_confirmed_at`
-* [ ] Create QR setup screen
-* [ ] Create TOTP confirm flow
-* [ ] Block dashboard until 2FA confirmed
-* [ ] Add `EnsureTwoFactorIsConfigured` middleware
+* [x] Create QR setup screen
+* [x] Create TOTP confirm flow
+* [x] Block dashboard until 2FA confirmed
+* [x] Add `EnsureTwoFactorIsConfigured` middleware
 
 ## Auth UX
 
 * [ ] Branded login screen
 * [ ] Forced password setup screen
-* [ ] Mandatory 2FA setup screen
-* [ ] Security completion gate
-* [ ] Logout flow
+* [x] Mandatory 2FA setup screen
+* [x] Security completion gate
+* [x] Logout flow
 
 ---
 
