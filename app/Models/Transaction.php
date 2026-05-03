@@ -29,6 +29,8 @@ class Transaction extends Model
         'net_amount',
     ];
 
+    protected $hidden = ['id'];
+
     protected static function booted(): void
     {
         static::creating(function (self $transaction): void {

@@ -12,7 +12,7 @@ test('profile page is displayed', function () {
     $response->assertOk();
 });
 
-test('profile information can be updated', function () {
+test('profile information update endpoint is disabled', function () {
     $user = User::factory()->create();
 
     $response = $this
@@ -22,18 +22,10 @@ test('profile information can be updated', function () {
             'email' => 'test@example.com',
         ]);
 
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
-
-    $user->refresh();
-
-    $this->assertSame('Test User', $user->name);
-    $this->assertSame('test@example.com', $user->email);
-    $this->assertNull($user->email_verified_at);
+    $response->assertMethodNotAllowed();
 });
 
-test('email verification status is unchanged when the email address is unchanged', function () {
+test('profile update remains disabled even when email is unchanged', function () {
     $user = User::factory()->create();
 
     $response = $this
@@ -43,14 +35,10 @@ test('email verification status is unchanged when the email address is unchanged
             'email' => $user->email,
         ]);
 
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/profile');
-
-    $this->assertNotNull($user->refresh()->email_verified_at);
+    $response->assertMethodNotAllowed();
 });
 
-test('user can delete their account', function () {
+test('user account deletion endpoint is disabled', function () {
     $user = User::factory()->create();
 
     $response = $this
@@ -59,27 +47,20 @@ test('user can delete their account', function () {
             'password' => 'password',
         ]);
 
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/');
-
-    $this->assertGuest();
-    $this->assertNull($user->fresh());
+    $response->assertMethodNotAllowed();
+    $this->assertNotNull($user->fresh());
 });
 
-test('correct password must be provided to delete account', function () {
+test('delete endpoint remains disabled regardless of password validity', function () {
     $user = User::factory()->create();
 
     $response = $this
         ->actingAs($user)
-        ->from('/profile')
         ->delete('/profile', [
             'password' => 'wrong-password',
         ]);
 
-    $response
-        ->assertSessionHasErrorsIn('userDeletion', 'password')
-        ->assertRedirect('/profile');
+    $response->assertMethodNotAllowed();
 
     $this->assertNotNull($user->fresh());
 });

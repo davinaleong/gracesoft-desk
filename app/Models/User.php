@@ -22,7 +22,7 @@ use Illuminate\Validation\ValidationException;
     'two_factor_confirmed_at',
     'last_login_at',
 ])]
-#[Hidden(['password', 'remember_token'])]
+#[Hidden(['id', 'password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */

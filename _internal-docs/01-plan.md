@@ -40,7 +40,7 @@
 * [x] Keep `id` as internal SQL PK on all core tables
 * [x] Add `uuid` to all public-facing tables
 * [x] Use `uuid` for route model binding
-* [ ] Never expose SQL `id` in UI / URLs / exports
+* [x] Never expose SQL `id` in UI / URLs / exports
 * [x] Use `uuid` for forms, URLs, route actions, exports
 * [x] Use `id` for joins, FKs, indexing, SQL performance
 * [x] Add UUID generation to all public models
@@ -89,8 +89,8 @@
 * [x] Remove registration routes
 * [x] Remove forgot password flow (or restrict)
 * [x] Disable public user creation
-* [ ] Configure auth guard
-* [ ] Configure session security
+* [x] Configure auth guard
+* [x] Configure session security
 * [x] Configure login throttling
 
 ---
@@ -102,7 +102,7 @@
 * [x] Create single-user auth rules
 * [x] Enforce only one user may exist
 * [x] Prevent second user creation
-* [ ] Remove user CRUD
+* [x] Remove user CRUD
 * [x] Seed default admin account
 
 ## Seeded Admin Security
@@ -173,7 +173,7 @@
 * [x] All public-facing tables index `uuid`
 * [x] All public-facing tables keep integer `id`
 * [x] All public-facing tables use timestamps
-* [ ] Never expose SQL `id` publicly
+* [x] Never expose SQL `id` publicly
 
 ## Constraints & Indexing
 
@@ -228,7 +228,7 @@
 
 * [x] Add UUID generation trait to all public models
 * [x] Override route model binding to UUID
-* [ ] Hide SQL `id` in public-facing payloads where appropriate
+* [x] Hide SQL `id` in public-facing payloads where appropriate
 
 ## Relationships
 

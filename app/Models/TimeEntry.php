@@ -31,6 +31,8 @@ class TimeEntry extends Model
         'notes',
     ];
 
+    protected $hidden = ['id'];
+
     protected function casts(): array
     {
         return [

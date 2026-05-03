@@ -31,6 +31,8 @@ class Project extends Model
         'is_billable',
     ];
 
+    protected $hidden = ['id'];
+
     protected function casts(): array
     {
         return [

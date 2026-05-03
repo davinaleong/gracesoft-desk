@@ -46,3 +46,15 @@ test('transactions generate public identifiers automatically', function () {
     expect($transaction->uuid)->not()->toBeEmpty()
         ->and($transaction->transaction_code)->toStartWith('TRX-');
 });
+
+test('public model serialization does not expose sql id', function () {
+    $project = Project::query()->create([
+        'code' => 'GS-TST-001',
+        'name' => 'Public Serialization Check',
+        'status' => 'active',
+        'is_billable' => true,
+    ]);
+
+    expect($project->toArray())->not()->toHaveKey('id')
+        ->and($project->toArray())->toHaveKey('uuid');
+});

@@ -28,6 +28,8 @@ class ProjectStage extends Model
         'status',
     ];
 
+    protected $hidden = ['id'];
+
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);

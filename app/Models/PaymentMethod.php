@@ -26,6 +26,8 @@ class PaymentMethod extends Model
         'is_active',
     ];
 
+    protected $hidden = ['id'];
+
     protected function casts(): array
     {
         return [
