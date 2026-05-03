@@ -1,4 +1,4 @@
-# GraceSoft Desk — Full Combined Milestone Checklist
+# GraceSoft Desk — Full Updated Milestone Checklist
 
 **Product:** GraceSoft Desk
 **Positioning:** SQL-powered internal operations desk (Excel → SQL cutover)
@@ -34,6 +34,23 @@
 * [ ] Confirm Blade-first UI strategy
 * [ ] Confirm ApexCharts for visualizations
 * [ ] Confirm Laravel Excel for imports / exports
+
+## Core Data Rules (Non-Negotiable)
+
+* [ ] Keep `id` as internal SQL PK on all core tables
+* [ ] Add `uuid` to all public-facing tables
+* [ ] Use `uuid` for route model binding
+* [ ] Never expose SQL `id` in UI / URLs / exports
+* [ ] Use `uuid` for forms, URLs, route actions, exports
+* [ ] Use `id` for joins, FKs, indexing, SQL performance
+* [ ] Add UUID generation to all public models
+* [ ] Enforce UUID route binding globally
+* [ ] Add `transaction_code` to transactions
+* [ ] Use `transaction_code` as visible transaction identifier
+* [ ] Keep `projects.code` manually controlled
+* [ ] Never auto-generate project codes
+* [ ] Auto-generate UUIDs on create
+* [ ] Auto-generate `transaction_code` on create
 
 ---
 
@@ -136,6 +153,8 @@
 * [ ] Define enum strategy
 * [ ] Define soft delete strategy
 * [ ] Define audit strategy
+* [ ] Define UUID strategy
+* [ ] Define public vs internal identifier rules
 
 ## Tables — Core
 
@@ -148,6 +167,14 @@
 * [ ] Create `accounts`
 * [ ] Create `transactions`
 
+## Core Table Rules
+
+* [ ] All public-facing tables use `id` + `uuid`
+* [ ] All public-facing tables index `uuid`
+* [ ] All public-facing tables keep integer `id`
+* [ ] All public-facing tables use timestamps
+* [ ] Never expose SQL `id` publicly
+
 ## Constraints & Indexing
 
 * [ ] Add unique constraints
@@ -156,6 +183,9 @@
 * [ ] Add reporting indexes
 * [ ] Add transaction date indexes
 * [ ] Add project aggregation indexes
+* [ ] Add UUID indexes
+* [ ] Add `transaction_code` unique index
+* [ ] Add `projects.code` unique index
 
 ---
 
@@ -194,6 +224,12 @@
 * [ ] Build PaymentMethod model
 * [ ] Build Account model
 
+## Model Rules
+
+* [ ] Add UUID generation trait to all public models
+* [ ] Override route model binding to UUID
+* [ ] Hide SQL `id` in public-facing payloads where appropriate
+
 ## Relationships
 
 * [ ] Project → TimeEntries
@@ -212,6 +248,8 @@
 * [ ] Net amount calculation
 * [ ] transaction type validation
 * [ ] money in/out integrity rules
+* [ ] manual project code enforcement
+* [ ] auto transaction code generation
 
 ---
 
@@ -307,6 +345,14 @@
 * [ ] 2FA management
 * [ ] system settings
 
+## CRUD Rules
+
+* [ ] All CRUD routes resolve via UUID
+* [ ] All UI tables display human-readable references
+* [ ] Projects display `code`
+* [ ] Transactions display `transaction_code`
+* [ ] Never expose SQL `id` in forms or views
+
 ---
 
 # Phase 9 — Dashboard Query Layer
@@ -385,6 +431,11 @@
 * [ ] import validation
 * [ ] import preview
 * [ ] import mapping
+* [ ] ignore incoming SQL IDs
+* [ ] map by UUID where valid
+* [ ] generate UUID where absent
+* [ ] map projects by manual `code`
+* [ ] map transactions by `transaction_code`
 
 ## Export
 
@@ -392,6 +443,10 @@
 * [ ] Export finance report
 * [ ] Export project report
 * [ ] Export monthly summary
+* [ ] never export SQL `id`
+* [ ] export UUID only where needed
+* [ ] export `transaction_code` as transaction reference
+* [ ] export `projects.code` as project reference
 
 ---
 
@@ -413,7 +468,7 @@
 * [ ] SGD formatting
 * [ ] date formatting
 * [ ] duration formatting
-* [ ] mono formatting for refs
+* [ ] mono formatting for refs / IDs
 
 ---
 
