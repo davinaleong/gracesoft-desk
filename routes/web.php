@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -14,6 +15,7 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'password.changed', 'twofactor.configured'])->group(function () {
     Route::resource('projects', ProjectController::class)->except('destroy');
+    Route::resource('transactions', TransactionController::class)->except('destroy');
 });
 
 Route::middleware('auth')->group(function () {

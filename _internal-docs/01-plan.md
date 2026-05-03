@@ -245,7 +245,7 @@
 * [ ] Duration calculation
 * [ ] Billable cost calculation
 * [ ] GST calculation
-* [ ] Net amount calculation
+* [x] Net amount calculation
 * [x] transaction type validation
 * [ ] money in/out integrity rules
 * [x] manual project code enforcement
@@ -334,10 +334,10 @@
 
 ## Transactions
 
-* [ ] Transactions index
-* [ ] Create transaction
-* [ ] Edit transaction
-* [ ] View transaction
+* [x] Transactions index
+* [x] Create transaction
+* [x] Edit transaction
+* [x] View transaction
 
 ## Settings
 
@@ -350,7 +350,7 @@
 * [ ] All CRUD routes resolve via UUID
 * [ ] All UI tables display human-readable references
 * [x] Projects display `code`
-* [ ] Transactions display `transaction_code`
+* [x] Transactions display `transaction_code`
 * [ ] Never expose SQL `id` in forms or views
 
 ---
