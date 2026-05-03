@@ -426,13 +426,13 @@
 ## Import
 
 * [x] Import projects CSV
-* [ ] Import time entries CSV
+* [x] Import time entries CSV
 * [ ] Import transactions CSV
 * [x] import validation
 * [x] import preview
 * [x] import mapping
 * [x] ignore incoming SQL IDs
-* [ ] map by UUID where valid
+* [x] map by UUID where valid
 * [x] generate UUID where absent
 * [x] map projects by manual `code`
 * [ ] map transactions by `transaction_code`
