@@ -320,10 +320,10 @@
 
 ## Projects
 
-* [ ] Projects index
-* [ ] Create project
-* [ ] Edit project
-* [ ] Project detail
+* [x] Projects index
+* [x] Create project
+* [x] Edit project
+* [x] Project detail
 
 ## Time Entries
 
@@ -341,15 +341,15 @@
 
 ## Settings
 
-* [ ] Profile & Security
-* [ ] 2FA management
+* [x] Profile & Security
+* [x] 2FA management
 * [ ] system settings
 
 ## CRUD Rules
 
 * [ ] All CRUD routes resolve via UUID
 * [ ] All UI tables display human-readable references
-* [ ] Projects display `code`
+* [x] Projects display `code`
 * [ ] Transactions display `transaction_code`
 * [ ] Never expose SQL `id` in forms or views
 
