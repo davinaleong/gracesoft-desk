@@ -476,8 +476,8 @@
 
 ## Audit
 
-* [ ] last login tracking
-* [ ] failed login tracking
+* [x] last login tracking
+* [x] failed login tracking
 * [ ] audit log table
 * [ ] create/update/delete audit logs
 

@@ -22,6 +22,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
     'password_changed_at',
     'two_factor_confirmed_at',
     'last_login_at',
+    'failed_login_attempts',
 ])]
 #[Hidden(['id', 'password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable
@@ -60,6 +61,7 @@ class User extends Authenticatable
             'password_changed_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'failed_login_attempts' => 'integer',
         ];
     }
 
