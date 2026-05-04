@@ -276,12 +276,12 @@
 
 ## Layout Shell
 
-* [ ] Build `layouts/app.blade.php`
-* [ ] Build `layouts/auth.blade.php`
-* [ ] Build sidebar
-* [ ] Build topbar
-* [ ] Build flash message zone
-* [ ] Build content shell
+* [x] Build `layouts/app.blade.php`
+* [x] Build `layouts/auth.blade.php`
+* [x] Build sidebar
+* [x] Build topbar
+* [x] Build flash message zone
+* [x] Build content shell
 
 ---
 
@@ -455,13 +455,13 @@
 ## UX
 
 * [x] flash alerts
-* [ ] validation states
-* [ ] success states
-* [ ] empty states
-* [ ] delete confirmations
+* [x] validation states
+* [x] success states
+* [x] empty states
+* [x] delete confirmations
 * [ ] loading states
 * [ ] keyboard accessibility
-* [ ] table overflow handling
+* [x] table overflow handling
 
 ## Data Formatting
 
@@ -486,7 +486,7 @@
 * [ ] soft deletes
 * [ ] archive mode
 * [ ] transaction integrity checks
-* [ ] destructive action confirmations
+* [x] destructive action confirmations
 
 ---
 
