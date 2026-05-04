@@ -1,4 +1,12 @@
 <x-guest-layout>
+    <div class="mb-6">
+        <p class="text-xs uppercase tracking-[0.2em] text-slate-500">{{ __('Internal Access') }}</p>
+        <h1 class="mt-1 text-2xl font-semibold text-slate-900">{{ __('GraceSoft Desk') }}</h1>
+        <p class="mt-2 text-sm text-slate-600">
+            {{ __('Sign in to continue to your finance, projects, and reporting cockpit.') }}
+        </p>
+    </div>
+
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
@@ -8,8 +16,8 @@
         <!-- Email Address -->
         <div>
             <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required
-                autofocus autocomplete="username" />
+            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')"
+                required autofocus autocomplete="username" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
@@ -32,7 +40,7 @@
             </label>
         </div>
 
-        <div class="flex items-center justify-end mt-4">
+        <div class="flex items-center justify-end mt-6">
             <x-primary-button class="ms-3">
                 {{ __('Log in') }}
             </x-primary-button>

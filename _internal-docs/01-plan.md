@@ -63,10 +63,10 @@
 * [x] Configure MySQL
 * [ ] Setup app branding:
 
-  * [ ] app name
-  * [ ] favicon
-  * [ ] logo
-  * [ ] metadata
+  * [x] app name
+  * [x] favicon
+  * [x] logo
+  * [x] metadata
 * [ ] Configure timezone / locale
 * [ ] Configure mail
 * [ ] Configure queues (optional)
@@ -135,8 +135,8 @@
 
 ## Auth UX
 
-* [ ] Branded login screen
-* [ ] Forced password setup screen
+* [x] Branded login screen
+* [x] Forced password setup screen
 * [x] Mandatory 2FA setup screen
 * [x] Security completion gate
 * [x] Logout flow
