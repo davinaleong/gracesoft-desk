@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Support\TransactionIntegrity;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class StoreTransactionRequest extends FormRequest
 {
@@ -36,5 +38,18 @@ class StoreTransactionRequest extends FormRequest
             'amount' => ['required', 'numeric', 'min:0'],
             'gst_amount' => ['required', 'numeric', 'min:0'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $errors = TransactionIntegrity::validate($this->all());
+
+            foreach ($errors as $field => $messages) {
+                foreach ($messages as $message) {
+                    $validator->errors()->add($field, $message);
+                }
+            }
+        });
     }
 }

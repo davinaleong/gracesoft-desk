@@ -174,6 +174,33 @@ test('transaction can be updated', function () {
         ->and((float) $transaction->net_amount)->toBe(182.0);
 });
 
+test('transaction create enforces money in and gst integrity rules', function () {
+    $user = readyUserForTransactions();
+    $dependencies = transactionDependencies();
+
+    $response = $this->from(route('transactions.create'))
+        ->actingAs($user)
+        ->post(route('transactions.store'), [
+            'account_id' => $dependencies['account']->id,
+            'transaction_category_id' => $dependencies['category']->id,
+            'payment_method_id' => $dependencies['paymentMethod']->id,
+            'project_id' => $dependencies['project']->id,
+            'type' => 'income',
+            'direction' => 'out',
+            'status' => 'completed',
+            'transaction_date' => now()->toDateString(),
+            'reference' => 'INV-BAD-001',
+            'description' => 'Invalid money flow',
+            'amount' => 100,
+            'gst_amount' => 120,
+        ]);
+
+    $response->assertRedirect(route('transactions.create'))
+        ->assertSessionHasErrors(['direction', 'gst_amount']);
+
+    expect(Transaction::query()->count())->toBe(0);
+});
+
 test('transactions routes require authentication', function () {
     $dependencies = transactionDependencies();
 

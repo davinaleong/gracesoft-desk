@@ -8,6 +8,7 @@ use App\Models\PaymentMethod;
 use App\Models\Project;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
+use App\Support\TransactionIntegrity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -201,6 +202,16 @@ class TransactionImportController extends Controller
                 'gst_amount' => ['required', 'numeric', 'min:0'],
                 'net_amount' => ['required', 'numeric', 'min:0'],
             ]);
+
+            $validator->after(function ($validator) use ($payload): void {
+                $errors = TransactionIntegrity::validate($payload);
+
+                foreach ($errors as $field => $messages) {
+                    foreach ($messages as $message) {
+                        $validator->errors()->add($field, $message);
+                    }
+                }
+            });
 
             if ($validator->fails()) {
                 $invalidRows[] = [

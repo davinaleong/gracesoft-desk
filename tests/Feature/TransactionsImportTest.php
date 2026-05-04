@@ -123,6 +123,29 @@ test('transactions csv can be previewed and committed with transaction code upse
         ->and($created->project_id)->toBe($dependencies['project']->id);
 });
 
+test('transactions import preview rejects rows that violate money in and gst integrity rules', function () {
+    $user = readyUserForTransactionsImport();
+    $dependencies = transactionImportDependencies();
+
+    $csvContent = implode("\n", [
+        'account_code,type,direction,status,transaction_date,amount,gst_amount',
+        $dependencies['account']->code.',income,out,completed,2026-05-03,100,120',
+    ]);
+
+    $file = UploadedFile::fake()->createWithContent('transactions-invalid.csv', $csvContent);
+
+    $previewResponse = $this->actingAs($user)
+        ->post(route('transactions.import.preview'), [
+            'csv_file' => $file,
+        ]);
+
+    $previewResponse->assertOk()
+        ->assertSee('Income transactions must use direction "in".')
+        ->assertSee('GST amount cannot exceed transaction amount.');
+
+    expect(session('transactions_import_rows'))->toBeArray()->toHaveCount(0);
+});
+
 test('transactions import routes require authentication', function () {
     $this->get(route('transactions.import.create'))->assertRedirect(route('login'));
 });

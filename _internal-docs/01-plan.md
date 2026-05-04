@@ -244,10 +244,10 @@
 * [x] One-user enforcement
 * [ ] Duration calculation
 * [x] Billable cost calculation
-* [ ] GST calculation
+* [x] GST calculation
 * [x] Net amount calculation
 * [x] transaction type validation
-* [ ] money in/out integrity rules
+* [x] money in/out integrity rules
 * [x] manual project code enforcement
 * [x] auto transaction code generation
 
