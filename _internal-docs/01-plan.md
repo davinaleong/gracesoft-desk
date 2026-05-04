@@ -359,7 +359,7 @@
 
 ## Reporting Services
 
-* [ ] Build DashboardService
+* [x] Build DashboardService
 * [x] Build FinanceReportService
 * [x] Build ProjectReportService
 * [x] Build LedgerSummaryService

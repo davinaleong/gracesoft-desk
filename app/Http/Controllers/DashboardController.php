@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\DashboardMetricsService;
+use App\Services\DashboardService;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __invoke(DashboardMetricsService $dashboardMetricsService): View
+    public function __invoke(DashboardService $dashboardService): View
     {
         return view('dashboard', [
-            'dashboard' => $dashboardMetricsService->getDashboardData(),
+            'dashboard' => $dashboardService->build(),
         ]);
     }
 }
