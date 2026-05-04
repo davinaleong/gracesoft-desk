@@ -13,3 +13,145 @@
 body {
 	font-family: var(--font-sans);
 }
+
+@layer components {
+	.desk-page-shell {
+		@apply py-10 lg:py-12;
+	}
+
+	.desk-page-container {
+		@apply mx-auto max-w-7xl sm:px-6 lg:px-8;
+	}
+
+	.desk-stack {
+		@apply space-y-6;
+	}
+
+	.desk-kpi-grid {
+		@apply mb-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4;
+	}
+
+	.desk-content-grid {
+		@apply grid grid-cols-1 gap-6 xl:grid-cols-4;
+	}
+
+	.desk-report-grid {
+		@apply grid grid-cols-1 gap-6 xl:grid-cols-2;
+	}
+
+	.desk-filter-grid {
+		@apply grid grid-cols-1 gap-4 sm:grid-cols-3;
+	}
+
+	.desk-toolbar-actions {
+		@apply flex items-center gap-2;
+	}
+
+	.desk-action-secondary {
+		@apply inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-700 transition duration-150 ease-in-out hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+	}
+
+	.desk-action-primary {
+		@apply inline-flex items-center rounded-md border border-transparent bg-slate-800 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-150 ease-in-out hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+	}
+
+	.desk-interactive-row {
+		@apply transition-colors duration-150 hover:bg-slate-50;
+	}
+
+	.desk-page-title {
+		@apply font-serif text-2xl font-semibold leading-tight text-slate-900;
+	}
+
+	.desk-brand-kicker {
+		@apply mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500;
+	}
+
+	.desk-context-chip {
+		@apply inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-sky-700;
+	}
+
+	.desk-empty-panel {
+		@apply rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500;
+	}
+
+	.desk-status-chip {
+		@apply inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-[0.08em];
+	}
+
+	.desk-status-chip-in {
+		@apply border-emerald-200 bg-emerald-50 text-emerald-700;
+	}
+
+	.desk-status-chip-out {
+		@apply border-rose-200 bg-rose-50 text-rose-700;
+	}
+
+	.desk-kpi-label {
+		@apply text-xs font-semibold uppercase tracking-[0.08em] text-slate-500;
+	}
+
+	.desk-kpi-value {
+		@apply mt-2 text-2xl font-semibold text-slate-900;
+	}
+
+	.desk-kpi-value-positive {
+		@apply mt-2 text-2xl font-semibold text-emerald-700;
+	}
+
+	.desk-kpi-value-negative {
+		@apply mt-2 text-2xl font-semibold text-rose-700;
+	}
+
+	.desk-kpi-value-pending {
+		@apply mt-2 text-2xl font-semibold text-amber-700;
+	}
+
+	.desk-table-head {
+		@apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500;
+	}
+
+	.desk-table-cell {
+		@apply px-2.5 py-1.5 text-sm;
+	}
+
+	.desk-table-empty {
+		@apply px-2.5 py-3 text-sm text-slate-500;
+	}
+
+	.desk-pill {
+		@apply inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-600;
+	}
+
+	.desk-table-dense th {
+		@apply px-2.5 py-2;
+	}
+
+	.desk-table-dense td {
+		@apply px-2.5 py-1.5 text-sm;
+	}
+
+	.desk-table-dense tbody tr:nth-child(even) {
+		@apply bg-slate-50;
+	}
+
+	.desk-card {
+		@apply overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm;
+	}
+
+	.desk-card-muted {
+		@apply overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm;
+	}
+
+	.desk-card-body {
+		@apply p-6 text-slate-900;
+	}
+
+	.desk-kpi-card {
+		@apply rounded-xl border border-slate-200 bg-white p-5 shadow-sm;
+	}
+
+	.desk-card-title {
+		@apply mb-4 font-serif text-lg font-semibold text-slate-900;
+	}
+}

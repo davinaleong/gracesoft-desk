@@ -1,25 +1,30 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-4">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Monthly Summary') }}</h2>
-            <div class="flex items-center gap-2">
+            <div>
+                <p class="desk-brand-kicker">{{ __('GraceSoft Desk') }}</p>
+                <div class="flex items-center gap-3">
+                    <h2 class="desk-page-title">{{ __('Monthly Summary') }}</h2>
+                    <span class="desk-context-chip">{{ __('Ledger') }}</span>
+                </div>
+            </div>
+            <div class="desk-toolbar-actions">
                 <a href="{{ route('reports.monthly-summary.export', request()->only(['from', 'to'])) }}"
-                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                    class="desk-action-secondary">
                     {{ __('Export CSV') }}
                 </a>
                 <a href="{{ route('reports.monthly-summary.print', request()->only(['from', 'to'])) }}" target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                    class="desk-action-primary">
                     {{ __('Print') }}
                 </a>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <form method="GET" action="{{ route('reports.monthly-summary') }}"
-                    class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="desk-page-shell">
+        <div class="desk-page-container desk-stack">
+            <div class="desk-card-muted p-6">
+                <form method="GET" action="{{ route('reports.monthly-summary') }}" class="desk-filter-grid">
                     <div>
                         <x-input-label for="from" :value="__('From')" />
                         <x-text-input id="from" name="from" type="date" class="mt-1 block w-full"
@@ -36,34 +41,37 @@
                 </form>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-semibold mb-4">{{ __('Monthly Ledger') }}</h3>
+            <div class="desk-card desk-card-body">
+                <h3 class="desk-card-title">{{ __('Monthly Ledger') }}</h3>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="desk-table-dense min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th class="desk-table-head">
                                     {{ __('Month') }}</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th class="desk-table-head">
                                     {{ __('Income') }}</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th class="desk-table-head">
                                     {{ __('Expense') }}</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th class="desk-table-head">
                                     {{ __('Pending') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse ($report['monthly_summary'] as $row)
-                                <tr>
-                                    <td class="px-3 py-2 text-sm">{{ $row['month_label'] }}</td>
-                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row['income_total'])</td>
-                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row['expense_total'])</td>
-                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row['pending_total'])</td>
+                                <tr class="desk-interactive-row">
+                                    <td class="desk-table-cell">{{ $row['month_label'] }}</td>
+                                    <td class="desk-table-cell">@deskMoney((float) $row['income_total'])</td>
+                                    <td class="desk-table-cell">@deskMoney((float) $row['expense_total'])</td>
+                                    <td class="desk-table-cell">@deskMoney((float) $row['pending_total'])</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td class="px-3 py-4 text-sm text-gray-500" colspan="4">
-                                        {{ __('No ledger data in selected range.') }}</td>
+                                    <td class="desk-table-empty" colspan="4">
+                                        <div class="desk-empty-panel">
+                                            {{ __('No ledger data in selected range.') }}
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -71,32 +79,35 @@
                 </div>
             </div>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <h3 class="text-lg font-semibold mb-4">{{ __('Account Summary') }}</h3>
+            <div class="desk-card desk-card-body">
+                <h3 class="desk-card-title">{{ __('Account Summary') }}</h3>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="desk-table-dense min-w-full divide-y divide-gray-200">
                         <thead>
                             <tr>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th class="desk-table-head">
                                     {{ __('Account') }}</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th class="desk-table-head">
                                     {{ __('Income') }}</th>
-                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                <th class="desk-table-head">
                                     {{ __('Expense') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             @forelse ($report['account_summary'] as $row)
-                                <tr>
-                                    <td class="px-3 py-2 text-sm"><span class="font-mono">{{ $row->code }}</span> -
+                                <tr class="desk-interactive-row">
+                                    <td class="desk-table-cell"><span class="font-mono">{{ $row->code }}</span> -
                                         {{ $row->name }}</td>
-                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row->income_total)</td>
-                                    <td class="px-3 py-2 text-sm">@deskMoney((float) $row->expense_total)</td>
+                                    <td class="desk-table-cell">@deskMoney((float) $row->income_total)</td>
+                                    <td class="desk-table-cell">@deskMoney((float) $row->expense_total)</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td class="px-3 py-4 text-sm text-gray-500" colspan="3">
-                                        {{ __('No account summary data in selected range.') }}</td>
+                                    <td class="desk-table-empty" colspan="3">
+                                        <div class="desk-empty-panel">
+                                            {{ __('No account summary data in selected range.') }}
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforelse
                         </tbody>

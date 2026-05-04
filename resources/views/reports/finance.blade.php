@@ -1,25 +1,30 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-4">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Finance Report') }}</h2>
-            <div class="flex items-center gap-2">
+            <div>
+                <p class="desk-brand-kicker">{{ __('GraceSoft Desk') }}</p>
+                <div class="flex items-center gap-3">
+                    <h2 class="desk-page-title">{{ __('Finance Report') }}</h2>
+                    <span class="desk-context-chip">{{ __('Finance') }}</span>
+                </div>
+            </div>
+            <div class="desk-toolbar-actions">
                 <a href="{{ route('reports.finance.export', request()->only(['from', 'to'])) }}"
-                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                    class="desk-action-secondary">
                     {{ __('Export CSV') }}
                 </a>
                 <a href="{{ route('reports.finance.print', request()->only(['from', 'to'])) }}" target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                    class="desk-action-primary">
                     {{ __('Print') }}
                 </a>
             </div>
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                <form method="GET" action="{{ route('reports.finance') }}"
-                    class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="desk-page-shell">
+        <div class="desk-page-container desk-stack">
+            <div class="desk-card-muted p-6">
+                <form method="GET" action="{{ route('reports.finance') }}" class="desk-filter-grid">
                     <div>
                         <x-input-label for="from" :value="__('From')" />
                         <x-text-input id="from" name="from" type="date" class="mt-1 block w-full"
@@ -36,53 +41,58 @@
                 </form>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
-                    <p class="text-sm text-gray-500">{{ __('Income') }}</p>
-                    <p class="mt-2 text-2xl font-semibold">@deskMoney((float) $report['totals']['income'])
+            <div class="desk-kpi-grid !mb-0 md:grid-cols-4 xl:grid-cols-4">
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Income') }}</p>
+                    <p class="desk-kpi-value-positive">@deskMoney((float) $report['totals']['income'])
                     </p>
                 </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
-                    <p class="text-sm text-gray-500">{{ __('Expense') }}</p>
-                    <p class="mt-2 text-2xl font-semibold">@deskMoney((float) $report['totals']['expense'])
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Expense') }}</p>
+                    <p class="desk-kpi-value-negative">@deskMoney((float) $report['totals']['expense'])
                     </p>
                 </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
-                    <p class="text-sm text-gray-500">{{ __('Pending') }}</p>
-                    <p class="mt-2 text-2xl font-semibold">@deskMoney((float) $report['totals']['pending'])
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Pending') }}</p>
+                    <p class="desk-kpi-value-pending">@deskMoney((float) $report['totals']['pending'])
                     </p>
                 </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
-                    <p class="text-sm text-gray-500">{{ __('Net') }}</p>
-                    <p class="mt-2 text-2xl font-semibold">@deskMoney((float) $report['totals']['net'])</p>
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Net') }}</p>
+                    <p
+                        class="{{ (float) $report['totals']['net'] >= 0 ? 'desk-kpi-value-positive' : 'desk-kpi-value-negative' }}">
+                        @deskMoney((float) $report['totals']['net'])
+                    </p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">{{ __('Expense Breakdown') }}</h3>
+            <div class="desk-report-grid">
+                <div class="desk-card desk-card-body">
+                    <h3 class="desk-card-title">{{ __('Expense Breakdown') }}</h3>
                     <ul class="space-y-2">
                         @forelse ($report['expense_by_category'] as $row)
-                            <li class="flex justify-between text-sm">
+                            <li
+                                class="flex justify-between rounded-md px-2 py-1 text-sm transition-colors duration-150 hover:bg-slate-100">
                                 <span>{{ $row->category_name }}</span>
                                 <span class="font-medium">@deskMoney((float) $row->total_amount)</span>
                             </li>
                         @empty
-                            <li class="text-sm text-gray-500">{{ __('No expense data in selected range.') }}</li>
+                            <li class="desk-empty-panel">{{ __('No expense data in selected range.') }}</li>
                         @endforelse
                     </ul>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-semibold mb-4">{{ __('Income Breakdown') }}</h3>
+                <div class="desk-card desk-card-body">
+                    <h3 class="desk-card-title">{{ __('Income Breakdown') }}</h3>
                     <ul class="space-y-2">
                         @forelse ($report['income_by_category'] as $row)
-                            <li class="flex justify-between text-sm">
+                            <li
+                                class="flex justify-between rounded-md px-2 py-1 text-sm transition-colors duration-150 hover:bg-slate-100">
                                 <span>{{ $row->category_name }}</span>
                                 <span class="font-medium">@deskMoney((float) $row->total_amount)</span>
                             </li>
                         @empty
-                            <li class="text-sm text-gray-500">{{ __('No income data in selected range.') }}</li>
+                            <li class="desk-empty-panel">{{ __('No income data in selected range.') }}</li>
                         @endforelse
                     </ul>
                 </div>

@@ -1,108 +1,120 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between gap-4">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Dashboard') }}
-            </h2>
+            <div>
+                <p class="desk-brand-kicker">{{ __('GraceSoft Desk') }}</p>
+                <h2 class="desk-page-title">
+                    {{ __('Dashboard') }}
+                </h2>
+            </div>
 
-            <span class="inline-flex items-center rounded-md bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
+            <span class="desk-context-chip">
                 {{ now()->format('F Y') }}
             </span>
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
-                    <p class="text-sm text-gray-500">{{ __('Active Projects') }}</p>
-                    <p class="mt-2 text-2xl font-semibold text-gray-900">{{ $dashboard['kpis']['active_projects'] }}</p>
+    <div class="desk-page-shell">
+        <div class="desk-page-container">
+            <div class="desk-kpi-grid">
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Active Projects') }}</p>
+                    <p class="desk-kpi-value">{{ $dashboard['kpis']['active_projects'] }}</p>
                 </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
-                    <p class="text-sm text-gray-500">{{ __('Total Logged Hours') }}</p>
-                    <p class="mt-2 text-2xl font-semibold text-gray-900">
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Total Logged Hours') }}</p>
+                    <p class="desk-kpi-value">
                         {{ number_format((float) $dashboard['kpis']['total_logged_hours'], 2) }}</p>
                 </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
-                    <p class="text-sm text-gray-500">{{ __('Total Billable Value') }}</p>
-                    <p class="mt-2 text-2xl font-semibold text-gray-900">
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Total Billable Value') }}</p>
+                    <p class="desk-kpi-value">
                         @deskMoney((float) $dashboard['kpis']['total_billable_value'])</p>
                 </div>
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-5">
-                    <p class="text-sm text-gray-500">{{ __('Net Cashflow (This Month)') }}</p>
-                    <p class="mt-2 text-2xl font-semibold text-gray-900">
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Net Cashflow (This Month)') }}</p>
+                    <p
+                        class="{{ (float) $dashboard['kpis']['net_cashflow_this_month'] >= 0 ? 'desk-kpi-value-positive' : 'desk-kpi-value-negative' }}">
                         @deskMoney((float) $dashboard['kpis']['net_cashflow_this_month'])</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg xl:col-span-2">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Monthly Net Cashflow') }}</h3>
+            <div class="desk-content-grid">
+                <div class="desk-card xl:col-span-2">
+                    <div class="desk-card-body">
+                        <h3 class="desk-card-title">{{ __('Monthly Net Cashflow') }}</h3>
                         <div id="monthly-cashflow-chart" class="h-80"></div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Expense Breakdown') }}</h3>
+                <div class="desk-card">
+                    <div class="desk-card-body">
+                        <h3 class="desk-card-title">{{ __('Expense Breakdown') }}</h3>
                         <div id="expense-breakdown-chart" class="h-80"></div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Income Breakdown') }}</h3>
+                <div class="desk-card">
+                    <div class="desk-card-body">
+                        <h3 class="desk-card-title">{{ __('Income Breakdown') }}</h3>
                         <div id="income-breakdown-chart" class="h-80"></div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg xl:col-span-2">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Billable by Project') }}</h3>
+                <div class="desk-card xl:col-span-2">
+                    <div class="desk-card-body">
+                        <h3 class="desk-card-title">{{ __('Billable by Project') }}</h3>
                         <div id="billable-by-project-chart" class="h-80"></div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg xl:col-span-2">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Billable by Stage') }}</h3>
+                <div class="desk-card xl:col-span-2">
+                    <div class="desk-card-body">
+                        <h3 class="desk-card-title">{{ __('Billable by Stage') }}</h3>
                         <div id="billable-by-stage-chart" class="h-80"></div>
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg xl:col-span-2">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                <div class="desk-card xl:col-span-2">
+                    <div class="desk-card-body">
+                        <h3 class="desk-card-title">
                             {{ __('Pending / Outstanding Transactions') }}</h3>
 
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <table class="desk-table-dense min-w-full divide-y divide-gray-200">
                                 <thead>
                                     <tr>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th class="desk-table-head">
                                             {{ __('Ref') }}</th>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th class="desk-table-head">
                                             {{ __('Date') }}</th>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th class="desk-table-head">
                                             {{ __('Direction') }}</th>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th class="desk-table-head">
                                             {{ __('Amount') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
                                     @forelse ($dashboard['pending_transactions'] as $row)
-                                        <tr>
-                                            <td class="px-3 py-2 text-sm font-mono">{{ $row['code'] }}</td>
-                                            <td class="px-3 py-2 text-sm">@deskDate($row['date'])</td>
-                                            <td class="px-3 py-2 text-sm">{{ strtoupper($row['direction']) }}</td>
-                                            <td class="px-3 py-2 text-sm">
+                                        <tr class="desk-interactive-row">
+                                            <td class="desk-table-cell font-mono">{{ $row['code'] }}</td>
+                                            <td class="desk-table-cell">@deskDate($row['date'])</td>
+                                            <td class="desk-table-cell">
+                                                <span
+                                                    class="desk-status-chip {{ $row['direction'] === 'in' ? 'desk-status-chip-in' : 'desk-status-chip-out' }}">
+                                                    {{ strtoupper($row['direction']) }}
+                                                </span>
+                                            </td>
+                                            <td class="desk-table-cell">
                                                 @deskMoney((float) $row['net_amount'])</td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td class="px-3 py-4 text-sm text-gray-500" colspan="4">
-                                                {{ __('No pending transactions.') }}</td>
+                                            <td class="desk-table-empty" colspan="4">
+                                                <div class="desk-empty-panel">
+                                                    {{ __('No pending transactions in the selected reporting period.') }}
+                                                </div>
+                                            </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -111,39 +123,42 @@
                     </div>
                 </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg xl:col-span-2">
-                    <div class="p-6 text-gray-900">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Project Overview') }}</h3>
+                <div class="desk-card xl:col-span-2">
+                    <div class="desk-card-body">
+                        <h3 class="desk-card-title">{{ __('Project Overview') }}</h3>
 
                         <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
+                            <table class="desk-table-dense min-w-full divide-y divide-gray-200">
                                 <thead>
                                     <tr>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th class="desk-table-head">
                                             {{ __('Project') }}</th>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th class="desk-table-head">
                                             {{ __('Hours') }}</th>
-                                        <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        <th class="desk-table-head">
                                             {{ __('Billable') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-100">
                                     @forelse ($dashboard['project_overview'] as $project)
-                                        <tr>
-                                            <td class="px-3 py-2 text-sm">
+                                        <tr class="desk-interactive-row">
+                                            <td class="desk-table-cell">
                                                 <div class="font-mono text-xs text-gray-500">{{ $project['code'] }}
                                                 </div>
                                                 <div>{{ $project['name'] }}</div>
                                             </td>
-                                            <td class="px-3 py-2 text-sm">
+                                            <td class="desk-table-cell">
                                                 @deskDuration($project['duration_minutes'])</td>
-                                            <td class="px-3 py-2 text-sm">
+                                            <td class="desk-table-cell">
                                                 @deskMoney((float) $project['billable_amount'])</td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td class="px-3 py-4 text-sm text-gray-500" colspan="3">
-                                                {{ __('No project metrics yet.') }}</td>
+                                            <td class="desk-table-empty" colspan="3">
+                                                <div class="desk-empty-panel">
+                                                    {{ __('No project metrics available for the current reporting period.') }}
+                                                </div>
+                                            </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
