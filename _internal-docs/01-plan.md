@@ -348,7 +348,7 @@
 ## CRUD Rules
 
 * [x] All CRUD routes resolve via UUID
-* [ ] All UI tables display human-readable references
+* [x] All UI tables display human-readable references
 * [x] Projects display `code`
 * [x] Transactions display `transaction_code`
 * [ ] Never expose SQL `id` in forms or views

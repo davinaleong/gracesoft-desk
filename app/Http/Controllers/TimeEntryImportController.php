@@ -22,12 +22,15 @@ class TimeEntryImportController extends Controller
     public function preview(ImportTimeEntriesCsvRequest $request): View
     {
         $parsed = $this->parseCsv($request->file('csv_file'));
+        $references = $this->buildReferences($parsed['valid_rows']);
 
         return view('time-entries.import-preview', [
             'headers' => $parsed['headers'],
             'validRows' => $parsed['valid_rows'],
             'invalidRows' => $parsed['invalid_rows'],
             'missingHeaders' => $parsed['missing_headers'],
+            'projectReferences' => $references['projects'],
+            'stageReferences' => $references['stages'],
         ]);
     }
 
@@ -260,5 +263,47 @@ class TimeEntryImportController extends Controller
         }
 
         return round(($durationMinutes / 60) * $hourlyRate, 2);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $validRows
+     * @return array{projects: array<int, string>, stages: array<int, string>}
+     */
+    private function buildReferences(array $validRows): array
+    {
+        $projectIds = collect($validRows)
+            ->pluck('project_id')
+            ->filter()
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        $stageIds = collect($validRows)
+            ->pluck('project_stage_id')
+            ->filter()
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        $projectReferences = Project::query()
+            ->whereIn('id', $projectIds)
+            ->get(['id', 'code', 'name'])
+            ->mapWithKeys(fn (Project $project): array => [
+                $project->id => sprintf('%s - %s', $project->code, $project->name),
+            ])
+            ->all();
+
+        $stageReferences = ProjectStage::query()
+            ->whereIn('id', $stageIds)
+            ->get(['id', 'name'])
+            ->mapWithKeys(fn (ProjectStage $stage): array => [
+                $stage->id => $stage->name,
+            ])
+            ->all();
+
+        return [
+            'projects' => $projectReferences,
+            'stages' => $stageReferences,
+        ];
     }
 }

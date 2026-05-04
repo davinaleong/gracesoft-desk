@@ -55,7 +55,10 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
             'csv_file' => $file,
         ]);
 
-    $previewResponse->assertOk()->assertSee('Time Entries Import Preview');
+    $previewResponse->assertOk()
+        ->assertSee('Time Entries Import Preview')
+        ->assertSee($project->code.' - '.$project->name)
+        ->assertSee($stage->name);
 
     expect(session('time_entries_import_rows'))->toBeArray()->toHaveCount(2);
 

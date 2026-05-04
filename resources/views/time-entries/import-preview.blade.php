@@ -37,9 +37,9 @@
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                     {{ __('Date') }}</th>
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                    {{ __('Project ID') }}</th>
+                                    {{ __('Project') }}</th>
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                                    {{ __('Stage ID') }}</th>
+                                    {{ __('Stage') }}</th>
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                     {{ __('Duration') }}</th>
                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
@@ -50,8 +50,12 @@
                             @forelse ($validRows as $row)
                                 <tr>
                                     <td class="px-3 py-2 text-sm">@deskDate($row['entry_date'])</td>
-                                    <td class="px-3 py-2 text-sm">{{ $row['project_id'] }}</td>
-                                    <td class="px-3 py-2 text-sm">{{ $row['project_stage_id'] ?? 'N/A' }}</td>
+                                    <td class="px-3 py-2 text-sm font-mono">
+                                        {{ $projectReferences[(int) $row['project_id']] ?? __('Unknown Project') }}
+                                    </td>
+                                    <td class="px-3 py-2 text-sm">
+                                        {{ isset($row['project_stage_id']) ? $stageReferences[(int) $row['project_stage_id']] ?? __('Unknown Stage') : __('N/A') }}
+                                    </td>
                                     <td class="px-3 py-2 text-sm">@deskDuration($row['duration_minutes'])</td>
                                     <td class="px-3 py-2 text-sm">@deskMoney((float) $row['billable_amount'])</td>
                                 </tr>
