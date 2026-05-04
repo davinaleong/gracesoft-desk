@@ -48,6 +48,7 @@ class TransactionController extends Controller
     public function store(StoreTransactionRequest $request): RedirectResponse
     {
         $payload = $request->validated();
+        $payload = $this->resolveForeignKeys($payload);
         $payload['net_amount'] = $this->calculateNetAmount($payload);
 
         $transaction = Transaction::query()->create($payload);
@@ -74,6 +75,8 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction): View
     {
+        $transaction->load(['account', 'category', 'paymentMethod', 'project']);
+
         return view('transactions.edit', [
             'transaction' => $transaction,
             'accounts' => Account::query()->orderBy('name')->get(),
@@ -89,6 +92,7 @@ class TransactionController extends Controller
     public function update(UpdateTransactionRequest $request, Transaction $transaction): RedirectResponse
     {
         $payload = $request->validated();
+        $payload = $this->resolveForeignKeys($payload);
         $payload['net_amount'] = $this->calculateNetAmount($payload);
 
         $transaction->update($payload);
@@ -104,5 +108,32 @@ class TransactionController extends Controller
     private function calculateNetAmount(array $payload): float
     {
         return max(0, ((float) $payload['amount']) - ((float) $payload['gst_amount']));
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function resolveForeignKeys(array $payload): array
+    {
+        $payload['account_id'] = Account::query()->where('uuid', (string) $payload['account_uuid'])->value('id');
+        $payload['transaction_category_id'] = isset($payload['transaction_category_uuid'])
+            ? TransactionCategory::query()->where('uuid', (string) $payload['transaction_category_uuid'])->value('id')
+            : null;
+        $payload['payment_method_id'] = isset($payload['payment_method_uuid'])
+            ? PaymentMethod::query()->where('uuid', (string) $payload['payment_method_uuid'])->value('id')
+            : null;
+        $payload['project_id'] = isset($payload['project_uuid'])
+            ? Project::query()->where('uuid', (string) $payload['project_uuid'])->value('id')
+            : null;
+
+        unset(
+            $payload['account_uuid'],
+            $payload['transaction_category_uuid'],
+            $payload['payment_method_uuid'],
+            $payload['project_uuid']
+        );
+
+        return $payload;
     }
 }

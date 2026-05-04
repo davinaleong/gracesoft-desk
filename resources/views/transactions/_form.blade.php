@@ -3,15 +3,15 @@
 <div class="space-y-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-            <x-input-label for="account_id" :value="__('Account')" />
-            <select id="account_id" name="account_id"
+            <x-input-label for="account_uuid" :value="__('Account')" />
+            <select id="account_uuid" name="account_uuid"
                 class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                 required>
                 @foreach ($accounts as $account)
-                    <option value="{{ $account->id }}" @selected((int) old('account_id', $transaction->account_id ?? 0) === $account->id)>{{ $account->name }}</option>
+                    <option value="{{ $account->uuid }}" @selected(old('account_uuid', $transaction->account?->uuid ?? '') === $account->uuid)>{{ $account->name }}</option>
                 @endforeach
             </select>
-            <x-input-error :messages="$errors->get('account_id')" class="mt-2" />
+            <x-input-error :messages="$errors->get('account_uuid')" class="mt-2" />
         </div>
 
         <div>
@@ -67,42 +67,42 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-            <x-input-label for="transaction_category_id" :value="__('Category')" />
-            <select id="transaction_category_id" name="transaction_category_id"
+            <x-input-label for="transaction_category_uuid" :value="__('Category')" />
+            <select id="transaction_category_uuid" name="transaction_category_uuid"
                 class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                 <option value="">{{ __('None') }}</option>
                 @foreach ($categories as $category)
-                    <option value="{{ $category->id }}" @selected((int) old('transaction_category_id', $transaction->transaction_category_id ?? 0) === $category->id)>{{ $category->name }}</option>
+                    <option value="{{ $category->uuid }}" @selected(old('transaction_category_uuid', $transaction->category?->uuid ?? '') === $category->uuid)>{{ $category->name }}</option>
                 @endforeach
             </select>
-            <x-input-error :messages="$errors->get('transaction_category_id')" class="mt-2" />
+            <x-input-error :messages="$errors->get('transaction_category_uuid')" class="mt-2" />
         </div>
 
         <div>
-            <x-input-label for="payment_method_id" :value="__('Payment Method')" />
-            <select id="payment_method_id" name="payment_method_id"
+            <x-input-label for="payment_method_uuid" :value="__('Payment Method')" />
+            <select id="payment_method_uuid" name="payment_method_uuid"
                 class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                 <option value="">{{ __('None') }}</option>
                 @foreach ($paymentMethods as $paymentMethod)
-                    <option value="{{ $paymentMethod->id }}" @selected((int) old('payment_method_id', $transaction->payment_method_id ?? 0) === $paymentMethod->id)>{{ $paymentMethod->name }}
+                    <option value="{{ $paymentMethod->uuid }}" @selected(old('payment_method_uuid', $transaction->paymentMethod?->uuid ?? '') === $paymentMethod->uuid)>{{ $paymentMethod->name }}
                     </option>
                 @endforeach
             </select>
-            <x-input-error :messages="$errors->get('payment_method_id')" class="mt-2" />
+            <x-input-error :messages="$errors->get('payment_method_uuid')" class="mt-2" />
         </div>
     </div>
 
     <div>
-        <x-input-label for="project_id" :value="__('Project (Optional)')" />
-        <select id="project_id" name="project_id"
+        <x-input-label for="project_uuid" :value="__('Project (Optional)')" />
+        <select id="project_uuid" name="project_uuid"
             class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
             <option value="">{{ __('None') }}</option>
             @foreach ($projects as $project)
-                <option value="{{ $project->id }}" @selected((int) old('project_id', $transaction->project_id ?? 0) === $project->id)>{{ $project->code }} -
+                <option value="{{ $project->uuid }}" @selected(old('project_uuid', $transaction->project?->uuid ?? '') === $project->uuid)>{{ $project->code }} -
                     {{ $project->name }}</option>
             @endforeach
         </select>
-        <x-input-error :messages="$errors->get('project_id')" class="mt-2" />
+        <x-input-error :messages="$errors->get('project_uuid')" class="mt-2" />
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -63,8 +63,8 @@ test('time entry can be created and billable amount is calculated', function () 
     $dependencies = timeEntryDependencies();
 
     $response = $this->actingAs($user)->post(route('time-entries.store'), [
-        'project_id' => $dependencies['project']->id,
-        'project_stage_id' => $dependencies['stage']->id,
+        'project_uuid' => $dependencies['project']->uuid,
+        'project_stage_uuid' => $dependencies['stage']->uuid,
         'entry_date' => now()->toDateString(),
         'duration_minutes' => 120,
         'is_billable' => true,
@@ -121,8 +121,8 @@ test('time entry can be updated', function () {
     ]);
 
     $response = $this->actingAs($user)->put(route('time-entries.update', $timeEntry), [
-        'project_id' => $dependencies['project']->id,
-        'project_stage_id' => $dependencies['stage']->id,
+        'project_uuid' => $dependencies['project']->uuid,
+        'project_stage_uuid' => $dependencies['stage']->uuid,
         'entry_date' => now()->subDay()->toDateString(),
         'duration_minutes' => 180,
         'is_billable' => true,

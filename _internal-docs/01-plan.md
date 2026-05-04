@@ -351,7 +351,7 @@
 * [x] All UI tables display human-readable references
 * [x] Projects display `code`
 * [x] Transactions display `transaction_code`
-* [ ] Never expose SQL `id` in forms or views
+* [x] Never expose SQL `id` in forms or views
 
 ---
 

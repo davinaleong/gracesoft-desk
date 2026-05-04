@@ -82,10 +82,10 @@ test('transaction can be created with generated transaction code', function () {
     $dependencies = transactionDependencies();
 
     $response = $this->actingAs($user)->post(route('transactions.store'), [
-        'account_id' => $dependencies['account']->id,
-        'transaction_category_id' => $dependencies['category']->id,
-        'payment_method_id' => $dependencies['paymentMethod']->id,
-        'project_id' => $dependencies['project']->id,
+        'account_uuid' => $dependencies['account']->uuid,
+        'transaction_category_uuid' => $dependencies['category']->uuid,
+        'payment_method_uuid' => $dependencies['paymentMethod']->uuid,
+        'project_uuid' => $dependencies['project']->uuid,
         'type' => 'expense',
         'direction' => 'out',
         'status' => 'completed',
@@ -150,10 +150,10 @@ test('transaction can be updated', function () {
     ]);
 
     $response = $this->actingAs($user)->put(route('transactions.update', $transaction), [
-        'account_id' => $dependencies['account']->id,
-        'transaction_category_id' => $dependencies['category']->id,
-        'payment_method_id' => $dependencies['paymentMethod']->id,
-        'project_id' => $dependencies['project']->id,
+        'account_uuid' => $dependencies['account']->uuid,
+        'transaction_category_uuid' => $dependencies['category']->uuid,
+        'payment_method_uuid' => $dependencies['paymentMethod']->uuid,
+        'project_uuid' => $dependencies['project']->uuid,
         'type' => 'expense',
         'direction' => 'out',
         'status' => 'completed',
@@ -181,10 +181,10 @@ test('transaction create enforces money in and gst integrity rules', function ()
     $response = $this->from(route('transactions.create'))
         ->actingAs($user)
         ->post(route('transactions.store'), [
-            'account_id' => $dependencies['account']->id,
-            'transaction_category_id' => $dependencies['category']->id,
-            'payment_method_id' => $dependencies['paymentMethod']->id,
-            'project_id' => $dependencies['project']->id,
+            'account_uuid' => $dependencies['account']->uuid,
+            'transaction_category_uuid' => $dependencies['category']->uuid,
+            'payment_method_uuid' => $dependencies['paymentMethod']->uuid,
+            'project_uuid' => $dependencies['project']->uuid,
             'type' => 'income',
             'direction' => 'out',
             'status' => 'completed',

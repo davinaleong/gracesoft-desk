@@ -3,31 +3,31 @@
 <div class="space-y-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-            <x-input-label for="project_id" :value="__('Project')" />
-            <select id="project_id" name="project_id"
+            <x-input-label for="project_uuid" :value="__('Project')" />
+            <select id="project_uuid" name="project_uuid"
                 class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                 required>
                 @foreach ($projects as $project)
-                    <option value="{{ $project->id }}" @selected((int) old('project_id', $timeEntry->project_id ?? 0) === $project->id)>
+                    <option value="{{ $project->uuid }}" @selected(old('project_uuid', $timeEntry->project?->uuid ?? '') === $project->uuid)>
                         {{ $project->code }} - {{ $project->name }}
                     </option>
                 @endforeach
             </select>
-            <x-input-error :messages="$errors->get('project_id')" class="mt-2" />
+            <x-input-error :messages="$errors->get('project_uuid')" class="mt-2" />
         </div>
 
         <div>
-            <x-input-label for="project_stage_id" :value="__('Stage (Optional)')" />
-            <select id="project_stage_id" name="project_stage_id"
+            <x-input-label for="project_stage_uuid" :value="__('Stage (Optional)')" />
+            <select id="project_stage_uuid" name="project_stage_uuid"
                 class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
                 <option value="">{{ __('None') }}</option>
                 @foreach ($stages as $stage)
-                    <option value="{{ $stage->id }}" @selected((int) old('project_stage_id', $timeEntry->project_stage_id ?? 0) === $stage->id)>
+                    <option value="{{ $stage->uuid }}" @selected(old('project_stage_uuid', $timeEntry->stage?->uuid ?? '') === $stage->uuid)>
                         {{ $stage->name }}
                     </option>
                 @endforeach
             </select>
-            <x-input-error :messages="$errors->get('project_stage_id')" class="mt-2" />
+            <x-input-error :messages="$errors->get('project_stage_uuid')" class="mt-2" />
         </div>
     </div>
 

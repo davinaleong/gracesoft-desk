@@ -44,6 +44,7 @@ class TimeEntryController extends Controller
     public function store(StoreTimeEntryRequest $request): RedirectResponse
     {
         $payload = $request->validated();
+        $payload = $this->resolveForeignKeys($payload);
         $payload['user_id'] = $request->user()?->id;
         $payload['billable_amount'] = $this->calculateBillableAmount($payload);
 
@@ -71,6 +72,8 @@ class TimeEntryController extends Controller
      */
     public function edit(TimeEntry $timeEntry): View
     {
+        $timeEntry->load(['project', 'stage']);
+
         return view('time-entries.edit', [
             'timeEntry' => $timeEntry,
             'projects' => Project::query()->orderBy('name')->get(),
@@ -84,6 +87,7 @@ class TimeEntryController extends Controller
     public function update(UpdateTimeEntryRequest $request, TimeEntry $timeEntry): RedirectResponse
     {
         $payload = $request->validated();
+        $payload = $this->resolveForeignKeys($payload);
         $payload['billable_amount'] = $this->calculateBillableAmount($payload);
 
         $timeEntry->update($payload);
@@ -122,5 +126,21 @@ class TimeEntryController extends Controller
         }
 
         return round(($minutes / 60) * $hourlyRate, 2);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function resolveForeignKeys(array $payload): array
+    {
+        $payload['project_id'] = Project::query()->where('uuid', (string) $payload['project_uuid'])->value('id');
+        $payload['project_stage_id'] = isset($payload['project_stage_uuid'])
+            ? ProjectStage::query()->where('uuid', (string) $payload['project_stage_uuid'])->value('id')
+            : null;
+
+        unset($payload['project_uuid'], $payload['project_stage_uuid']);
+
+        return $payload;
     }
 }

@@ -25,10 +25,10 @@ class UpdateTransactionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account_id' => ['required', 'integer', 'exists:accounts,id'],
-            'transaction_category_id' => ['nullable', 'integer', 'exists:transaction_categories,id'],
-            'payment_method_id' => ['nullable', 'integer', 'exists:payment_methods,id'],
-            'project_id' => ['nullable', 'integer', 'exists:projects,id'],
+            'account_uuid' => ['required', 'uuid', 'exists:accounts,uuid'],
+            'transaction_category_uuid' => ['nullable', 'uuid', 'exists:transaction_categories,uuid'],
+            'payment_method_uuid' => ['nullable', 'uuid', 'exists:payment_methods,uuid'],
+            'project_uuid' => ['nullable', 'uuid', 'exists:projects,uuid'],
             'type' => ['required', 'in:income,expense,transfer'],
             'direction' => ['required', 'in:in,out'],
             'status' => ['required', 'in:pending,completed,void'],

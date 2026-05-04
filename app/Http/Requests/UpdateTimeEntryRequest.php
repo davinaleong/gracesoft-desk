@@ -23,8 +23,8 @@ class UpdateTimeEntryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'project_id' => ['required', 'integer', 'exists:projects,id'],
-            'project_stage_id' => ['nullable', 'integer', 'exists:project_stages,id'],
+            'project_uuid' => ['required', 'uuid', 'exists:projects,uuid'],
+            'project_stage_uuid' => ['nullable', 'uuid', 'exists:project_stages,uuid'],
             'entry_date' => ['required', 'date'],
             'duration_minutes' => ['required', 'integer', 'min:1'],
             'is_billable' => ['required', 'boolean'],
