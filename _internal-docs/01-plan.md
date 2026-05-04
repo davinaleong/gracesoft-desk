@@ -459,7 +459,7 @@
 * [x] success states
 * [x] empty states
 * [x] delete confirmations
-* [ ] loading states
+* [x] loading states
 * [ ] keyboard accessibility
 * [x] table overflow handling
 
