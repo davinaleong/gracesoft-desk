@@ -483,7 +483,7 @@
 
 ## Safety
 
-* [ ] soft deletes
+* [x] soft deletes
 * [ ] archive mode
 * [ ] transaction integrity checks
 * [x] destructive action confirmations

@@ -158,7 +158,7 @@ test('time entry can be deleted', function () {
 
     $response->assertRedirect(route('time-entries.index'));
 
-    $this->assertDatabaseMissing('time_entries', [
+    $this->assertSoftDeleted('time_entries', [
         'uuid' => $timeEntry->uuid,
     ]);
 });

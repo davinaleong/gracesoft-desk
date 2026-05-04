@@ -6,12 +6,14 @@ use App\Models\Concerns\HasPublicUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
 class Transaction extends Model
 {
     use HasFactory;
     use HasPublicUuid;
+    use SoftDeletes;
 
     protected $fillable = [
         'transaction_code',
