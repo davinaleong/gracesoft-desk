@@ -23,9 +23,17 @@ class SystemSetting extends Model
     public static function upsertValues(array $settings): void
     {
         foreach ($settings as $key => $value) {
+            if (is_bool($value)) {
+                $normalizedValue = $value ? '1' : '0';
+            } elseif (is_null($value)) {
+                $normalizedValue = null;
+            } else {
+                $normalizedValue = (string) $value;
+            }
+
             self::query()->updateOrCreate(
                 ['key' => $key],
-                ['value' => is_null($value) ? null : (string) $value],
+                ['value' => $normalizedValue],
             );
         }
     }

@@ -20,6 +20,7 @@ class SystemSettingsController extends Controller
                 'default_currency' => $settings->get('default_currency', 'SGD'),
                 'timezone' => $settings->get('timezone', config('app.timezone', 'UTC')),
                 'default_hourly_rate' => $settings->get('default_hourly_rate', '0.00'),
+                'archive_mode' => in_array(strtolower((string) $settings->get('archive_mode', '0')), ['1', 'true', 'yes', 'on'], true),
             ],
         ]);
     }

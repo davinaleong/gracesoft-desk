@@ -21,7 +21,7 @@ Route::get('/dashboard', DashboardController::class)
     ->middleware(['auth', 'password.changed', 'twofactor.configured'])
     ->name('dashboard');
 
-Route::middleware(['auth', 'password.changed', 'twofactor.configured'])->group(function () {
+Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.open'])->group(function () {
     Route::get('/projects/import', [ProjectImportController::class, 'create'])->name('projects.import.create');
     Route::post('/projects/import/preview', [ProjectImportController::class, 'preview'])->name('projects.import.preview');
     Route::post('/projects/import/commit', [ProjectImportController::class, 'commit'])->name('projects.import.commit');

@@ -55,6 +55,17 @@
                             </div>
                         </div>
 
+                        <div class="flex items-center gap-2 pt-2">
+                            <input type="hidden" name="archive_mode" value="0">
+                            <input id="archive_mode" name="archive_mode" type="checkbox" value="1"
+                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                @checked(old('archive_mode', $settings['archive_mode']))>
+                            <x-input-label for="archive_mode" :value="__('Archive Mode (Read-Only)')" />
+                        </div>
+                        <p class="text-sm text-gray-600">
+                            {{ __('When enabled, create/update/delete actions are blocked across the desk except this settings page.') }}
+                        </p>
+
                         <div class="pt-2">
                             <x-primary-button>{{ __('Save Settings') }}</x-primary-button>
                         </div>

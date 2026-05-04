@@ -28,6 +28,7 @@ class UpdateSystemSettingsRequest extends FormRequest
             'default_currency' => ['required', 'string', 'size:3'],
             'timezone' => ['required', 'timezone'],
             'default_hourly_rate' => ['required', 'numeric', 'min:0'],
+            'archive_mode' => ['required', 'boolean'],
         ];
     }
 }

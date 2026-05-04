@@ -32,6 +32,9 @@
             'two-factor-authentication-enabled' => __('Two-factor authentication enabled.'),
             'two-factor-authentication-confirmed' => __('Two-factor authentication confirmed.'),
             'two-factor-authentication-disabled' => __('Two-factor authentication disabled.'),
+            'archive-mode-read-only' => __(
+                'Archive mode is enabled. This action is blocked while the desk is read-only.',
+            ),
             default => is_string($status) ? $status : null,
         };
     @endphp

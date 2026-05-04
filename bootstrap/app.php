@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureArchiveModeIsDisabled;
 use App\Http\Middleware\EnsurePasswordChanged;
 use App\Http\Middleware\EnsureTwoFactorIsConfigured;
 use Illuminate\Foundation\Application;
@@ -14,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
+            'archive.open' => EnsureArchiveModeIsDisabled::class,
             'password.changed' => EnsurePasswordChanged::class,
             'twofactor.configured' => EnsureTwoFactorIsConfigured::class,
         ]);
