@@ -478,8 +478,8 @@
 
 * [x] last login tracking
 * [x] failed login tracking
-* [ ] audit log table
-* [ ] create/update/delete audit logs
+* [x] audit log table
+* [x] create/update/delete audit logs
 
 ## Safety
 
