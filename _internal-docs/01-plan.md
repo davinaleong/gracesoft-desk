@@ -70,7 +70,7 @@
 * [x] Configure timezone / locale
 * [ ] Configure mail
 * [ ] Configure queues (optional)
-* [ ] Configure logging
+* [x] Configure logging
 
 ## Frontend Foundation
 
