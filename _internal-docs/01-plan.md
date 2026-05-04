@@ -460,7 +460,7 @@
 * [x] empty states
 * [x] delete confirmations
 * [x] loading states
-* [ ] keyboard accessibility
+* [x] keyboard accessibility
 * [x] table overflow handling
 
 ## Data Formatting

@@ -36,12 +36,18 @@
         };
     @endphp
 
+    <a href="#main-content"
+        class="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50 focus:bg-white focus:px-3 focus:py-2 focus:rounded-md focus:shadow">
+        {{ __('Skip to main content') }}
+    </a>
+
     <div class="min-h-screen bg-gray-100">
         @include('layouts.navigation')
 
         @if ($flashMessage)
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-                <div class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                <div role="status" aria-live="polite"
+                    class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                     {{ $flashMessage }}
                 </div>
             </div>
@@ -57,7 +63,7 @@
         @endisset
 
         <!-- Page Content -->
-        <main>
+        <main id="main-content" tabindex="-1">
             {{ $slot }}
         </main>
     </div>

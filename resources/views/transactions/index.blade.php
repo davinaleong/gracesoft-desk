@@ -24,19 +24,25 @@
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
+                            <caption class="sr-only">{{ __('Transactions list') }}</caption>
                             <thead>
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Transaction') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Date') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Type') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Status') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Amount') }}</th>
-                                    <th class="px-4 py-2"></th>
+                                    <th scope="col" class="px-4 py-2"></th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -53,6 +59,7 @@
                                             @deskMoney((float) $transaction->amount)</td>
                                         <td class="px-4 py-3 text-right text-sm">
                                             <a href="{{ route('transactions.show', $transaction) }}"
+                                                aria-label="{{ __('View transaction :code', ['code' => $transaction->transaction_code]) }}"
                                                 class="text-blue-600 hover:text-blue-800">{{ __('View') }}</a>
                                         </td>
                                     </tr>

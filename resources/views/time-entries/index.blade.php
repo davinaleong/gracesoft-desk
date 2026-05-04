@@ -24,19 +24,25 @@
                 <div class="p-6 text-gray-900">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
+                            <caption class="sr-only">{{ __('Time entries list') }}</caption>
                             <thead>
                                 <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Date') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Project') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Stage') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Duration') }}</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Billable') }}</th>
-                                    <th class="px-4 py-2"></th>
+                                    <th scope="col" class="px-4 py-2"></th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
@@ -50,6 +56,7 @@
                                             @deskMoney((float) $timeEntry->billable_amount)</td>
                                         <td class="px-4 py-3 text-right text-sm">
                                             <a href="{{ route('time-entries.show', $timeEntry) }}"
+                                                aria-label="{{ __('View time entry for :project on :date', ['project' => $timeEntry->project?->code ?? 'N/A', 'date' => \App\Support\DeskFormat::date($timeEntry->entry_date)]) }}"
                                                 class="text-blue-600 hover:text-blue-800">{{ __('View') }}</a>
                                         </td>
                                     </tr>
