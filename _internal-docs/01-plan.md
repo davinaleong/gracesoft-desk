@@ -485,7 +485,7 @@
 
 * [x] soft deletes
 * [x] archive mode
-* [ ] transaction integrity checks
+* [x] transaction integrity checks
 * [x] destructive action confirmations
 
 ---

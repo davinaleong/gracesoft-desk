@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class Transaction extends Model
 {
@@ -36,6 +37,10 @@ class Transaction extends Model
 
     protected static function booted(): void
     {
+        static::saving(function (self $transaction): void {
+            self::enforceIntegrity($transaction);
+        });
+
         static::creating(function (self $transaction): void {
             self::fillUuid($transaction);
 
@@ -56,6 +61,34 @@ class Transaction extends Model
         } while (self::query()->where('transaction_code', $candidate)->exists());
 
         return $candidate;
+    }
+
+    private static function enforceIntegrity(self $transaction): void
+    {
+        $type = strtolower((string) $transaction->type);
+        $direction = strtolower((string) $transaction->direction);
+        $amount = (float) $transaction->amount;
+        $gstAmount = (float) $transaction->gst_amount;
+
+        if ($gstAmount > $amount) {
+            throw ValidationException::withMessages([
+                'gst_amount' => 'GST amount cannot exceed transaction amount.',
+            ]);
+        }
+
+        if ($type === 'income' && $direction !== 'in') {
+            throw ValidationException::withMessages([
+                'direction' => 'Income transactions must use direction "in".',
+            ]);
+        }
+
+        if ($type === 'expense' && $direction !== 'out') {
+            throw ValidationException::withMessages([
+                'direction' => 'Expense transactions must use direction "out".',
+            ]);
+        }
+
+        $transaction->net_amount = max(0, round($amount - $gstAmount, 2));
     }
 
     protected function casts(): array
