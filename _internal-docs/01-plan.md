@@ -67,7 +67,7 @@
   * [x] favicon
   * [x] logo
   * [x] metadata
-* [ ] Configure timezone / locale
+* [x] Configure timezone / locale
 * [ ] Configure mail
 * [ ] Configure queues (optional)
 * [ ] Configure logging

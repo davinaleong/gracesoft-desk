@@ -29,6 +29,7 @@ test('system settings can be updated', function () {
         'company_email' => 'ops@gracesoftdesk.com',
         'default_currency' => 'SGD',
         'timezone' => 'Asia/Singapore',
+        'locale' => 'en',
         'default_hourly_rate' => 125.50,
         'archive_mode' => false,
     ]);
@@ -37,6 +38,7 @@ test('system settings can be updated', function () {
 
     expect(SystemSetting::query()->where('key', 'company_name')->value('value'))->toBe('GraceSoft Desk Pte Ltd')
         ->and(SystemSetting::query()->where('key', 'timezone')->value('value'))->toBe('Asia/Singapore')
+        ->and(SystemSetting::query()->where('key', 'locale')->value('value'))->toBe('en')
         ->and((float) SystemSetting::query()->where('key', 'default_hourly_rate')->value('value'))->toBe(125.5)
         ->and(SystemSetting::query()->where('key', 'archive_mode')->value('value'))->toBe('0');
 });
@@ -74,6 +76,7 @@ test('archive mode can be disabled from system settings', function () {
         'company_email' => 'ops@gracesoftdesk.com',
         'default_currency' => 'SGD',
         'timezone' => 'Asia/Singapore',
+        'locale' => 'en',
         'default_hourly_rate' => '100',
         'archive_mode' => true,
     ]);
@@ -83,6 +86,7 @@ test('archive mode can be disabled from system settings', function () {
         'company_email' => 'ops@gracesoftdesk.com',
         'default_currency' => 'SGD',
         'timezone' => 'Asia/Singapore',
+        'locale' => 'en',
         'default_hourly_rate' => 100,
         'archive_mode' => false,
     ]);

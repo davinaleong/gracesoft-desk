@@ -31,7 +31,7 @@
                             <x-input-error :messages="$errors->get('company_email')" class="mt-2" />
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                             <div>
                                 <x-input-label for="default_currency" :value="__('Default Currency')" />
                                 <x-text-input id="default_currency" name="default_currency" type="text"
@@ -44,6 +44,13 @@
                                 <x-text-input id="timezone" name="timezone" type="text" class="mt-1 block w-full"
                                     :value="old('timezone', $settings['timezone'])" required />
                                 <x-input-error :messages="$errors->get('timezone')" class="mt-2" />
+                            </div>
+
+                            <div>
+                                <x-input-label for="locale" :value="__('Locale')" />
+                                <x-text-input id="locale" name="locale" type="text" class="mt-1 block w-full"
+                                    :value="old('locale', $settings['locale'])" required />
+                                <x-input-error :messages="$errors->get('locale')" class="mt-2" />
                             </div>
 
                             <div>

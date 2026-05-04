@@ -27,6 +27,7 @@ class UpdateSystemSettingsRequest extends FormRequest
             'company_email' => ['nullable', 'email', 'max:255'],
             'default_currency' => ['required', 'string', 'size:3'],
             'timezone' => ['required', 'timezone'],
+            'locale' => ['required', 'string', 'max:10'],
             'default_hourly_rate' => ['required', 'numeric', 'min:0'],
             'archive_mode' => ['required', 'boolean'],
         ];
