@@ -8,6 +8,9 @@ beforeEach(function (): void {
     config()->set('session.secure', true);
     config()->set('session.http_only', true);
     config()->set('session.same_site', 'strict');
+    config()->set('app.url', 'https://gracesoft.test');
+    config()->set('mail.from.address', 'ops@gracesoft.dev');
+    config()->set('queue.default', 'database');
 
     $backupPath = storage_path('app/backups-test');
 
@@ -66,4 +69,21 @@ test('prelaunch check command can seed admin when option is provided', function 
         ->assertExitCode(0);
 
     expect(User::query()->where('email', 'admin@gracesoft.local')->exists())->toBeTrue();
+});
+
+test('prelaunch check command fails in strict mode when warnings exist', function () {
+    User::factory()->create([
+        'email' => 'admin@gracesoft.local',
+        'must_change_password' => true,
+        'password_changed_at' => null,
+    ]);
+
+    config()->set('queue.default', 'sync');
+    putenv('ADMIN_TEMP_PASSWORD=StrongTempPassword!2026');
+    $_ENV['ADMIN_TEMP_PASSWORD'] = 'StrongTempPassword!2026';
+    $_SERVER['ADMIN_TEMP_PASSWORD'] = 'StrongTempPassword!2026';
+
+    $this->artisan('desk:prelaunch-check --strict')
+        ->expectsOutputToContain('strict mode')
+        ->assertExitCode(1);
 });

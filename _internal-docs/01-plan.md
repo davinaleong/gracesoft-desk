@@ -11,29 +11,29 @@
 
 ## Product Framing
 
-* [ ] Define GraceSoft Desk as the lightweight ops + finance sibling of GraceSoft HQ
-* [ ] Position product as:
+* [x] Define GraceSoft Desk as the lightweight ops + finance sibling of GraceSoft HQ
+* [x] Position product as:
 
-  * [ ] Excel-to-SQL operational cutover
-  * [ ] single-seat internal admin tool
-  * [ ] finance + project + reporting cockpit
-* [ ] Finalize module scope:
+  * [x] Excel-to-SQL operational cutover
+  * [x] single-seat internal admin tool
+  * [x] finance + project + reporting cockpit
+* [x] Finalize module scope:
 
-  * [ ] Finance
-  * [ ] Projects
-  * [ ] Time Entries
-  * [ ] Reports
-  * [ ] Settings
+  * [x] Finance
+  * [x] Projects
+  * [x] Time Entries
+  * [x] Reports
+  * [x] Settings
 
 ## Technical Direction
 
-* [ ] Confirm static Blade + refresh architecture
-* [ ] Confirm no SPA / no API-first architecture
-* [ ] Confirm MySQL as reporting engine
-* [ ] Confirm SQL-first aggregation strategy
-* [ ] Confirm Blade-first UI strategy
-* [ ] Confirm ApexCharts for visualizations
-* [ ] Confirm Laravel Excel for imports / exports
+* [x] Confirm static Blade + refresh architecture
+* [x] Confirm no SPA / no API-first architecture
+* [x] Confirm MySQL as reporting engine
+* [x] Confirm SQL-first aggregation strategy
+* [x] Confirm Blade-first UI strategy
+* [x] Confirm ApexCharts for visualizations
+* [x] Confirm Laravel Excel for imports / exports
 
 ## Core Data Rules (Non-Negotiable)
 
@@ -59,17 +59,17 @@
 ## Laravel Foundation
 
 * [x] Create Laravel 12 project
-* [ ] Configure environment
+* [x] Configure environment
 * [x] Configure MySQL
-* [ ] Setup app branding:
+* [x] Setup app branding:
 
   * [x] app name
   * [x] favicon
   * [x] logo
   * [x] metadata
 * [x] Configure timezone / locale
-* [ ] Configure mail
-* [ ] Configure queues (optional)
+* [x] Configure mail
+* [x] Configure queues (optional)
 * [x] Configure logging
 
 ## Frontend Foundation
@@ -147,12 +147,12 @@
 
 ## Schema Design
 
-* [ ] Finalize normalized schema
-* [ ] Define naming conventions
+* [x] Finalize normalized schema
+* [x] Define naming conventions
 * [x] Define FK rules
 * [x] Define enum strategy
 * [x] Define soft delete strategy
-* [ ] Define audit strategy
+* [x] Define audit strategy
 * [x] Define UUID strategy
 * [x] Define public vs internal identifier rules
 

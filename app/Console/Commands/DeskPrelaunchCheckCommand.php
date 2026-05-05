@@ -25,11 +25,19 @@ class DeskPrelaunchCheckCommand extends Command
         $checks = [
             $this->check('APP_KEY is configured', filled(config('app.key'))),
             $this->check('APP_DEBUG is disabled', config('app.debug') === false),
+            $this->check('APP_URL is configured', filled(config('app.url'))),
             $this->check('Session cookie is secure', (bool) config('session.secure') === true),
             $this->check('Session cookie is HTTP-only', (bool) config('session.http_only') === true),
             $this->check(
                 'Session same-site policy is strict or lax',
                 in_array((string) config('session.same_site'), ['strict', 'lax'], true)
+            ),
+            $this->check('Mail sender address is configured', filled(config('mail.from.address'))),
+            $this->check('Queue connection is configured', filled(config('queue.default'))),
+            $this->check(
+                'Queue connection is not sync',
+                (string) config('queue.default') !== 'sync',
+                warning: true
             ),
             $this->check('Admin account exists', $this->adminUserExists()),
             $this->check('Backup directory is writable', $this->backupDirectoryWritable()),
