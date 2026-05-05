@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasPublicUuid;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,5 +59,15 @@ class TimeEntry extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeWithinDateRange(Builder $query, string $fromDate, string $toDate): Builder
+    {
+        return $query->whereBetween('entry_date', [$fromDate, $toDate]);
+    }
+
+    public function scopeBillable(Builder $query): Builder
+    {
+        return $query->where('is_billable', true);
     }
 }

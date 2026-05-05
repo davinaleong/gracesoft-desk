@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\TimeEntry;
 use App\Models\Transaction;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class DashboardMetricsService
 {
@@ -14,34 +15,45 @@ class DashboardMetricsService
      */
     public function getDashboardData(): array
     {
-        $activeProjects = Project::query()->where('status', 'active')->count();
-        $totalDurationMinutes = (int) TimeEntry::query()->sum('duration_minutes');
-        $totalBillableValue = (float) TimeEntry::query()->sum('billable_amount');
+        $cacheKey = sprintf('dashboard.metrics.%s', $this->dashboardCacheSignature());
 
-        $currentMonthStart = now()->startOfMonth()->toDateString();
-        $netCashflowThisMonth = (float) Transaction::query()
-            ->where('status', 'completed')
-            ->whereDate('transaction_date', '>=', $currentMonthStart)
-            ->get()
-            ->sum(fn (Transaction $transaction): float => $transaction->direction === 'in'
-                ? (float) $transaction->net_amount
-                : -1 * (float) $transaction->net_amount);
+        $callback = function (): array {
+            $activeProjects = Project::query()->active()->count();
+            $totalDurationMinutes = (int) TimeEntry::query()->sum('duration_minutes');
+            $totalBillableValue = (float) TimeEntry::query()->sum('billable_amount');
 
-        return [
-            'kpis' => [
-                'active_projects' => $activeProjects,
-                'total_logged_hours' => round($totalDurationMinutes / 60, 2),
-                'total_billable_value' => round($totalBillableValue, 2),
-                'net_cashflow_this_month' => round($netCashflowThisMonth, 2),
-            ],
-            'monthly_cashflow' => $this->monthlyCashflowSeries(),
-            'expense_breakdown' => $this->breakdownByCategory('out'),
-            'income_breakdown' => $this->breakdownByCategory('in'),
-            'pending_transactions' => $this->pendingTransactionsRows(),
-            'project_overview' => $this->projectOverviewRows(),
-            'billable_by_project' => $this->billableByProject(),
-            'billable_by_stage' => $this->billableByStage(),
-        ];
+            $currentMonthStart = now()->startOfMonth()->toDateString();
+            $currentMonthEnd = now()->endOfMonth()->toDateString();
+            $netCashflowThisMonth = (float) Transaction::query()
+                ->completed()
+                ->withinDateRange($currentMonthStart, $currentMonthEnd)
+                ->get()
+                ->sum(fn (Transaction $transaction): float => $transaction->direction === 'in'
+                    ? (float) $transaction->net_amount
+                    : -1 * (float) $transaction->net_amount);
+
+            return [
+                'kpis' => [
+                    'active_projects' => $activeProjects,
+                    'total_logged_hours' => round($totalDurationMinutes / 60, 2),
+                    'total_billable_value' => round($totalBillableValue, 2),
+                    'net_cashflow_this_month' => round($netCashflowThisMonth, 2),
+                ],
+                'monthly_cashflow' => $this->monthlyCashflowSeries(),
+                'expense_breakdown' => $this->breakdownByCategory('out'),
+                'income_breakdown' => $this->breakdownByCategory('in'),
+                'pending_transactions' => $this->pendingTransactionsRows(),
+                'project_overview' => $this->projectOverviewRows(),
+                'billable_by_project' => $this->billableByProject(),
+                'billable_by_stage' => $this->billableByStage(),
+            ];
+        };
+
+        if (app()->environment('testing')) {
+            return $callback();
+        }
+
+        return Cache::remember($cacheKey, now()->addMinutes(5), $callback);
     }
 
     /**
@@ -53,8 +65,8 @@ class DashboardMetricsService
         $monthEnd = now()->endOfMonth();
 
         $transactions = Transaction::query()
-            ->where('status', 'completed')
-            ->whereBetween('transaction_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->completed()
+            ->withinDateRange($monthStart->toDateString(), $monthEnd->toDateString())
             ->get();
 
         $groupedValues = $transactions
@@ -112,9 +124,9 @@ class DashboardMetricsService
             ->leftJoin('transaction_categories', 'transactions.transaction_category_id', '=', 'transaction_categories.id')
             ->selectRaw("COALESCE(transaction_categories.name, 'Uncategorized') as label")
             ->selectRaw('COALESCE(SUM(transactions.net_amount), 0) as total_amount')
-            ->where('transactions.status', 'completed')
-            ->where('transactions.direction', $direction)
-            ->whereDate('transactions.transaction_date', '>=', now()->startOfMonth()->toDateString())
+            ->completed()
+            ->direction($direction)
+            ->withinDateRange(now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString())
             ->groupBy('label')
             ->orderByDesc('total_amount')
             ->limit(6)
@@ -132,7 +144,7 @@ class DashboardMetricsService
     private function pendingTransactionsRows(): array
     {
         return Transaction::query()
-            ->where('status', 'pending')
+            ->pending()
             ->latest('transaction_date')
             ->limit(6)
             ->get()
@@ -184,5 +196,17 @@ class DashboardMetricsService
             'labels' => $rows->pluck('label')->map(fn ($value): string => (string) $value)->all(),
             'values' => $rows->pluck('total_amount')->map(fn ($value): float => round((float) $value, 2))->all(),
         ];
+    }
+
+    private function dashboardCacheSignature(): string
+    {
+        return sha1(implode('|', [
+            Project::query()->count(),
+            (string) (Project::query()->max('updated_at') ?? 'none'),
+            TimeEntry::query()->count(),
+            (string) (TimeEntry::query()->max('updated_at') ?? 'none'),
+            Transaction::query()->count(),
+            (string) (Transaction::query()->max('updated_at') ?? 'none'),
+        ]));
     }
 }
