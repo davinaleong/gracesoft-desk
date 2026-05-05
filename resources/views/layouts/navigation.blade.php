@@ -30,7 +30,7 @@
 
         <footer class="space-y-3 border-t border-violet-500 p-6 text-sm">
             <a href="{{ route('profile.edit') }}"
-                class="block font-semibold text-violet-50 hover:text-violet-200">{{ __('Profile') }}</a>
+                class="block font-semibold no-underline text-violet-50 hover:text-violet-200">{{ __('Profile') }}</a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"

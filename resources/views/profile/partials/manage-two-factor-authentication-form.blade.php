@@ -26,11 +26,12 @@
     @else
         <div class="space-y-3">
             <p class="text-sm text-gray-600">
-                {{ __('Step 1: Open your authenticator app and scan this QR endpoint:') }}
+                {{ __('Step 1: Open your authenticator app and scan this QR code:') }}
             </p>
-            <a href="/user/two-factor-qr-code" target="_blank" class="text-sm text-blue-600 underline">
-                /user/two-factor-qr-code
-            </a>
+
+            <div class="inline-flex rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+                {!! auth()->user()->twoFactorQrCodeSvg() !!}
+            </div>
 
             <p class="text-sm text-gray-600">
                 {{ __('Step 2: Enter the current TOTP code to confirm setup.') }}
@@ -64,11 +65,34 @@
                         {{ __('Regenerate Recovery Codes') }}
                     </x-secondary-button>
                 </form>
+            </div>
 
-                <a href="/user/two-factor-recovery-codes" target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50">
-                    {{ __('View Recovery Codes') }}
-                </a>
+            @php
+                $recoveryCodes = auth()->user()->two_factor_recovery_codes ? auth()->user()->recoveryCodes() : [];
+            @endphp
+
+            <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                <h3 class="text-sm font-semibold text-gray-900">
+                    {{ __('Recovery Codes') }}
+                </h3>
+                <p class="mt-1 text-xs text-gray-600">
+                    {{ __('Store these in a secure place. Each code can be used once.') }}
+                </p>
+
+                @if (count($recoveryCodes) > 0)
+                    <ul class="mt-3 grid gap-2 sm:grid-cols-2">
+                        @foreach ($recoveryCodes as $recoveryCode)
+                            <li
+                                class="rounded border border-gray-200 bg-white px-3 py-2 font-mono text-xs text-gray-800">
+                                {{ $recoveryCode }}
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="mt-3 text-xs text-gray-600">
+                        {{ __('Recovery codes will appear here after two-factor authentication is enabled.') }}
+                    </p>
+                @endif
             </div>
 
             <form method="post" action="/user/two-factor-authentication">

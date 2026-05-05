@@ -25,10 +25,10 @@
 	--color-text: #111322;
 	--color-text-muted: #5f6477;
 	--color-border: #d9deea;
-	--color-primary: #5d3fd3;
-	--color-primary-soft: #ede9ff;
-	--color-sidebar: #5a36d6;
-	--color-sidebar-muted: #816ae1;
+	--color-primary: #4f46e5;
+	--color-primary-soft: #e0e7ff;
+	--color-sidebar: #4f46e5;
+	--color-sidebar-muted: #6366f1;
 	--color-success: #15803d;
 	--color-danger: #b91c1c;
 	--color-warning: #b45309;
@@ -99,7 +99,7 @@ body {
 	}
 
 	.desk-action-primary:hover {
-		background: #4f2dd0;
+		background: #4338ca;
 		border-radius: var(--radius-md);
 	}
 
@@ -108,7 +108,7 @@ body {
 	}
 
 	.desk-interactive-row {
-		@apply transition-colors duration-150 hover:bg-violet-50;
+		@apply transition-colors duration-150 hover:bg-indigo-50;
 	}
 
 	.desk-page-title {
@@ -200,7 +200,7 @@ body {
 	}
 
 	.desk-table-dense tbody tr:nth-child(even) {
-		@apply bg-violet-50/40;
+		@apply bg-indigo-50/40;
 	}
 
 	.desk-card {
@@ -254,8 +254,8 @@ body {
 	.desk-select:focus,
 	.desk-date:focus,
 	.desk-textarea:focus {
-		--tw-ring-color: #c8bbfb;
-		border-color: #a895f2;
+		--tw-ring-color: #a5b4fc;
+		border-color: #818cf8;
 	}
 
 	.desk-textarea {

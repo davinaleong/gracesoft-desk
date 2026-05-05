@@ -106,7 +106,7 @@ class DeskPrelaunchCheckCommand extends Command
 
     private function adminUserExists(): bool
     {
-        $adminEmail = (string) env('ADMIN_EMAIL', 'admin@gracesoft.local');
+        $adminEmail = (string) env('ADMIN_EMAIL', 'admin@gracesoft.dev');
 
         return User::query()->where('email', $adminEmail)->exists();
     }

@@ -22,14 +22,14 @@ beforeEach(function (): void {
     $_ENV['DESK_BACKUP_PATH'] = $backupPath;
     $_SERVER['DESK_BACKUP_PATH'] = $backupPath;
 
-    putenv('ADMIN_EMAIL=admin@gracesoft.local');
-    $_ENV['ADMIN_EMAIL'] = 'admin@gracesoft.local';
-    $_SERVER['ADMIN_EMAIL'] = 'admin@gracesoft.local';
+    putenv('ADMIN_EMAIL=admin@gracesoft.dev');
+    $_ENV['ADMIN_EMAIL'] = 'admin@gracesoft.dev';
+    $_SERVER['ADMIN_EMAIL'] = 'admin@gracesoft.dev';
 });
 
 test('prelaunch check command succeeds when hardening checks pass', function () {
     User::factory()->create([
-        'email' => 'admin@gracesoft.local',
+        'email' => 'admin@gracesoft.dev',
         'must_change_password' => true,
         'password_changed_at' => null,
     ]);
@@ -45,7 +45,7 @@ test('prelaunch check command succeeds when hardening checks pass', function () 
 
 test('prelaunch check command fails when app debug is enabled', function () {
     User::factory()->create([
-        'email' => 'admin@gracesoft.local',
+        'email' => 'admin@gracesoft.dev',
         'must_change_password' => true,
         'password_changed_at' => null,
     ]);
@@ -58,7 +58,7 @@ test('prelaunch check command fails when app debug is enabled', function () {
 });
 
 test('prelaunch check command can seed admin when option is provided', function () {
-    User::query()->where('email', 'admin@gracesoft.local')->delete();
+    User::query()->where('email', 'admin@gracesoft.dev')->delete();
 
     putenv('ADMIN_TEMP_PASSWORD=StrongTempPassword!2026');
     $_ENV['ADMIN_TEMP_PASSWORD'] = 'StrongTempPassword!2026';
@@ -68,12 +68,12 @@ test('prelaunch check command can seed admin when option is provided', function 
         ->expectsOutputToContain('Admin user seed executed')
         ->assertExitCode(0);
 
-    expect(User::query()->where('email', 'admin@gracesoft.local')->exists())->toBeTrue();
+    expect(User::query()->where('email', 'admin@gracesoft.dev')->exists())->toBeTrue();
 });
 
 test('prelaunch check command fails in strict mode when warnings exist', function () {
     User::factory()->create([
-        'email' => 'admin@gracesoft.local',
+        'email' => 'admin@gracesoft.dev',
         'must_change_password' => true,
         'password_changed_at' => null,
     ]);

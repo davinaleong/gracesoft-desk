@@ -64,3 +64,23 @@ test('delete endpoint remains disabled regardless of password validity', functio
 
     $this->assertNotNull($user->fresh());
 });
+
+test('profile page shows recovery codes ui when two-factor is enabled', function () {
+    $user = User::factory()->create([
+        'two_factor_secret' => encrypt('JBSWY3DPEHPK3PXP'),
+        'two_factor_recovery_codes' => encrypt(json_encode([
+            'alpha-recovery-code',
+            'bravo-recovery-code',
+        ], JSON_THROW_ON_ERROR)),
+        'two_factor_confirmed_at' => now(),
+    ]);
+
+    $response = $this
+        ->actingAs($user)
+        ->get('/profile');
+
+    $response->assertOk()
+        ->assertSeeText('Recovery Codes')
+        ->assertSeeText('alpha-recovery-code')
+        ->assertSeeText('bravo-recovery-code');
+});

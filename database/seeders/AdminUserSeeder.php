@@ -13,7 +13,7 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $email = env('ADMIN_EMAIL', 'admin@gracesoft.local');
+        $email = env('ADMIN_EMAIL', 'admin@gracesoft.dev');
 
         User::query()->updateOrCreate(
             ['email' => $email],
