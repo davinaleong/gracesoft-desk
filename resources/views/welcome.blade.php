@@ -26,7 +26,7 @@
 </head>
 
 <body class="min-h-screen bg-[#eef2ff] text-[#111322] grid place-items-center antialiased">
-    <main class="mx-auto min-h-screen max-w-4xl items-center space-y-4 gap-8">
+    <main class="mx-auto max-w-4xl items-center space-y-4 gap-8">
         <section class="rounded-2xl border border-indigo-200 bg-white p-7 shadow-lg lg:p-10">
             <header class="flex items-center gap-4">
                 <img src="{{ asset('wm.svg') }}" alt="GraceSoft Desk" class="h-11 w-auto">
