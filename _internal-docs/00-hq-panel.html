@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <meta name="csrf-token" content="GiscHrewCuUQdSf2Rcniy0HZywQLXWXwVCYetWV7">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+
+    
+    <title>GraceSoft HQ</title>
+
+    <link rel="icon" href="http://gracesoft-hq.test/logo.svg" type="image/svg+xml">
+
+    
+    <link rel="preload" as="style" href="http://gracesoft-hq.test/build/assets/app-DiYxZ4En.css" /><link rel="modulepreload" as="script" href="http://gracesoft-hq.test/build/assets/app-BHlXbMEA.js" /><link rel="stylesheet" href="http://gracesoft-hq.test/build/assets/app-DiYxZ4En.css" /><script type="module" src="http://gracesoft-hq.test/build/assets/app-BHlXbMEA.js"></script><script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://gracesoft-hq.test/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        const seen = new WeakSet();
+        return JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[Circular]';
+                seen.add(value);
+            }
+            if (value instanceof Error) {
+                return {
+                    name: value.name,
+                    message: value.message,
+                    stack: value.stack
+                };
+            }
+            return value;
+        });
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            logQueue.push({
+                type: 'uncaught_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: errorMsg,
+                    filename: url,
+                    lineno: lineNumber,
+                    colno: colNumber,
+                    error: error ? {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: event.reason instanceof Error ? {
+                        name: event.reason.name,
+                        message: event.reason.message,
+                        stack: event.reason.stack
+                    } : event.reason
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+</head>
+<body class="relative text-gs-black-900 bg-gs-black-50">
+        
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-gs-black-900">
+        Skip to main content
+    </a>
+
+    <div class="fixed right-4 top-4 z-40 hidden gap-2 rounded-lg border border-gs-black-200 bg-white p-2 shadow lg:flex">
+        <div class="grid aspect-square h-[4ch] w-[4ch] place-items-center rounded-full bg-gs-purple-600 font-bold text-white">
+            GA
+        </div>
+        <div>
+            <p class="font-bold leading-tight">GraceSoft Admin</p>
+            <p class="font-mono text-gs-black-600"><small>admin@gracesoft.dev</small></p>
+        </div>
+    </div>
+
+    <div class="flex min-h-screen flex-col items-stretch lg:flex-row">
+        <aside class="flex w-full flex-col justify-between bg-gs-purple-600 text-white lg:max-w-xs lg:min-h-screen lg:sticky lg:top-0">
+            <div class="space-y-4">
+                <header class="border-b border-gs-purple-500 p-6">
+                    <img src="http://gracesoft-hq.test/wm-w.svg" alt="GraceSoft HQ logo" class="mx-auto h-auto w-full">
+                </header>
+
+                <div class="p-6 space-y-4">
+                                            <section class="space-y-2">
+                            <h2 class="text-xs font-bold uppercase tracking-wide text-gs-purple-300">Dashboard</h2>
+                            <nav class="space-y-1 text-sm" aria-label="Dashboard navigation">
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/dashboard"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 bg-gs-purple-500 text-white"
+                                    >
+                                        <span>Dashboard</span>
+                                                                            </a>
+                                                            </nav>
+                        </section>
+                                            <section class="space-y-2">
+                            <h2 class="text-xs font-bold uppercase tracking-wide text-gs-purple-300">Identity &amp; Security</h2>
+                            <nav class="space-y-1 text-sm" aria-label="Identity &amp; Security navigation">
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/notifications"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Notifications</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/activity"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Recent Activity</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/analytics"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Analytics</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/hq/analytics"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Insights</span>
+                                                                            </a>
+                                                            </nav>
+                        </section>
+                                            <section class="space-y-2">
+                            <h2 class="text-xs font-bold uppercase tracking-wide text-gs-purple-300">CRM</h2>
+                            <nav class="space-y-1 text-sm" aria-label="CRM navigation">
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/clients"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Clients</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/enquiries"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Enquiries</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/notes"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Notes</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/feedback"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Feedback</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/hq/feedback"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Feedback Intake</span>
+                                                                            </a>
+                                                            </nav>
+                        </section>
+                                            <section class="space-y-2">
+                            <h2 class="text-xs font-bold uppercase tracking-wide text-gs-purple-300">Work Management</h2>
+                            <nav class="space-y-1 text-sm" aria-label="Work Management navigation">
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/time-entries"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Time Entries</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/time-entries/dashboard"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Time Dashboard</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/projects"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Projects</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/reminders"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Reminders</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/events"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Events List</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/calendar"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Calendar</span>
+                                                                            </a>
+                                                            </nav>
+                        </section>
+                                            <section class="space-y-2">
+                            <h2 class="text-xs font-bold uppercase tracking-wide text-gs-purple-300">Billing</h2>
+                            <nav class="space-y-1 text-sm" aria-label="Billing navigation">
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/orders"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Orders</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/invoices"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Invoices</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/payments"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Payments</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/subscriptions"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Subscriptions</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/hq/billing"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Billing Checkout</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/products"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Products</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/pricing-plans"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Pricing Plans</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/licenses"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Licenses</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/integrations"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Community Integrations</span>
+                                                                            </a>
+                                                            </nav>
+                        </section>
+                                            <section class="space-y-2">
+                            <h2 class="text-xs font-bold uppercase tracking-wide text-gs-purple-300">Finance</h2>
+                            <nav class="space-y-1 text-sm" aria-label="Finance navigation">
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/finance/dashboard"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Dashboard</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/expenses"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Expenses</span>
+                                                                            </a>
+                                                                                                        <a
+                                        href="http://gracesoft-hq.test/currencies"
+                                        class="flex items-center justify-between rounded px-2.5 py-2 font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-gs-purple-600 text-gs-purple-50 hover:bg-gs-purple-500/60"
+                                    >
+                                        <span>Currencies</span>
+                                                                            </a>
+                                                            </nav>
+                        </section>
+                                    </div>
+            </div>
+
+            <footer class="border-t border-gs-purple-500 p-6">
+                <nav class="space-y-3 text-sm">
+                    <a href="http://gracesoft-hq.test/account" class="block font-semibold hover:text-gs-purple-200">Account</a>
+                    <a href="http://gracesoft-hq.test/legal" class="block font-semibold hover:text-gs-purple-200">Legal</a>
+                    <form method="post" action="http://gracesoft-hq.test/logout">
+                        <input type="hidden" name="_token" value="GiscHrewCuUQdSf2Rcniy0HZywQLXWXwVCYetWV7" autocomplete="off">                        <button type="submit" class="block font-semibold hover:text-gs-purple-200">Logout</button>
+                    </form>
+                </nav>
+            </footer>
+        </aside>
+
+        <main id="main-content" tabindex="-1" class="min-h-screen flex-1 space-y-6 p-4 lg:p-6">
+            <div class="space-y-2">
+            <div class="rounded-md border px-4 py-3 border-green-200 bg-green-50 text-green-900" role="status" aria-live="polite">
+            <p class="font-semibold">Success</p>
+    
+            <p class="text-sm">Welcome back.</p>
+    </div>
+                
+</div>
+                <div class="border-b border-gs-black-300 pb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <div>
+        <h1 class="text-3xl font-bold">Dashboard</h1>
+                    <p class="text-gs-black-700">Welcome back. Here is a snapshot of operations, billing, and finance health today.</p>
+            </div>
+
+            <div>
+            <div class="inline-flex items-center rounded-full bg-gs-purple-100 text-gs-purple-800 font-semibold px-3 py-1 text-sm">
+    Reporting month: 2026-05
+</div>
+        </div>
+    </div>
+
+    
+    <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4" aria-label="Financial snapshot">
+        <article class="rounded border border-gs-black-200 bg-white p-4 shadow">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gs-black-600">Outstanding exposure</p>
+            <p class="mt-1 text-2xl font-bold text-gs-black-900">$0.00</p>
+            <p class="mt-1 text-xs text-gs-black-700">Total receivables currently at risk.</p>
+        </article>
+
+        <article class="rounded border p-4 shadow border-emerald-200 bg-emerald-50">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gs-black-700">Overdue invoices</p>
+            <p class="mt-1 text-2xl font-bold text-emerald-700">0</p>
+            <p class="mt-1 text-xs text-gs-black-700">No overdue invoices</p>
+        </article>
+
+        <article class="rounded border p-4 shadow border-emerald-200 bg-emerald-50">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gs-black-700">Pending approvals</p>
+            <p class="mt-1 text-2xl font-bold text-emerald-700">0</p>
+            <p class="mt-1 text-xs text-gs-black-700">Approval queue is clear</p>
+        </article>
+
+        <article class="rounded border p-4 shadow border-emerald-200 bg-emerald-50">
+            <p class="text-xs font-semibold uppercase tracking-wide text-gs-black-700">Unread notifications</p>
+            <p class="mt-1 text-2xl font-bold text-emerald-700">0</p>
+            <p class="mt-1 text-xs text-gs-black-700">Inbox is clear</p>
+        </article>
+    </section>
+
+    <section class="mt-4 rounded border border-gs-black-200 bg-white p-4 shadow">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-gs-black-700">Focus Signals</h2>
+        <div class="mt-3 flex flex-wrap gap-2">
+                            <span class="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Healthy: No overdue invoices</span>
+            
+            
+            <span class="inline-flex items-center rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-700">Ops inbox: 0 unread</span>
+        </div>
+    </section>
+
+    <section class="mt-4 grid gap-4 xl:grid-cols-3" aria-label="Operational overview">
+        <article class="xl:col-span-2 space-y-3">
+            <h2 class="text-lg font-bold text-gs-purple-700">Recent Invoices</h2>
+            <div class="overflow-x-auto">
+    <div class="w-full overflow-hidden rounded-xl border border-gs-black-200 bg-white shadow">
+        <table class="w-full border-collapse">
+                            <caption class="border-b border-gs-black-200 px-3 py-2 text-left text-xs font-bold uppercase tracking-wide text-gs-black-700">Invoice list</caption>
+                        <thead>
+                <tr>
+                                            <th class="bg-gs-black-100 px-3 py-2 text-left text-xs font-bold uppercase tracking-wide text-gs-black-700">Invoice</th>
+                                            <th class="bg-gs-black-100 px-3 py-2 text-left text-xs font-bold uppercase tracking-wide text-gs-black-700">Due Date</th>
+                                            <th class="bg-gs-black-100 px-3 py-2 text-left text-xs font-bold uppercase tracking-wide text-gs-black-700">Total</th>
+                                            <th class="bg-gs-black-100 px-3 py-2 text-left text-xs font-bold uppercase tracking-wide text-gs-black-700">Balance Due</th>
+                                            <th class="bg-gs-black-100 px-3 py-2 text-left text-xs font-bold uppercase tracking-wide text-gs-black-700">Status</th>
+                                    </tr>
+            </thead>
+            <tbody class="divide-y divide-gs-black-100">
+                <tr>
+                    <td class="px-3 py-2 text-center text-gs-black-600" colspan="5">No records found.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+        </article>
+
+        <article class="rounded-xl border border-gs-black-200 bg-white p-4 shadow">
+            <h2 class="text-lg font-bold text-gs-purple-700">Quick Links</h2>
+            <ul class="mt-3 space-y-2 text-sm">
+                <li><a href="http://gracesoft-hq.test/clients" class="font-semibold text-gs-purple-700 hover:text-gs-purple-800 hover:underline">Open Clients</a></li>
+                <li><a href="http://gracesoft-hq.test/orders" class="font-semibold text-gs-purple-700 hover:text-gs-purple-800 hover:underline">Open Orders</a></li>
+                <li><a href="http://gracesoft-hq.test/finance/dashboard" class="font-semibold text-gs-purple-700 hover:text-gs-purple-800 hover:underline">Finance Dashboard</a></li>
+                <li><a href="http://gracesoft-hq.test/currencies" class="font-semibold text-gs-purple-700 hover:text-gs-purple-800 hover:underline">Currency Rates</a></li>
+                <li><a href="http://gracesoft-hq.test/reminders" class="font-semibold text-gs-purple-700 hover:text-gs-purple-800 hover:underline">Reminders</a></li>
+                <li><a href="http://gracesoft-hq.test/notifications" class="font-semibold text-gs-purple-700 hover:text-gs-purple-800 hover:underline">Notifications</a></li>
+            </ul>
+        </article>
+    </section>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>

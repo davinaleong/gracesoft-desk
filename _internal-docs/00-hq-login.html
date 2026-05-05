@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    
+    <meta name="csrf-token" content="ExSDJPeYSVFEMisMMDahG2judMaeFBBNS2Lu9xJn">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+
+    
+    <title>Login | GraceSoft HQ</title>
+
+    <link rel="icon" href="http://gracesoft-hq.test/logo.svg" type="image/svg+xml">
+
+    
+    <link rel="preload" as="style" href="http://gracesoft-hq.test/build/assets/app-DiYxZ4En.css" /><link rel="modulepreload" as="script" href="http://gracesoft-hq.test/build/assets/app-BHlXbMEA.js" /><link rel="stylesheet" href="http://gracesoft-hq.test/build/assets/app-DiYxZ4En.css" /><script type="module" src="http://gracesoft-hq.test/build/assets/app-BHlXbMEA.js"></script><script id="browser-logger-active">
+(function() {
+    const ENDPOINT = 'http://gracesoft-hq.test/_boost/browser-logs';
+    const logQueue = [];
+    let flushTimeout = null;
+
+    console.log('🔍 Browser logger active (MCP server detected). Posting to: ' + ENDPOINT);
+
+    // Store original console methods
+    const originalConsole = {
+        log: console.log,
+        info: console.info,
+        error: console.error,
+        warn: console.warn,
+        table: console.table
+    };
+
+    // Helper to safely stringify values
+    function safeStringify(obj) {
+        const seen = new WeakSet();
+        return JSON.stringify(obj, (key, value) => {
+            if (typeof value === 'object' && value !== null) {
+                if (seen.has(value)) return '[Circular]';
+                seen.add(value);
+            }
+            if (value instanceof Error) {
+                return {
+                    name: value.name,
+                    message: value.message,
+                    stack: value.stack
+                };
+            }
+            return value;
+        });
+    }
+
+    // Batch and send logs
+    function flushLogs() {
+        if (logQueue.length === 0) return;
+
+        const batch = logQueue.splice(0, logQueue.length);
+
+        fetch(ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ logs: batch })
+        }).catch(err => {
+            // Silently fail to avoid infinite loops
+            originalConsole.error('Failed to send logs:', err);
+        });
+    }
+
+    // Debounced flush (100ms)
+    function scheduleFlush() {
+        if (flushTimeout) clearTimeout(flushTimeout);
+        flushTimeout = setTimeout(flushLogs, 100);
+    }
+
+    // Intercept console methods
+    ['log', 'info', 'error', 'warn', 'table'].forEach(method => {
+        console[method] = function(...args) {
+            // Call original method
+            originalConsole[method].apply(console, args);
+
+            // Capture log data
+            try {
+                logQueue.push({
+                    type: method,
+                    timestamp: new Date().toISOString(),
+                    data: args.map(arg => {
+                        try {
+                            return typeof arg === 'object' ? JSON.parse(safeStringify(arg)) : arg;
+                        } catch (e) {
+                            return String(arg);
+                        }
+                    }),
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                });
+
+                scheduleFlush();
+            } catch (e) {
+                // Fail silently
+            }
+        };
+    });
+
+    // Global error handlers for uncaught errors
+    const originalOnError = window.onerror;
+    window.onerror = function boostErrorHandler(errorMsg, url, lineNumber, colNumber, error) {
+        try {
+            logQueue.push({
+                type: 'uncaught_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: errorMsg,
+                    filename: url,
+                    lineno: lineNumber,
+                    colno: colNumber,
+                    error: error ? {
+                        name: error.name,
+                        message: error.message,
+                        stack: error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Call original handler if it exists
+        if (originalOnError && typeof originalOnError === 'function') {
+            return originalOnError(errorMsg, url, lineNumber, colNumber, error);
+        }
+
+        // Let the error continue to propagate
+        return false;
+    }
+    window.addEventListener('error', (event) => {
+        try {
+            logQueue.push({
+                type: 'window_error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: event.message,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    error: event.error ? {
+                        name: event.error.name,
+                        message: event.error.message,
+                        stack: event.error.stack
+                    } : null
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the error continue to propagate
+        return false;
+    });
+    window.addEventListener('unhandledrejection', (event) => {
+        try {
+            logQueue.push({
+                type: 'error',
+                timestamp: new Date().toISOString(),
+                data: [{
+                    message: 'Unhandled Promise Rejection',
+                    reason: event.reason instanceof Error ? {
+                        name: event.reason.name,
+                        message: event.reason.message,
+                        stack: event.reason.stack
+                    } : event.reason
+                }],
+                url: window.location.href,
+                userAgent: navigator.userAgent
+            });
+
+            scheduleFlush();
+        } catch (e) {
+            // Fail silently
+        }
+
+        // Let the rejection continue to propagate
+        return false;
+    });
+
+    // Flush on page unload
+    window.addEventListener('beforeunload', () => {
+        if (logQueue.length > 0) {
+            navigator.sendBeacon(ENDPOINT, JSON.stringify({ logs: logQueue }));
+        }
+    });
+})();
+</script>
+</head>
+<body class="min-h-screen text-gs-black-900 bg-gs-purple-700">
+        <div class="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-8 px-4 py-8 lg:grid-cols-2 lg:px-8">
+        <section class="hidden text-white lg:block">
+            <img src="http://gracesoft-hq.test/wm-w.svg" alt="GraceSoft HQ logo" class="h-16 w-auto">
+            <h2 class="mt-10 max-w-md font-serif text-4xl font-bold leading-tight">Operations visibility, billing control, and customer workflows in one place.</h2>
+            <p class="mt-4 max-w-lg text-gs-purple-100">GraceSoft HQ keeps teams aligned across CRM, work management, billing, and finance with streamlined daily actions.</p>
+        </section>
+
+        <section class="rounded-2xl border p-6 shadow-xl lg:p-8 border-gs-black-200 bg-white">
+            <header class="mb-6 flex items-center justify-between gap-4">
+                <img src="http://gracesoft-hq.test/wm.svg" alt="GraceSoft HQ logo" class="h-12 w-auto">
+                <span class="rounded-full bg-gs-purple-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-gs-purple-700">Secure Access</span>
+            </header>
+
+            <div class="space-y-2">
+                
+</div>
+
+                <main class="space-y-5">
+        <article class="space-y-5">
+            <header>
+                <h1 class="font-serif text-3xl font-bold text-gs-black-900">Sign in to GraceSoft HQ</h1>
+                <p class="mt-1 text-gs-black-700">Use your work credentials to continue to the operations dashboard.</p>
+            </header>
+
+            <form class="space-y-4" method="post" action="http://gracesoft-hq.test/login" novalidate>
+                <input type="hidden" name="_token" value="ExSDJPeYSVFEMisMMDahG2judMaeFBBNS2Lu9xJn" autocomplete="off">
+                <div class="space-y-1">
+    <label for="email" class="block text-sm font-semibold text-gs-black-800">
+        Email <span class="text-red-600">*</span>    </label>
+
+    <input
+        id="email"
+        name="email"
+        type="email"
+        value=""
+        placeholder="you@example.com"
+        autocomplete="email"
+         required         class="block w-full rounded-lg border px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 bg-gs-black-50 border-gs-black-200 text-gs-black-900 focus-visible:ring-gs-purple-300"
+    >
+
+    
+    </div>
+
+                <div class="space-y-1">
+    <label for="password" class="block text-sm font-semibold text-gs-black-800">
+        Password <span class="text-red-600">*</span>    </label>
+
+    <input
+        id="password"
+        name="password"
+        type="password"
+        value=""
+        placeholder="********"
+        autocomplete="current-password"
+         required         class="block w-full rounded-lg border px-3 py-2 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 bg-gs-black-50 border-gs-black-200 text-gs-black-900 focus-visible:ring-gs-purple-300"
+    >
+
+    
+    </div>
+
+                <button type="submit" data-loading-text="Processing..." class="inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 font-semibold transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 bg-gs-purple-600 text-white hover:bg-gs-purple-700 focus-visible:ring-gs-purple-300 w-full">
+    <i data-lucide="log-in" class="w-4 h-4 aspect-square"></i>
+                    Sign In
+</button>
+            </form>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-gs-black-700">
+                <a href="http://gracesoft-hq.test/forgot-password" class="font-semibold text-gs-purple-700 hover:text-gs-purple-800 hover:underline">Forgot password?</a>
+                <a href="http://gracesoft-hq.test/register" class="font-semibold text-gs-purple-700 hover:text-gs-purple-800 hover:underline">Create account</a>
+            </div>
+        </article>
+    </main>
+
+            <footer class="mt-6 border-t border-gs-black-200 pt-4">
+                <p class="text-xs text-gs-black-700">&copy; 2026 GraceSoft HQ. All rights reserved.</p>
+            </footer>
+        </section>
+    </div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
