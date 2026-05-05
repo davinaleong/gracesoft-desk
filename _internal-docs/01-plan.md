@@ -242,7 +242,7 @@
 ## Domain Rules
 
 * [x] One-user enforcement
-* [ ] Duration calculation
+* [x] Duration calculation
 * [x] Billable cost calculation
 * [x] GST calculation
 * [x] Net amount calculation

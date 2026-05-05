@@ -17,6 +17,10 @@ class TimeEntry extends Model
 
     protected static function booted(): void
     {
+        static::saving(function (self $entry): void {
+            self::deriveBillingValues($entry);
+        });
+
         static::creating(function (self $entry): void {
             self::fillUuid($entry);
         });
@@ -69,5 +73,23 @@ class TimeEntry extends Model
     public function scopeBillable(Builder $query): Builder
     {
         return $query->where('is_billable', true);
+    }
+
+    private static function deriveBillingValues(self $entry): void
+    {
+        $durationMinutes = max(0, (int) ($entry->duration_minutes ?? 0));
+        $hourlyRate = max(0, (float) ($entry->hourly_rate ?? 0));
+        $isBillable = (bool) ($entry->is_billable ?? false);
+
+        $entry->duration_minutes = $durationMinutes;
+        $entry->hourly_rate = $hourlyRate;
+
+        if (! $isBillable || $durationMinutes === 0 || $hourlyRate === 0.0) {
+            $entry->billable_amount = 0;
+
+            return;
+        }
+
+        $entry->billable_amount = round(($durationMinutes / 60) * $hourlyRate, 2);
     }
 }

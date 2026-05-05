@@ -80,6 +80,43 @@ test('time entry can be created and billable amount is calculated', function () 
         ->and($timeEntry->user_id)->toBe($user->id);
 });
 
+test('time entry model enforces duration and billable amount calculations', function () {
+    $user = readyUserForTimeEntries();
+    $dependencies = timeEntryDependencies();
+
+    $timeEntry = TimeEntry::query()->create([
+        'project_id' => $dependencies['project']->id,
+        'project_stage_id' => $dependencies['stage']->id,
+        'user_id' => $user->id,
+        'entry_date' => now()->toDateString(),
+        'duration_minutes' => 90,
+        'is_billable' => true,
+        'hourly_rate' => 120,
+        'billable_amount' => 1,
+    ]);
+
+    expect((float) $timeEntry->billable_amount)->toBe(180.0);
+
+    $timeEntry->update([
+        'duration_minutes' => 30,
+        'hourly_rate' => 120,
+    ]);
+
+    $timeEntry->refresh();
+
+    expect((float) $timeEntry->billable_amount)->toBe(60.0);
+
+    $timeEntry->update([
+        'is_billable' => false,
+        'duration_minutes' => 45,
+        'hourly_rate' => 99,
+    ]);
+
+    $timeEntry->refresh();
+
+    expect((float) $timeEntry->billable_amount)->toBe(0.0);
+});
+
 test('time entry detail resolves by uuid not sql id', function () {
     $user = readyUserForTimeEntries();
     $dependencies = timeEntryDependencies();
