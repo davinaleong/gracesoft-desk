@@ -17,155 +17,114 @@
     <div class="desk-page-shell">
         <div class="desk-page-container">
             <div class="desk-kpi-grid">
-                <div class="desk-kpi-card">
-                    <p class="desk-kpi-label">{{ __('Active Projects') }}</p>
-                    <p class="desk-kpi-value">{{ $dashboard['kpis']['active_projects'] }}</p>
-                </div>
-                <div class="desk-kpi-card">
-                    <p class="desk-kpi-label">{{ __('Total Logged Hours') }}</p>
-                    <p class="desk-kpi-value">
-                        {{ number_format((float) $dashboard['kpis']['total_logged_hours'], 2) }}</p>
-                </div>
-                <div class="desk-kpi-card">
-                    <p class="desk-kpi-label">{{ __('Total Billable Value') }}</p>
-                    <p class="desk-kpi-value">
-                        @deskMoney((float) $dashboard['kpis']['total_billable_value'])</p>
-                </div>
-                <div class="desk-kpi-card">
-                    <p class="desk-kpi-label">{{ __('Net Cashflow (This Month)') }}</p>
-                    <p
-                        class="{{ (float) $dashboard['kpis']['net_cashflow_this_month'] >= 0 ? 'desk-kpi-value-positive' : 'desk-kpi-value-negative' }}">
-                        @deskMoney((float) $dashboard['kpis']['net_cashflow_this_month'])</p>
-                </div>
+                <x-desk.kpi-card :label="__('Active Projects')" :value="$dashboard['kpis']['active_projects']" />
+                <x-desk.kpi-card :label="__('Total Logged Hours')" :value="number_format((float) $dashboard['kpis']['total_logged_hours'], 2)" />
+                <x-desk.kpi-card :label="__('Total Billable Value')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['total_billable_value'])" />
+                <x-desk.kpi-card :label="__('Net Cashflow (This Month)')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['net_cashflow_this_month'])" :tone="(float) $dashboard['kpis']['net_cashflow_this_month'] >= 0 ? 'positive' : 'negative'" />
             </div>
 
             <div class="desk-content-grid">
-                <div class="desk-card xl:col-span-2">
-                    <div class="desk-card-body">
-                        <h3 class="desk-card-title">{{ __('Monthly Net Cashflow') }}</h3>
-                        <div id="monthly-cashflow-chart" class="h-80"></div>
-                    </div>
-                </div>
+                <x-desk.chart-card class="xl:col-span-2" :title="__('Monthly Net Cashflow')">
+                    <div id="monthly-cashflow-chart" class="h-80"></div>
+                </x-desk.chart-card>
 
-                <div class="desk-card">
-                    <div class="desk-card-body">
-                        <h3 class="desk-card-title">{{ __('Expense Breakdown') }}</h3>
-                        <div id="expense-breakdown-chart" class="h-80"></div>
-                    </div>
-                </div>
+                <x-desk.chart-card :title="__('Expense Breakdown')">
+                    <div id="expense-breakdown-chart" class="h-80"></div>
+                </x-desk.chart-card>
 
-                <div class="desk-card">
-                    <div class="desk-card-body">
-                        <h3 class="desk-card-title">{{ __('Income Breakdown') }}</h3>
-                        <div id="income-breakdown-chart" class="h-80"></div>
-                    </div>
-                </div>
+                <x-desk.chart-card :title="__('Income Breakdown')">
+                    <div id="income-breakdown-chart" class="h-80"></div>
+                </x-desk.chart-card>
 
-                <div class="desk-card xl:col-span-2">
-                    <div class="desk-card-body">
-                        <h3 class="desk-card-title">{{ __('Billable by Project') }}</h3>
-                        <div id="billable-by-project-chart" class="h-80"></div>
-                    </div>
-                </div>
+                <x-desk.chart-card class="xl:col-span-2" :title="__('Billable by Project')">
+                    <div id="billable-by-project-chart" class="h-80"></div>
+                </x-desk.chart-card>
 
-                <div class="desk-card xl:col-span-2">
-                    <div class="desk-card-body">
-                        <h3 class="desk-card-title">{{ __('Billable by Stage') }}</h3>
-                        <div id="billable-by-stage-chart" class="h-80"></div>
-                    </div>
-                </div>
+                <x-desk.chart-card class="xl:col-span-2" :title="__('Billable by Stage')">
+                    <div id="billable-by-stage-chart" class="h-80"></div>
+                </x-desk.chart-card>
 
-                <div class="desk-card xl:col-span-2">
-                    <div class="desk-card-body">
-                        <h3 class="desk-card-title">
-                            {{ __('Pending / Outstanding Transactions') }}</h3>
+                <x-desk.table-card class="xl:col-span-2" :title="__('Pending / Outstanding Transactions')">
 
-                        <div class="overflow-x-auto">
-                            <table class="desk-table-dense min-w-full divide-y divide-gray-200">
-                                <thead>
-                                    <tr>
-                                        <th class="desk-table-head">
-                                            {{ __('Ref') }}</th>
-                                        <th class="desk-table-head">
-                                            {{ __('Date') }}</th>
-                                        <th class="desk-table-head">
-                                            {{ __('Direction') }}</th>
-                                        <th class="desk-table-head">
-                                            {{ __('Amount') }}</th>
+                    <div class="overflow-x-auto">
+                        <table class="desk-table-dense min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="desk-table-head">
+                                        {{ __('Ref') }}</th>
+                                    <th class="desk-table-head">
+                                        {{ __('Date') }}</th>
+                                    <th class="desk-table-head">
+                                        {{ __('Direction') }}</th>
+                                    <th class="desk-table-head">
+                                        {{ __('Amount') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse ($dashboard['pending_transactions'] as $row)
+                                    <tr class="desk-interactive-row">
+                                        <td class="desk-table-cell font-mono">{{ $row['code'] }}</td>
+                                        <td class="desk-table-cell">@deskDate($row['date'])</td>
+                                        <td class="desk-table-cell">
+                                            <x-desk.status-pill :status="$row['direction']" />
+                                        </td>
+                                        <td class="desk-table-cell">
+                                            @deskMoney((float) $row['net_amount'])</td>
                                     </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100">
-                                    @forelse ($dashboard['pending_transactions'] as $row)
-                                        <tr class="desk-interactive-row">
-                                            <td class="desk-table-cell font-mono">{{ $row['code'] }}</td>
-                                            <td class="desk-table-cell">@deskDate($row['date'])</td>
-                                            <td class="desk-table-cell">
-                                                <span
-                                                    class="desk-status-chip {{ $row['direction'] === 'in' ? 'desk-status-chip-in' : 'desk-status-chip-out' }}">
-                                                    {{ strtoupper($row['direction']) }}
-                                                </span>
-                                            </td>
-                                            <td class="desk-table-cell">
-                                                @deskMoney((float) $row['net_amount'])</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td class="desk-table-empty" colspan="4">
-                                                <div class="desk-empty-panel">
-                                                    {{ __('No pending transactions in the selected reporting period.') }}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="desk-card xl:col-span-2">
-                    <div class="desk-card-body">
-                        <h3 class="desk-card-title">{{ __('Project Overview') }}</h3>
-
-                        <div class="overflow-x-auto">
-                            <table class="desk-table-dense min-w-full divide-y divide-gray-200">
-                                <thead>
+                                @empty
                                     <tr>
-                                        <th class="desk-table-head">
-                                            {{ __('Project') }}</th>
-                                        <th class="desk-table-head">
-                                            {{ __('Hours') }}</th>
-                                        <th class="desk-table-head">
-                                            {{ __('Billable') }}</th>
+                                        <td class="desk-table-empty" colspan="4">
+                                            <div class="desk-empty-panel">
+                                                {{ __('No pending transactions in the selected reporting period.') }}
+                                            </div>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-100">
-                                    @forelse ($dashboard['project_overview'] as $project)
-                                        <tr class="desk-interactive-row">
-                                            <td class="desk-table-cell">
-                                                <div class="font-mono text-xs text-gray-500">{{ $project['code'] }}
-                                                </div>
-                                                <div>{{ $project['name'] }}</div>
-                                            </td>
-                                            <td class="desk-table-cell">
-                                                @deskDuration($project['duration_minutes'])</td>
-                                            <td class="desk-table-cell">
-                                                @deskMoney((float) $project['billable_amount'])</td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td class="desk-table-empty" colspan="3">
-                                                <div class="desk-empty-panel">
-                                                    {{ __('No project metrics available for the current reporting period.') }}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
-                </div>
+                </x-desk.table-card>
+
+                <x-desk.table-card class="xl:col-span-2" :title="__('Project Overview')">
+
+                    <div class="overflow-x-auto">
+                        <table class="desk-table-dense min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="desk-table-head">
+                                        {{ __('Project') }}</th>
+                                    <th class="desk-table-head">
+                                        {{ __('Hours') }}</th>
+                                    <th class="desk-table-head">
+                                        {{ __('Billable') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse ($dashboard['project_overview'] as $project)
+                                    <tr class="desk-interactive-row">
+                                        <td class="desk-table-cell">
+                                            <div class="font-mono text-xs text-gray-500">{{ $project['code'] }}
+                                            </div>
+                                            <div>{{ $project['name'] }}</div>
+                                        </td>
+                                        <td class="desk-table-cell">
+                                            @deskDuration($project['duration_minutes'])</td>
+                                        <td class="desk-table-cell">
+                                            @deskMoney((float) $project['billable_amount'])</td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td class="desk-table-empty" colspan="3">
+                                            <div class="desk-empty-panel">
+                                                {{ __('No project metrics available for the current reporting period.') }}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </x-desk.table-card>
             </div>
         </div>
     </div>

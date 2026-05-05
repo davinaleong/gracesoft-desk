@@ -257,22 +257,22 @@
 
 ## Design Tokens
 
-* [ ] Create design tokens
-* [ ] Define font tokens
-* [ ] Define color tokens
-* [ ] Define spacing scale
-* [ ] Define radius scale
-* [ ] Define shadows
-* [ ] Define semantic colors
+* [x] Create design tokens
+* [x] Define font tokens
+* [x] Define color tokens
+* [x] Define spacing scale
+* [x] Define radius scale
+* [x] Define shadows
+* [x] Define semantic colors
 
 ## Global Styles
 
-* [ ] Build app styles
-* [ ] Normalize typography
-* [ ] Normalize forms
-* [ ] Normalize tables
-* [ ] Normalize buttons
-* [ ] Normalize cards
+* [x] Build app styles
+* [x] Normalize typography
+* [x] Normalize forms
+* [x] Normalize tables
+* [x] Normalize buttons
+* [x] Normalize cards
 
 ## Layout Shell
 
@@ -289,30 +289,30 @@
 
 ## Core Components
 
-* [ ] KPI card
-* [ ] chart card
-* [ ] table card
-* [ ] stat card
-* [ ] insight card
+* [x] KPI card
+* [x] chart card
+* [x] table card
+* [x] stat card
+* [x] insight card
 
 ## UI Elements
 
-* [ ] buttons
-* [ ] badges
-* [ ] status pills
-* [ ] alerts
-* [ ] forms
-* [ ] inputs
-* [ ] selects
-* [ ] date fields
-* [ ] textareas
+* [x] buttons
+* [x] badges
+* [x] status pills
+* [x] alerts
+* [x] forms
+* [x] inputs
+* [x] selects
+* [x] date fields
+* [x] textareas
 
 ## Data Components
 
-* [ ] standard table
-* [ ] dense finance table
-* [ ] empty states
-* [ ] pagination footer
+* [x] standard table
+* [x] dense finance table
+* [x] empty states
+* [x] pagination footer
 
 ---
 
