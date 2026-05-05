@@ -16,14 +16,14 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased min-h-screen text-[#111322] bg-violet-700">
+<body class="font-sans antialiased min-h-screen text-[#111322] bg-indigo-700">
     <div class="mx-auto grid min-h-screen w-full max-w-6xl items-center gap-8 px-4 py-8 lg:grid-cols-2 lg:px-8">
         <section class="hidden text-white lg:block">
             <img src="{{ asset('wm-w.svg') }}" alt="GraceSoft Desk logo" class="h-16 w-auto">
             <h2 class="mt-10 max-w-md font-serif text-4xl font-bold leading-tight">
                 {{ __('Operations visibility, finance control, and reporting workflows in one place.') }}
             </h2>
-            <p class="mt-4 max-w-lg text-violet-100">
+            <p class="mt-4 max-w-lg text-indigo-100">
                 {{ __('GraceSoft Desk keeps internal operations aligned across project tracking, time logs, and finance review.') }}
             </p>
         </section>
@@ -32,7 +32,7 @@
             <header class="mb-6 flex items-center justify-between gap-4">
                 <img src="{{ asset('wm.svg') }}" alt="GraceSoft Desk logo" class="h-12 w-auto">
                 <span
-                    class="rounded-full bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-violet-700">{{ __('Secure Access') }}</span>
+                    class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-indigo-700">{{ __('Secure Access') }}</span>
             </header>
 
             <main>

@@ -34,7 +34,7 @@
             <div class="block">
                 <label for="remember_me" class="inline-flex items-center">
                     <input id="remember_me" type="checkbox"
-                        class="rounded border-[#d9deea] text-violet-700 shadow-sm focus:ring-violet-400"
+                        class="rounded border-[#d9deea] text-indigo-700 shadow-sm focus:ring-indigo-400"
                         name="remember">
                     <span class="ms-2 text-sm text-[#5f6477]">{{ __('Remember me') }}</span>
                 </label>
