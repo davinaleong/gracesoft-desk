@@ -533,4 +533,4 @@
 * [ ] import live Excel data
 * [x] verify reports
 * [x] verify dashboard totals
-* [ ] begin SQL-first operations
+* [x] begin SQL-first operations
