@@ -528,9 +528,9 @@
 
 ## Launch
 
-* [ ] production deploy
+* [x] production deploy
 * [x] first login security flow
-* [ ] import live Excel data
+* [x] import live Excel data
 * [x] verify reports
 * [x] verify dashboard totals
 * [x] begin SQL-first operations
