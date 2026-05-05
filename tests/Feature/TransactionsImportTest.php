@@ -140,8 +140,8 @@ test('transactions import preview rejects rows that violate money in and gst int
         ]);
 
     $previewResponse->assertOk()
-        ->assertSee('Income transactions must use direction "in".')
-        ->assertSee('GST amount cannot exceed transaction amount.');
+        ->assertSee('For income transactions, please choose the "Money In" direction.')
+        ->assertSee('GST cannot be higher than the transaction amount.');
 
     expect(session('transactions_import_rows'))->toBeArray()->toHaveCount(0);
 });

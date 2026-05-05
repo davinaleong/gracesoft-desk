@@ -41,7 +41,7 @@ class User extends Authenticatable
 
             if (self::query()->exists()) {
                 throw ValidationException::withMessages([
-                    'email' => 'Only one admin user is allowed for this application.',
+                    'email' => 'GraceSoft Desk supports only one admin account.',
                 ]);
             }
         });

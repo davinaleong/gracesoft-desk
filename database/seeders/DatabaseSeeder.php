@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
             PaymentMethodSeeder::class,
             AccountSeeder::class,
             ProjectSeeder::class,
+            ProjectMapSeeder::class,
+            CsvProjectWorklogSeeder::class,
+            LedgerPrototypeSeeder::class,
         ]);
     }
 }

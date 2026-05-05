@@ -1,0 +1,7 @@
+Project ID,SDLC Stage,Description,Started Date,Started Time,Ended Date,Ended Time,Duration (Hours),Billable Cost (SGD),Remarks
+GS-WEB,Planning,Define website structure and content plan,2026-03-24,19:17,2026-03-24,19:47,0.50,8.00,"Astro scaffold, Tailwind setup, asset import"
+GS-WEB,Design,Build website layout and marketing pages,2026-03-24,19:54,2026-03-25,12:27,16.55,264.80,"Layout, homepage, services, about, approach"
+GS-WEB,Development,Build contact flow and enquiry delivery,2026-03-25,12:33,2026-03-27,18:55,54.37,869.92,"Contact form, Formsfree, Netlify, Cloudflare fixes"
+GS-WEB,Testing,Stabilize contact form and deployment flow,2026-03-27,15:19,2026-03-30,10:12,66.88,1070.08,"Debugging, deploy fixes, signature, API cleanup"
+GS-WEB,Development,Add product hub and site expansion content,2026-04-03,17:17,2026-04-07,16:08,94.85,1517.60,"GraceSoft Capture, dev.to links, content updates"
+GS-WEB,Design,Refine AI messaging and chatbot experience,2026-04-10,15:54,2026-04-17,13:30,165.60,2649.60,"AI messaging, Azure chatbot, footer and UX polish"

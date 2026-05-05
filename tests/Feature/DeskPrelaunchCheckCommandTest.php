@@ -39,7 +39,7 @@ test('prelaunch check command succeeds when hardening checks pass', function () 
     $_SERVER['ADMIN_TEMP_PASSWORD'] = 'StrongTempPassword!2026';
 
     $this->artisan('desk:prelaunch-check')
-        ->expectsOutputToContain('Prelaunch checks passed')
+        ->expectsOutputToContain('all pre-launch checks passed')
         ->assertExitCode(0);
 });
 
@@ -53,7 +53,7 @@ test('prelaunch check command fails when app debug is enabled', function () {
     config()->set('app.debug', true);
 
     $this->artisan('desk:prelaunch-check')
-        ->expectsOutputToContain('Prelaunch checks failed')
+        ->expectsOutputToContain('critical issue')
         ->assertExitCode(1);
 });
 
@@ -65,7 +65,7 @@ test('prelaunch check command can seed admin when option is provided', function 
     $_SERVER['ADMIN_TEMP_PASSWORD'] = 'StrongTempPassword!2026';
 
     $this->artisan('desk:prelaunch-check --seed-admin')
-        ->expectsOutputToContain('Admin user seed executed')
+        ->expectsOutputToContain('Admin account has been seeded/updated')
         ->assertExitCode(0);
 
     expect(User::query()->where('email', 'admin@gracesoft.dev')->exists())->toBeTrue();
@@ -84,6 +84,6 @@ test('prelaunch check command fails in strict mode when warnings exist', functio
     $_SERVER['ADMIN_TEMP_PASSWORD'] = 'StrongTempPassword!2026';
 
     $this->artisan('desk:prelaunch-check --strict')
-        ->expectsOutputToContain('strict mode')
+        ->expectsOutputToContain('Strict mode stopped the pre-launch check')
         ->assertExitCode(1);
 });

@@ -1,0 +1,7 @@
+Project ID,SDLC Stage,Description,Started Date,Started Time,Ended Date,Ended Time,Duration (Hours),Billable Cost (SGD),Remarks
+GS-SEN-CON,Planning,Define AI concierge architecture and service scope,2026-04-25,09:44,2026-04-25,12:24,2.67,42.72,"Initial Node setup, env shape, service docs"
+GS-SEN-CON,Development,Build AI agent backend and booking foundations,2026-04-25,12:35,2026-04-26,13:19,24.73,395.68,"Prisma, Redis, FAQ matcher, booking routes"
+GS-SEN-CON,Testing,Stabilize booking flow and WhatsApp orchestration,2026-04-26,10:16,2026-04-27,18:03,31.78,508.48,"Calendar auth, booking confirmation, Singlish QA"
+GS-SEN-CON,Development,Add business-hours logic and production runtime hardening,2026-04-28,10:47,2026-04-28,15:31,4.73,75.68,"Workday map, Docker assets, Redis resilience"
+GS-SEN-CON,Design,Refine FAQ response quality and intent wording,2026-04-30,17:33,2026-04-30,18:28,0.92,14.72,"FAQ tuning, wording polish, response clarity"
+GS-SEN-CON,Development,Build marketing microsite and simulator experience,2026-04-28,19:38,2026-04-30,17:33,45.92,734.72,"Vite site, blog, simulator, legal pages, branding"

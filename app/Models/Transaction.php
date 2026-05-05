@@ -73,19 +73,19 @@ class Transaction extends Model
 
         if ($gstAmount > $amount) {
             throw ValidationException::withMessages([
-                'gst_amount' => 'GST amount cannot exceed transaction amount.',
+                'gst_amount' => 'GST cannot be higher than the transaction amount.',
             ]);
         }
 
         if ($type === 'income' && $direction !== 'in') {
             throw ValidationException::withMessages([
-                'direction' => 'Income transactions must use direction "in".',
+                'direction' => 'For income transactions, please choose the "Money In" direction.',
             ]);
         }
 
         if ($type === 'expense' && $direction !== 'out') {
             throw ValidationException::withMessages([
-                'direction' => 'Expense transactions must use direction "out".',
+                'direction' => 'For expense transactions, please choose the "Money Out" direction.',
             ]);
         }
 

@@ -1,0 +1,12 @@
+Project ID,SDLC Stage,Description,Started Date,Started Time,Ended Date,Ended Time,Duration (Hours),Billable Cost (SGD),Remarks
+GS-CORE,Planning,Define core architecture and module roadmap,2026-04-13,10:58,2026-04-14,09:45,22.78,364.48,"Initial install, plan docs, architecture scaffolding"
+GS-CORE,Development,Build core platform foundation and shared services,2026-04-14,09:47,2026-04-14,12:09,2.37,37.92,"UUID, auth, CI, storage, attachments, webhooks"
+GS-CORE,Testing,"Validate security, CI, and deployment safeguards",2026-04-14,15:20,2026-04-14,18:08,2.8,44.8,"Privacy tests, hardening, Postmark/Stripe verification"
+GS-CORE,Analysis,Define phase 2 privacy and ownership strategy,2026-04-15,01:57,2026-04-15,11:17,9.33,149.28,"Privacy-first spec, migration tooling, ownership model"
+GS-CORE,Development,Build billing sync and privacy-first modules,2026-04-15,10:54,2026-04-16,12:00,25.1,401.6,"Billing entitlements, privacy logging, secure email"
+GS-CORE,Maintenance,Decouple HQ dependencies and add offline gating,2026-04-17,11:09,2026-04-17,16:17,5.13,82.08,"Remove HQ runtime paths, offline entitlement gating"
+GS-CORE,Maintenance,Finalize standalone identity and webhook hardening,2026-04-17,16:19,2026-04-18,12:40,20.35,325.6,"Standalone auth, webhook auth, privacy cleanup"
+GS-CORE,Analysis,Define privacy-first module specification,2026-04-18,12:17,2026-04-22,14:54,98.62,1577.92,"Privacy module spec, optional install architecture"
+GS-CORE,Development,Build privacy module and trust UX surfaces,2026-04-22,15:06,2026-04-23,12:11,21.08,337.28,"Privacy APIs, UI, jobs, trust flows"
+GS-CORE,Development,"Build CMS, admin, and trust-first UI modules",2026-04-23,12:25,2026-04-23,19:26,7.02,112.32,"Pages, posts, events, forms, admin dashboard"
+GS-CORE,Testing,Validate admin auth and 2FA enforcement,2026-04-23,18:41,2026-04-23,19:26,0.75,12.0,"Admin/user split, 2FA rotation, auth coverage"

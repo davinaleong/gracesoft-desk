@@ -29,7 +29,7 @@ class DeskImportLiveDataCommand extends Command
         $transactionsPath = $this->option('transactions');
 
         if (! $projectsPath && ! $timeEntriesPath && ! $transactionsPath) {
-            $this->error('Provide at least one CSV path using --projects, --time-entries, or --transactions.');
+            $this->error('Please provide at least one CSV file path using --projects, --time-entries, or --transactions.');
 
             return self::FAILURE;
         }
@@ -59,7 +59,7 @@ class DeskImportLiveDataCommand extends Command
             ['Transactions', $imported['transactions']],
         ]);
 
-        $this->info('Live CSV import completed.');
+        $this->info('Import complete. Your live data has been loaded.');
 
         return self::SUCCESS;
     }
@@ -67,11 +67,11 @@ class DeskImportLiveDataCommand extends Command
     private function assertCsvReadable(string $path): void
     {
         if (! File::exists($path)) {
-            throw new \RuntimeException('CSV file not found: '.$path);
+            throw new \RuntimeException('We could not find this CSV file: '.$path);
         }
 
         if (! File::isFile($path)) {
-            throw new \RuntimeException('Path is not a file: '.$path);
+            throw new \RuntimeException('This path is not a valid file: '.$path);
         }
     }
 
@@ -85,7 +85,7 @@ class DeskImportLiveDataCommand extends Command
         $handle = fopen($path, 'rb');
 
         if (! is_resource($handle)) {
-            throw new \RuntimeException('Unable to open CSV file: '.$path);
+            throw new \RuntimeException('We could not open this CSV file. Please check file permissions: '.$path);
         }
 
         $header = fgetcsv($handle) ?: [];

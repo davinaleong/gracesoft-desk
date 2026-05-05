@@ -64,24 +64,24 @@ class DeskPrelaunchCheckCommand extends Command
         $warnings = collect($checks)->filter(fn (array $check): bool => ! $check['passed'] && $check['warning'])->count();
 
         if ($failed > 0) {
-            $this->error("Prelaunch checks failed: {$failed} failure(s), {$warnings} warning(s).");
+            $this->error("Pre-launch checks found {$failed} critical issue(s) and {$warnings} warning(s). Please fix the critical issues and run the check again.");
 
             return self::FAILURE;
         }
 
         if ($warnings > 0 && $this->option('strict')) {
-            $this->error("Prelaunch checks failed in strict mode: {$warnings} warning(s).");
+            $this->error("Strict mode stopped the pre-launch check because {$warnings} warning(s) still need attention.");
 
             return self::FAILURE;
         }
 
         if ($warnings > 0) {
-            $this->warn("Prelaunch checks passed with {$warnings} warning(s).");
+            $this->warn("Pre-launch checks passed, but {$warnings} warning(s) still need attention.");
 
             return self::SUCCESS;
         }
 
-        $this->info('Prelaunch checks passed with no issues.');
+        $this->info('Great news: all pre-launch checks passed.');
 
         return self::SUCCESS;
     }
@@ -101,7 +101,7 @@ class DeskPrelaunchCheckCommand extends Command
     private function seedAdmin(): void
     {
         $this->callSilent('db:seed', ['--class' => AdminUserSeeder::class, '--no-interaction' => true]);
-        $this->info('Admin user seed executed.');
+        $this->info('Admin account has been seeded/updated.');
     }
 
     private function adminUserExists(): bool

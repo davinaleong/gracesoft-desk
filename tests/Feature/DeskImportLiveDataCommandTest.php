@@ -84,7 +84,7 @@ test('live data import command imports projects time entries and transactions fr
         '--projects' => $projectsCsv,
         '--time-entries' => $timeEntriesCsv,
         '--transactions' => $transactionsCsv,
-    ])->expectsOutputToContain('Live CSV import completed')
+    ])->expectsOutputToContain('Import complete. Your live data has been loaded.')
         ->assertExitCode(0);
 
     expect(Project::query()->where('code', 'PRJ-LIVE-001')->value('name'))->toBe('Updated Live Project')
