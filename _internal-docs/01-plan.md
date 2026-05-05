@@ -379,7 +379,7 @@
 * [x] Add reporting indexes
 * [x] Add query scopes
 * [x] Add summary caching
-* [ ] Optimize aggregate queries
+* [x] Optimize aggregate queries
 
 ---
 

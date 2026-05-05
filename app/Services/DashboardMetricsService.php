@@ -5,8 +5,9 @@ namespace App\Services;
 use App\Models\Project;
 use App\Models\TimeEntry;
 use App\Models\Transaction;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class DashboardMetricsService
 {
@@ -24,13 +25,11 @@ class DashboardMetricsService
 
             $currentMonthStart = now()->startOfMonth()->toDateString();
             $currentMonthEnd = now()->endOfMonth()->toDateString();
-            $netCashflowThisMonth = (float) Transaction::query()
+            $netCashflowThisMonth = (float) (Transaction::query()
                 ->completed()
                 ->withinDateRange($currentMonthStart, $currentMonthEnd)
-                ->get()
-                ->sum(fn (Transaction $transaction): float => $transaction->direction === 'in'
-                    ? (float) $transaction->net_amount
-                    : -1 * (float) $transaction->net_amount);
+                ->selectRaw("COALESCE(SUM(CASE WHEN direction = 'in' THEN net_amount ELSE -net_amount END), 0) as net_total")
+                ->value('net_total') ?? 0);
 
             return [
                 'kpis' => [
@@ -63,17 +62,21 @@ class DashboardMetricsService
     {
         $monthStart = now()->startOfMonth()->subMonths(5);
         $monthEnd = now()->endOfMonth();
+        $monthKeyExpression = $this->monthKeyExpression();
 
-        $transactions = Transaction::query()
+        $groupedRows = Transaction::query()
             ->completed()
             ->withinDateRange($monthStart->toDateString(), $monthEnd->toDateString())
+            ->selectRaw($monthKeyExpression.' as month_key')
+            ->selectRaw("COALESCE(SUM(CASE WHEN direction = 'in' THEN net_amount ELSE -net_amount END), 0) as net_total")
+            ->groupByRaw($monthKeyExpression)
             ->get();
 
-        $groupedValues = $transactions
-            ->groupBy(fn (Transaction $transaction): string => $transaction->transaction_date?->format('Y-m') ?? now()->format('Y-m'))
-            ->map(fn (Collection $rows): float => $rows->sum(fn (Transaction $row): float => $row->direction === 'in'
-                ? (float) $row->net_amount
-                : -1 * (float) $row->net_amount));
+        $groupedValues = $groupedRows
+            ->mapWithKeys(fn ($row): array => [
+                (string) $row->month_key => (float) $row->net_total,
+            ])
+            ->all();
 
         $labels = [];
         $values = [];
@@ -83,7 +86,7 @@ class DashboardMetricsService
             $monthKey = $month->format('Y-m');
 
             $labels[] = $month->format('M Y');
-            $values[] = round((float) ($groupedValues[$monthKey] ?? 0), 2);
+            $values[] = round((float) Arr::get($groupedValues, $monthKey, 0), 2);
         }
 
         return [
@@ -208,5 +211,14 @@ class DashboardMetricsService
             Transaction::query()->count(),
             (string) (Transaction::query()->max('updated_at') ?? 'none'),
         ]));
+    }
+
+    private function monthKeyExpression(): string
+    {
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            return "strftime('%Y-%m', transaction_date)";
+        }
+
+        return "DATE_FORMAT(transaction_date, '%Y-%m')";
     }
 }
