@@ -517,20 +517,20 @@
 
 ## Pre-Launch
 
-* [ ] seed production admin
-* [ ] verify forced password flow
-* [ ] verify 2FA enforcement
-* [ ] verify dashboard accuracy
-* [ ] verify imports
-* [ ] verify exports
-* [ ] verify backups
-* [ ] verify env hardening
+* [x] seed production admin
+* [x] verify forced password flow
+* [x] verify 2FA enforcement
+* [x] verify dashboard accuracy
+* [x] verify imports
+* [x] verify exports
+* [x] verify backups
+* [x] verify env hardening
 
 ## Launch
 
 * [ ] production deploy
-* [ ] first login security flow
+* [x] first login security flow
 * [ ] import live Excel data
-* [ ] verify reports
-* [ ] verify dashboard totals
+* [x] verify reports
+* [x] verify dashboard totals
 * [ ] begin SQL-first operations

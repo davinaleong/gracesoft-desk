@@ -9,7 +9,7 @@
         content="GraceSoft Desk internal operations cockpit for finance, projects, time entries, and reporting.">
     <meta name="theme-color" content="#0f172a">
 
-    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ asset('logo.svg') }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
@@ -17,7 +17,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased">
+<body class="font-sans antialiased bg-[#f7f8fc] text-[#111322]">
     @php
         $status = session('status');
         $flashMessage = match ($status) {
@@ -45,31 +45,33 @@
         {{ __('Skip to main content') }}
     </a>
 
-    <div class="min-h-screen bg-slate-50">
+    <div class="min-h-screen lg:flex">
         @include('layouts.navigation')
 
-        @if ($flashMessage)
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-                <div role="status" aria-live="polite"
-                    class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-                    {{ $flashMessage }}
+        <div class="min-h-screen flex-1">
+            @if ($flashMessage)
+                <div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+                    <div role="status" aria-live="polite"
+                        class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                        {{ $flashMessage }}
+                    </div>
                 </div>
-            </div>
-        @endif
+            @endif
 
-        <!-- Page Heading -->
-        @isset($header)
-            <header class="border-b border-slate-200 bg-white/90">
-                <div class="max-w-7xl mx-auto px-4 py-5 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
-        @endisset
+            <!-- Page Heading -->
+            @isset($header)
+                <header class="border-b border-[#d9deea] bg-white">
+                    <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
 
-        <!-- Page Content -->
-        <main id="main-content" tabindex="-1">
-            {{ $slot }}
-        </main>
+            <!-- Page Content -->
+            <main id="main-content" tabindex="-1">
+                {{ $slot }}
+            </main>
+        </div>
     </div>
 </body>
 

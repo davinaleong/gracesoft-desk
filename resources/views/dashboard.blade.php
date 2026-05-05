@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-4">
             <div>
-                <p class="desk-brand-kicker">{{ __('GraceSoft Desk') }}</p>
+                <img src="{{ asset('wm.svg') }}" alt="GraceSoft Desk" class="h-3.5 w-auto">
                 <h2 class="desk-page-title">
                     {{ __('Dashboard') }}
                 </h2>

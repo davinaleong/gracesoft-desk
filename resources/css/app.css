@@ -18,15 +18,17 @@
 	--radius-md: 0.5rem;
 	--radius-lg: 0.75rem;
 	--radius-xl: 1rem;
-	--shadow-sm: 0 1px 2px rgb(15 23 42 / 0.08);
-	--shadow-md: 0 10px 24px rgb(15 23 42 / 0.08);
+	--shadow-sm: 0 1px 2px rgb(15 23 42 / 0.08), 0 2px 8px rgb(15 23 42 / 0.05);
+	--shadow-md: 0 10px 24px rgb(15 23 42 / 0.12);
 	--color-surface: #ffffff;
-	--color-surface-muted: #f8fafc;
-	--color-text: #0f172a;
-	--color-text-muted: #475569;
-	--color-border: #e2e8f0;
-	--color-primary: #0f172a;
-	--color-primary-soft: #e2e8f0;
+	--color-surface-muted: #f8f8fb;
+	--color-text: #111322;
+	--color-text-muted: #5f6477;
+	--color-border: #d9deea;
+	--color-primary: #5d3fd3;
+	--color-primary-soft: #ede9ff;
+	--color-sidebar: #5a36d6;
+	--color-sidebar-muted: #816ae1;
 	--color-success: #15803d;
 	--color-danger: #b91c1c;
 	--color-warning: #b45309;
@@ -41,15 +43,17 @@
 
 body {
 	font-family: var(--font-sans);
+	background-color: #f7f8fc;
+	color: var(--color-text);
 }
 
 @layer components {
 	.desk-page-shell {
-		@apply py-10 lg:py-12;
+		@apply py-6 lg:py-8;
 	}
 
 	.desk-page-container {
-		@apply mx-auto max-w-7xl sm:px-6 lg:px-8;
+		@apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
 	}
 
 	.desk-stack {
@@ -77,12 +81,25 @@ body {
 	}
 
 	.desk-action-secondary {
-		@apply inline-flex items-center rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-slate-700 transition duration-150 ease-in-out hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+		@apply inline-flex items-center rounded-lg border px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2;
+		border-color: var(--color-border);
+		background: #fff;
+		color: var(--color-text);
+	}
+
+	.desk-action-secondary:hover {
+		background: #f7f5ff;
+		border-color: #c9bdf8;
 		border-radius: var(--radius-md);
 	}
 
 	.desk-action-primary {
-		@apply inline-flex items-center rounded-md border border-transparent bg-slate-800 px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-150 ease-in-out hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+		@apply inline-flex items-center rounded-lg border border-transparent px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-white transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2;
+		background: var(--color-primary);
+	}
+
+	.desk-action-primary:hover {
+		background: #4f2dd0;
 		border-radius: var(--radius-md);
 	}
 
@@ -91,23 +108,31 @@ body {
 	}
 
 	.desk-interactive-row {
-		@apply transition-colors duration-150 hover:bg-slate-50;
+		@apply transition-colors duration-150 hover:bg-violet-50;
 	}
 
 	.desk-page-title {
-		@apply font-serif text-2xl font-semibold leading-tight text-slate-900;
+		@apply font-serif text-3xl font-bold leading-tight;
+		color: var(--color-text);
 	}
 
 	.desk-brand-kicker {
-		@apply mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500;
+		@apply mb-1 text-xs font-bold uppercase tracking-[0.14em];
+		color: #7a6eb6;
 	}
 
 	.desk-context-chip {
-		@apply inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-sky-700;
+		@apply inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em];
+		border: 1px solid #d8cdfc;
+		background: #f4f0ff;
+		color: #5b3ed0;
 	}
 
 	.desk-empty-panel {
-		@apply rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500;
+		@apply rounded-lg border border-dashed px-4 py-5 text-sm;
+		border-color: var(--color-border);
+		background: #fafafe;
+		color: var(--color-text-muted);
 	}
 
 	.desk-status-chip {
@@ -127,11 +152,13 @@ body {
 	}
 
 	.desk-kpi-label {
-		@apply text-xs font-semibold uppercase tracking-[0.08em] text-slate-500;
+		@apply text-xs font-semibold uppercase tracking-[0.08em];
+		color: var(--color-text-muted);
 	}
 
 	.desk-kpi-value {
-		@apply mt-2 text-2xl font-semibold text-slate-900;
+		@apply mt-2 text-3xl font-bold;
+		color: var(--color-text);
 	}
 
 	.desk-kpi-value-positive {
@@ -147,11 +174,13 @@ body {
 	}
 
 	.desk-table-head {
-		@apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-[0.08em] text-slate-500;
+		@apply px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.08em];
+		background: #f0f2f8;
+		color: #5a5f75;
 	}
 
 	.desk-table-cell {
-		@apply px-2.5 py-1.5 text-sm;
+		@apply px-2.5 py-2 text-sm;
 	}
 
 	.desk-table-empty {
@@ -171,18 +200,20 @@ body {
 	}
 
 	.desk-table-dense tbody tr:nth-child(even) {
-		@apply bg-slate-50;
+		@apply bg-violet-50/40;
 	}
 
 	.desk-card {
-		@apply overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm;
+		@apply overflow-hidden rounded-xl border bg-white;
 		border-color: var(--color-border);
 		background-color: var(--color-surface);
 		box-shadow: var(--shadow-sm);
 	}
 
 	.desk-card-muted {
-		@apply overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm;
+		@apply overflow-hidden rounded-xl border shadow-sm;
+		border-color: #ded4ff;
+		background: #f7f4ff;
 	}
 
 	.desk-card-body {
@@ -191,11 +222,14 @@ body {
 	}
 
 	.desk-kpi-card {
-		@apply rounded-xl border border-slate-200 bg-white p-5 shadow-sm;
+		@apply rounded-xl border bg-white p-5;
+		border-color: var(--color-border);
+		box-shadow: var(--shadow-sm);
 	}
 
 	.desk-card-title {
-		@apply mb-4 font-serif text-lg font-semibold text-slate-900;
+		@apply mb-4 font-serif text-xl font-bold;
+		color: #4d35ad;
 	}
 
 	.desk-form-grid {
@@ -210,7 +244,18 @@ body {
 	.desk-select,
 	.desk-date,
 	.desk-textarea {
-		@apply block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-sky-500 focus:ring-sky-500;
+		@apply block w-full rounded-lg border text-sm shadow-sm;
+		border-color: var(--color-border);
+		background: #fbfbfe;
+		color: var(--color-text);
+	}
+
+	.desk-input:focus,
+	.desk-select:focus,
+	.desk-date:focus,
+	.desk-textarea:focus {
+		--tw-ring-color: #c8bbfb;
+		border-color: #a895f2;
 	}
 
 	.desk-textarea {
