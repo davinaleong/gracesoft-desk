@@ -64,6 +64,16 @@ test('transactions import page is accessible', function () {
         ->assertSee('Import Transactions CSV');
 });
 
+test('transactions import template csv can be downloaded', function () {
+    $user = readyUserForTransactionsImport();
+
+    $this->actingAs($user)
+        ->get(route('transactions.import.template'))
+        ->assertOk()
+        ->assertDownload('transactions-import-template.csv')
+        ->assertStreamedContent("transaction_code,account_uuid,account_code,category_uuid,category_slug,payment_method_uuid,payment_method_slug,project_uuid,project_code,type,direction,status,transaction_date,reference,description,amount,gst_amount\nTRX-001,,BANK-001,,software,,bank-transfer,,PRJ-001,expense,out,completed,2026-07-20,INV-2026-001,\"Subscription renewal\",240.00,20.00\n");
+});
+
 test('transactions csv can be previewed and committed with transaction code upsert and uuid mapping', function () {
     $user = readyUserForTransactionsImport();
     $dependencies = transactionImportDependencies();
@@ -148,4 +158,5 @@ test('transactions import preview rejects rows that violate money in and gst int
 
 test('transactions import routes require authentication', function () {
     $this->get(route('transactions.import.create'))->assertRedirect(route('login'));
+    $this->get(route('transactions.import.template'))->assertRedirect(route('login'));
 });

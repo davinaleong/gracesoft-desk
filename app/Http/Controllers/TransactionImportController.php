@@ -14,9 +14,28 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TransactionImportController extends Controller
 {
+    public function template(): StreamedResponse
+    {
+        return response()->streamDownload(function (): void {
+            $handle = fopen('php://output', 'wb');
+
+            if (! is_resource($handle)) {
+                return;
+            }
+
+            fputcsv($handle, ['transaction_code', 'account_uuid', 'account_code', 'category_uuid', 'category_slug', 'payment_method_uuid', 'payment_method_slug', 'project_uuid', 'project_code', 'type', 'direction', 'status', 'transaction_date', 'reference', 'description', 'amount', 'gst_amount']);
+            fputcsv($handle, ['TRX-001', '', 'BANK-001', '', 'software', '', 'bank-transfer', '', 'PRJ-001', 'expense', 'out', 'completed', '2026-07-20', 'INV-2026-001', 'Subscription renewal', '240.00', '20.00']);
+
+            fclose($handle);
+        }, 'transactions-import-template.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
     public function create(): View
     {
         return view('transactions.import');
@@ -76,7 +95,23 @@ class TransactionImportController extends Controller
      */
     private function parseCsv(UploadedFile $file): array
     {
-        $handle = fopen((string) $file->getRealPath(), 'rb');
+        $realPath = $file->getRealPath();
+        $path = is_string($realPath) && $realPath !== '' ? $realPath : $file->getPathname();
+
+        if (! is_string($path) || $path === '') {
+            return [
+                'headers' => [],
+                'valid_rows' => [],
+                'invalid_rows' => [[
+                    'line' => 0,
+                    'errors' => ['Unable to read uploaded CSV file.'],
+                    'raw' => [],
+                ]],
+                'missing_headers' => [],
+            ];
+        }
+
+        $handle = fopen($path, 'rb');
 
         if ($handle === false) {
             return [

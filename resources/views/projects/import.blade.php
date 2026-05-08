@@ -12,6 +12,13 @@
                     {{ __('Upload a CSV file with at least code and name columns. Rows are mapped by project code and incoming id/uuid columns are ignored.') }}
                 </p>
 
+                <p class="text-sm mb-4">
+                    <a href="{{ route('projects.import.template') }}"
+                        class="text-indigo-600 hover:text-indigo-800 underline">
+                        {{ __('Download CSV template') }}
+                    </a>
+                </p>
+
                 <form method="POST" action="{{ route('projects.import.preview') }}" enctype="multipart/form-data"
                     class="space-y-4">
                     @csrf

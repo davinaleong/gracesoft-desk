@@ -12,6 +12,13 @@
                     {{ __('Upload a CSV file with account_code, type, direction, status, transaction_date, amount, and gst_amount. Existing rows map by transaction_code where provided; incoming id and uuid columns are ignored.') }}
                 </p>
 
+                <p class="text-sm mb-4">
+                    <a href="{{ route('transactions.import.template') }}"
+                        class="text-indigo-600 hover:text-indigo-800 underline">
+                        {{ __('Download CSV template') }}
+                    </a>
+                </p>
+
                 <form method="POST" action="{{ route('transactions.import.preview') }}" enctype="multipart/form-data"
                     class="space-y-4">
                     @csrf

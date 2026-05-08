@@ -22,10 +22,12 @@ Route::get('/dashboard', DashboardController::class)
     ->name('dashboard');
 
 Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.open'])->group(function () {
+    Route::get('/projects/import/template', [ProjectImportController::class, 'template'])->name('projects.import.template');
     Route::get('/projects/import', [ProjectImportController::class, 'create'])->name('projects.import.create');
     Route::post('/projects/import/preview', [ProjectImportController::class, 'preview'])->name('projects.import.preview');
     Route::post('/projects/import/commit', [ProjectImportController::class, 'commit'])->name('projects.import.commit');
 
+    Route::get('/time-entries/import/template', [TimeEntryImportController::class, 'template'])->name('time-entries.import.template');
     Route::get('/time-entries/import', [TimeEntryImportController::class, 'create'])->name('time-entries.import.create');
     Route::post('/time-entries/import/preview', [TimeEntryImportController::class, 'preview'])->name('time-entries.import.preview');
     Route::post('/time-entries/import/commit', [TimeEntryImportController::class, 'commit'])->name('time-entries.import.commit');
@@ -33,6 +35,7 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::resource('projects', ProjectController::class)->except('destroy');
     Route::resource('time-entries', TimeEntryController::class);
 
+    Route::get('/transactions/import/template', [TransactionImportController::class, 'template'])->name('transactions.import.template');
     Route::get('/transactions/import', [TransactionImportController::class, 'create'])->name('transactions.import.create');
     Route::post('/transactions/import/preview', [TransactionImportController::class, 'preview'])->name('transactions.import.preview');
     Route::post('/transactions/import/commit', [TransactionImportController::class, 'commit'])->name('transactions.import.commit');

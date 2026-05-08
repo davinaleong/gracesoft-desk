@@ -24,6 +24,16 @@ test('time entries import page is accessible', function () {
         ->assertSee('Import Time Entries CSV');
 });
 
+test('time entries import template csv can be downloaded', function () {
+    $user = readyUserForTimeEntriesImport();
+
+    $this->actingAs($user)
+        ->get(route('time-entries.import.template'))
+        ->assertOk()
+        ->assertDownload('time-entries-import-template.csv')
+        ->assertStreamedContent("project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes\n,PRJ-001,,Execution,2026-07-15,90,yes,120,\"Frontend build and QA\"\n");
+});
+
 test('time entries csv can be previewed and committed with uuid-aware mapping', function () {
     $user = readyUserForTimeEntriesImport();
 
@@ -81,4 +91,5 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
 
 test('time entries import routes require authentication', function () {
     $this->get(route('time-entries.import.create'))->assertRedirect(route('login'));
+    $this->get(route('time-entries.import.template'))->assertRedirect(route('login'));
 });

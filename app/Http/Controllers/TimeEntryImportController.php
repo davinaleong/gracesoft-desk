@@ -11,9 +11,28 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TimeEntryImportController extends Controller
 {
+    public function template(): StreamedResponse
+    {
+        return response()->streamDownload(function (): void {
+            $handle = fopen('php://output', 'wb');
+
+            if (! is_resource($handle)) {
+                return;
+            }
+
+            fputcsv($handle, ['project_uuid', 'project_code', 'stage_uuid', 'stage_name', 'entry_date', 'duration_minutes', 'is_billable', 'hourly_rate', 'notes']);
+            fputcsv($handle, ['', 'PRJ-001', '', 'Execution', '2026-07-15', '90', 'yes', '120', 'Frontend build and QA']);
+
+            fclose($handle);
+        }, 'time-entries-import-template.csv', [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
     public function create(): View
     {
         return view('time-entries.import');
@@ -68,7 +87,23 @@ class TimeEntryImportController extends Controller
      */
     private function parseCsv(UploadedFile $file): array
     {
-        $handle = fopen((string) $file->getRealPath(), 'rb');
+        $realPath = $file->getRealPath();
+        $path = is_string($realPath) && $realPath !== '' ? $realPath : $file->getPathname();
+
+        if (! is_string($path) || $path === '') {
+            return [
+                'headers' => [],
+                'valid_rows' => [],
+                'invalid_rows' => [[
+                    'line' => 0,
+                    'errors' => ['Unable to read uploaded CSV file.'],
+                    'raw' => [],
+                ]],
+                'missing_headers' => [],
+            ];
+        }
+
+        $handle = fopen($path, 'rb');
 
         if ($handle === false) {
             return [

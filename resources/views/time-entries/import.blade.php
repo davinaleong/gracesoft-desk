@@ -12,6 +12,13 @@
                     {{ __('Upload a CSV file with entry_date and duration_minutes. Resolve project by project_uuid or project_code; stage can be resolved by stage_uuid or stage_name. Incoming id/uuid columns for time entries are ignored.') }}
                 </p>
 
+                <p class="text-sm mb-4">
+                    <a href="{{ route('time-entries.import.template') }}"
+                        class="text-indigo-600 hover:text-indigo-800 underline">
+                        {{ __('Download CSV template') }}
+                    </a>
+                </p>
+
                 <form method="POST" action="{{ route('time-entries.import.preview') }}" enctype="multipart/form-data"
                     class="space-y-4">
                     @csrf

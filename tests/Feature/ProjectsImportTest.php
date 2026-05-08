@@ -22,6 +22,16 @@ test('projects import page is accessible', function () {
         ->assertSee('Import Projects CSV');
 });
 
+test('projects import template csv can be downloaded', function () {
+    $user = readyUserForProjectsImport();
+
+    $this->actingAs($user)
+        ->get(route('projects.import.template'))
+        ->assertOk()
+        ->assertDownload('projects-import-template.csv')
+        ->assertStreamedContent("code,name,status,description,starts_on,ends_on,is_billable\nPRJ-001,\"Website Revamp\",active,\"Q3 delivery scope\",2026-07-01,2026-09-30,yes\n");
+});
+
 test('projects csv can be previewed and committed by code mapping while ignoring id columns', function () {
     $user = readyUserForProjectsImport();
 
@@ -67,4 +77,5 @@ test('projects csv can be previewed and committed by code mapping while ignoring
 
 test('projects import routes require authentication', function () {
     $this->get(route('projects.import.create'))->assertRedirect(route('login'));
+    $this->get(route('projects.import.template'))->assertRedirect(route('login'));
 });
