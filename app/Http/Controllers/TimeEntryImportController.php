@@ -152,17 +152,17 @@ class TimeEntryImportController extends Controller
             }
 
             $stage = $this->resolveStage($mapped, $project->id);
+            $hasStageReference = $this->nullableString($mapped['stage_uuid'] ?? null)
+                || $this->nullableString($mapped['stage_name'] ?? null);
 
-            if (($mapped['stage_uuid'] ?? null) || ($mapped['stage_name'] ?? null)) {
-                if (($mapped['stage_uuid'] ?? null || $mapped['stage_name'] ?? null) && ! $stage) {
-                    $invalidRows[] = [
-                        'line' => $line,
-                        'errors' => ['Unable to resolve stage by stage_uuid or stage_name for the resolved project.'],
-                        'raw' => $mapped,
-                    ];
+            if ($hasStageReference && ! $stage) {
+                $invalidRows[] = [
+                    'line' => $line,
+                    'errors' => ['Unable to resolve stage by stage_uuid or stage_name for the resolved project.'],
+                    'raw' => $mapped,
+                ];
 
-                    continue;
-                }
+                continue;
             }
 
             $durationMinutes = (int) ($mapped['duration_minutes'] ?? 0);
@@ -250,19 +250,37 @@ class TimeEntryImportController extends Controller
         $stageName = $this->nullableString($mapped['stage_name'] ?? null);
 
         if ($stageUuid) {
-            $stage = ProjectStage::query()
+            $projectStage = ProjectStage::query()
                 ->where('project_id', $projectId)
                 ->where('uuid', $stageUuid)
                 ->first();
 
-            if ($stage) {
-                return $stage;
+            if ($projectStage) {
+                return $projectStage;
+            }
+
+            $globalStage = ProjectStage::query()
+                ->whereNull('project_id')
+                ->where('uuid', $stageUuid)
+                ->first();
+
+            if ($globalStage) {
+                return $globalStage;
             }
         }
 
         if ($stageName) {
-            return ProjectStage::query()
+            $projectStage = ProjectStage::query()
                 ->where('project_id', $projectId)
+                ->whereRaw('LOWER(name) = ?', [strtolower($stageName)])
+                ->first();
+
+            if ($projectStage) {
+                return $projectStage;
+            }
+
+            return ProjectStage::query()
+                ->whereNull('project_id')
                 ->whereRaw('LOWER(name) = ?', [strtolower($stageName)])
                 ->first();
         }

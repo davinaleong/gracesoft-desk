@@ -240,7 +240,14 @@ class DeskImportLiveDataCommand extends Command
         $trimmedName = trim((string) $name);
 
         if ($trimmedUuid !== '') {
-            $byUuid = ProjectStage::query()->where('uuid', $trimmedUuid)->first();
+            $byUuid = ProjectStage::query()
+                ->where('uuid', $trimmedUuid)
+                ->where(function ($query) use ($project): void {
+                    $query->where('project_id', $project->id)
+                        ->orWhereNull('project_id');
+                })
+                ->orderByRaw('CASE WHEN project_id = ? THEN 0 ELSE 1 END', [$project->id])
+                ->first();
 
             if ($byUuid) {
                 return $byUuid;
@@ -249,8 +256,12 @@ class DeskImportLiveDataCommand extends Command
 
         if ($trimmedName !== '') {
             return ProjectStage::query()
-                ->where('project_id', $project->id)
                 ->whereRaw('LOWER(name) = ?', [strtolower($trimmedName)])
+                ->where(function ($query) use ($project): void {
+                    $query->where('project_id', $project->id)
+                        ->orWhereNull('project_id');
+                })
+                ->orderByRaw('CASE WHEN project_id = ? THEN 0 ELSE 1 END', [$project->id])
                 ->first();
         }
 

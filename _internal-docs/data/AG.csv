@@ -1,0 +1,11 @@
+project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes
+,AG,,Planning,2026-05-20,60,yes,120,"Project initialization with Create Next App, local environment setup, and base asset imports"
+,AG,,Development,2026-05-20,90,yes,120,"Implemented passcode page skeleton, sidebar layout, reusable image components, and component testing utilities"
+,AG,,Planning,2026-05-20,45,yes,120,"Added TODO planning notes and prepared generator component testing workflows"
+,AG,,Design,2026-05-21,90,yes,120,"Designed and refined generator preview layouts, sidebar visuals, and overall UI/UX look and feel"
+,AG,,Design,2026-05-21,60,yes,120,"Implemented preview rendering system and wordmark preview presentation styling"
+,AG,,Analysis,2026-05-21,75,yes,120,"Developed generator transformation rules, local passcode tooling, and hash handling improvements"
+,AG,,Development,2026-05-21,90,yes,120,"Implemented asset export pipeline, ZIP download generation, and export UX improvements"
+,AG,,Testing,2026-05-21,45,yes,120,"Performed UI fine-tuning, font rendering fixes, and SVG-to-PNG export accuracy improvements"
+,AG,,Maintenance,2026-05-21,30,yes,120,"Removed obsolete testing components and cleaned up generator session handling logic"
+,AG,,Maintenance,2026-05-25,30,yes,120,"Optimized export workflow by removing redundant PNG exports and retaining favicon ICO generation"
