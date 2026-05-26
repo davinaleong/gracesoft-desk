@@ -26,10 +26,8 @@ test('create update and delete actions are persisted to audit logs', function ()
     ]);
 
     $stage = ProjectStage::query()->create([
-        'project_id' => $project->getRawOriginal('id'),
-        'name' => 'Audit Stage',
-        'slug' => 'audit-stage',
-        'sort_order' => 1,
+        'name' => 'Design',
+        'sort_order' => 3,
         'status' => 'active',
     ]);
 

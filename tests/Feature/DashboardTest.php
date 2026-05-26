@@ -29,10 +29,8 @@ test('dashboard displays aggregated metrics', function () {
     ]);
 
     $stage = ProjectStage::query()->create([
-        'project_id' => $project->id,
-        'name' => 'Execution',
-        'slug' => 'execution-stage',
-        'sort_order' => 1,
+        'name' => 'Development',
+        'sort_order' => 4,
         'status' => 'active',
     ]);
 

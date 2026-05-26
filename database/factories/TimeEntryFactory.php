@@ -28,10 +28,8 @@ class TimeEntryFactory extends Factory
         ]);
 
         $stage = ProjectStage::query()->first() ?? ProjectStage::query()->create([
-            'project_id' => $project->id,
             'name' => 'Development',
-            'slug' => 'development-factory',
-            'sort_order' => 1,
+            'sort_order' => 4,
             'status' => 'active',
         ]);
 

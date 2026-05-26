@@ -25,7 +25,7 @@ class TimeEntryImportController extends Controller
             }
 
             fputcsv($handle, ['project_uuid', 'project_code', 'stage_uuid', 'stage_name', 'entry_date', 'duration_minutes', 'is_billable', 'hourly_rate', 'notes']);
-            fputcsv($handle, ['', 'PRJ-001', '', 'Execution', '2026-07-15', '90', 'yes', '120', 'Frontend build and QA']);
+            fputcsv($handle, ['', 'PRJ-001', '', 'Development', '2026-07-15', '90', 'yes', '120', 'Frontend build and QA']);
 
             fclose($handle);
         }, 'time-entries-import-template.csv', [
@@ -151,7 +151,7 @@ class TimeEntryImportController extends Controller
                 continue;
             }
 
-            $stage = $this->resolveStage($mapped, $project->id);
+            $stage = $this->resolveStage($mapped);
             $hasStageReference = $this->nullableString($mapped['stage_uuid'] ?? null)
                 || $this->nullableString($mapped['stage_name'] ?? null);
 
@@ -244,43 +244,23 @@ class TimeEntryImportController extends Controller
     /**
      * @param  array<string, mixed>  $mapped
      */
-    private function resolveStage(array $mapped, int $projectId): ?ProjectStage
+    private function resolveStage(array $mapped): ?ProjectStage
     {
         $stageUuid = $this->nullableString($mapped['stage_uuid'] ?? null);
         $stageName = $this->nullableString($mapped['stage_name'] ?? null);
 
         if ($stageUuid) {
-            $projectStage = ProjectStage::query()
-                ->where('project_id', $projectId)
+            $stage = ProjectStage::query()
                 ->where('uuid', $stageUuid)
                 ->first();
 
-            if ($projectStage) {
-                return $projectStage;
-            }
-
-            $globalStage = ProjectStage::query()
-                ->whereNull('project_id')
-                ->where('uuid', $stageUuid)
-                ->first();
-
-            if ($globalStage) {
-                return $globalStage;
+            if ($stage) {
+                return $stage;
             }
         }
 
         if ($stageName) {
-            $projectStage = ProjectStage::query()
-                ->where('project_id', $projectId)
-                ->whereRaw('LOWER(name) = ?', [strtolower($stageName)])
-                ->first();
-
-            if ($projectStage) {
-                return $projectStage;
-            }
-
             return ProjectStage::query()
-                ->whereNull('project_id')
                 ->whereRaw('LOWER(name) = ?', [strtolower($stageName)])
                 ->first();
         }

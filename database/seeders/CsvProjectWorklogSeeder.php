@@ -7,7 +7,6 @@ use App\Models\ProjectStage;
 use App\Models\TimeEntry;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class CsvProjectWorklogSeeder extends Seeder
 {
@@ -195,25 +194,37 @@ class CsvProjectWorklogSeeder extends Seeder
 
     private function resolveStage(string $stageName): ProjectStage
     {
-        $slug = Str::slug($stageName);
+        $normalized = strtolower(trim($stageName));
 
-        $sortOrderBySlug = [
-            'discovery' => 1,
-            'planning' => 2,
-            'analysis' => 3,
-            'design' => 4,
-            'development' => 5,
-            'testing' => 6,
-            'deployment' => 7,
-            'maintenance' => 8,
+        $stageNameByAlias = [
+            'discovery' => 'Discovery',
+            'planning' => 'Analysis',
+            'analysis' => 'Analysis',
+            'design' => 'Design',
+            'development' => 'Development',
+            'execution' => 'Development',
+            'implementation' => 'Development',
+            'testing' => 'Testing',
+            'deployment' => 'Deployment',
+            'maintenance' => 'Maintenance',
+        ];
+
+        $resolvedName = $stageNameByAlias[$normalized] ?? 'Analysis';
+
+        $sortOrderByName = [
+            'Discovery' => 1,
+            'Analysis' => 2,
+            'Design' => 3,
+            'Development' => 4,
+            'Testing' => 5,
+            'Deployment' => 6,
+            'Maintenance' => 7,
         ];
 
         return ProjectStage::query()->updateOrCreate(
-            ['slug' => $slug],
+            ['name' => $resolvedName],
             [
-                'project_id' => null,
-                'name' => $stageName,
-                'sort_order' => $sortOrderBySlug[$slug] ?? 99,
+                'sort_order' => $sortOrderByName[$resolvedName] ?? 99,
                 'status' => 'active',
             ]
         );

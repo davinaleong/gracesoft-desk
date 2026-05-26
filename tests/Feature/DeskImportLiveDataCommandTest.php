@@ -31,10 +31,8 @@ test('live data import command imports projects time entries and transactions fr
     ]);
 
     $stage = ProjectStage::query()->create([
-        'project_id' => $project->id,
-        'name' => 'Execution',
-        'slug' => 'execution',
-        'sort_order' => 1,
+        'name' => 'Development',
+        'sort_order' => 4,
         'status' => 'active',
     ]);
 
@@ -71,7 +69,7 @@ test('live data import command imports projects time entries and transactions fr
     $timeEntriesCsv = tempCsvPath('time-entries.csv');
     file_put_contents($timeEntriesCsv, implode("\n", [
         'project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes',
-        $project->uuid.',,'.$stage->uuid.',Execution,2026-05-05,90,yes,120,Imported live time entry',
+        $project->uuid.',,'.$stage->uuid.',Development,2026-05-05,90,yes,120,Imported live time entry',
     ]));
 
     $transactionsCsv = tempCsvPath('transactions.csv');

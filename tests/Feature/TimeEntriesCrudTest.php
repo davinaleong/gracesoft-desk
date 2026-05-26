@@ -27,10 +27,8 @@ function timeEntryDependencies(): array
     ]);
 
     $stage = ProjectStage::query()->create([
-        'project_id' => $project->id,
-        'name' => 'Implementation',
-        'slug' => 'implementation-stage',
-        'sort_order' => 1,
+        'name' => 'Development',
+        'sort_order' => 4,
         'status' => 'active',
     ]);
 

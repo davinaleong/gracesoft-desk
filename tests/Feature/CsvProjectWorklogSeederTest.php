@@ -18,15 +18,15 @@ test('csv project worklog seeders map project data into database schemas', funct
         ->and(Project::query()->where('code', 'GS-WEB')->exists())->toBeTrue()
         ->and(Project::query()->where('code', 'GS-BEAC')->exists())->toBeTrue();
 
-    expect(ProjectStage::query()->where('slug', 'analysis')->exists())->toBeTrue()
-        ->and(ProjectStage::query()->where('slug', 'design')->exists())->toBeTrue();
+    expect(ProjectStage::query()->where('name', 'Analysis')->exists())->toBeTrue()
+        ->and(ProjectStage::query()->where('name', 'Design')->exists())->toBeTrue();
 
     $importedEntriesCount = TimeEntry::query()->count();
 
     expect($importedEntriesCount)->toBeGreaterThan(40)
         ->and(TimeEntry::query()
             ->whereHas('project', fn ($query) => $query->where('code', 'GS-BEAC'))
-            ->whereHas('stage', fn ($query) => $query->where('slug', 'planning'))
+            ->whereHas('stage', fn ($query) => $query->where('name', 'Analysis'))
             ->exists())->toBeTrue();
 
     $this->seed(CsvProjectWorklogSeeder::class);

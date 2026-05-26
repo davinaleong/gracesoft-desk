@@ -150,7 +150,7 @@ class DeskImportLiveDataCommand extends Command
                 continue;
             }
 
-            $stage = $this->resolveStage($project, $row['stage_uuid'] ?? null, $row['stage_name'] ?? null);
+            $stage = $this->resolveStage($row['stage_uuid'] ?? null, $row['stage_name'] ?? null);
             $duration = max(1, (int) ($row['duration_minutes'] ?? 0));
 
             TimeEntry::query()->create([
@@ -234,20 +234,13 @@ class DeskImportLiveDataCommand extends Command
         return null;
     }
 
-    private function resolveStage(Project $project, ?string $uuid, ?string $name): ?ProjectStage
+    private function resolveStage(?string $uuid, ?string $name): ?ProjectStage
     {
         $trimmedUuid = trim((string) $uuid);
         $trimmedName = trim((string) $name);
 
         if ($trimmedUuid !== '') {
-            $byUuid = ProjectStage::query()
-                ->where('uuid', $trimmedUuid)
-                ->where(function ($query) use ($project): void {
-                    $query->where('project_id', $project->id)
-                        ->orWhereNull('project_id');
-                })
-                ->orderByRaw('CASE WHEN project_id = ? THEN 0 ELSE 1 END', [$project->id])
-                ->first();
+            $byUuid = ProjectStage::query()->where('uuid', $trimmedUuid)->first();
 
             if ($byUuid) {
                 return $byUuid;
@@ -257,11 +250,6 @@ class DeskImportLiveDataCommand extends Command
         if ($trimmedName !== '') {
             return ProjectStage::query()
                 ->whereRaw('LOWER(name) = ?', [strtolower($trimmedName)])
-                ->where(function ($query) use ($project): void {
-                    $query->where('project_id', $project->id)
-                        ->orWhereNull('project_id');
-                })
-                ->orderByRaw('CASE WHEN project_id = ? THEN 0 ELSE 1 END', [$project->id])
                 ->first();
         }
 

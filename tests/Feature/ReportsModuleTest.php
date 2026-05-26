@@ -28,10 +28,8 @@ function seedReportData(User $user): void
     ]);
 
     $stage = ProjectStage::query()->create([
-        'project_id' => $project->id,
-        'name' => 'Planning',
-        'slug' => 'planning-stage',
-        'sort_order' => 1,
+        'name' => 'Analysis',
+        'sort_order' => 2,
         'status' => 'active',
     ]);
 

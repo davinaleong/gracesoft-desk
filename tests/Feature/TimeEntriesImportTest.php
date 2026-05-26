@@ -31,7 +31,7 @@ test('time entries import template csv can be downloaded', function () {
         ->get(route('time-entries.import.template'))
         ->assertOk()
         ->assertDownload('time-entries-import-template.csv')
-        ->assertStreamedContent("project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes\n,PRJ-001,,Execution,2026-07-15,90,yes,120,\"Frontend build and QA\"\n");
+        ->assertStreamedContent("project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes\n,PRJ-001,,Development,2026-07-15,90,yes,120,\"Frontend build and QA\"\n");
 });
 
 test('time entries csv can be previewed and committed with uuid-aware mapping', function () {
@@ -45,17 +45,15 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
     ]);
 
     $stage = ProjectStage::query()->create([
-        'project_id' => $project->id,
-        'name' => 'Execution',
-        'slug' => 'execution',
-        'sort_order' => 1,
+        'name' => 'Development',
+        'sort_order' => 4,
         'status' => 'active',
     ]);
 
     $csvContent = implode("\n", [
         'id,uuid,project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes',
         '99,aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa,'.$project->uuid.',UNKNOWN-CODE,'.$stage->uuid.',Wrong Stage Name,2026-05-05,90,yes,120,Imported from UUID mapping',
-        '100,bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb,,PRJ-TIM-001,,Execution,2026-05-06,30,no,150,Imported by code + stage name',
+        '100,bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb,,PRJ-TIM-001,,Development,2026-05-06,30,no,150,Imported by code + stage name',
     ]);
 
     $file = UploadedFile::fake()->createWithContent('time-entries.csv', $csvContent);
@@ -89,7 +87,7 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
         ->and($uuidMappedRow->uuid)->not()->toBe('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
 });
 
-test('time entries csv resolves stage name from global stages when project has no project-specific stage', function () {
+test('time entries csv resolves stage name from canonical global stages', function () {
     $user = readyUserForTimeEntriesImport();
 
     $project = Project::query()->create([
@@ -99,17 +97,16 @@ test('time entries csv resolves stage name from global stages when project has n
         'is_billable' => true,
     ]);
 
-    $globalStage = ProjectStage::query()->create([
-        'project_id' => null,
-        'name' => 'Planning',
-        'slug' => 'planning-global',
+    $globalStage = ProjectStage::query()->firstOrCreate([
+        'name' => 'Analysis',
+    ], [
         'sort_order' => 2,
         'status' => 'active',
     ]);
 
     $csvContent = implode("\n", [
         'project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes',
-        ',PRJ-TIM-002,,Planning,2026-05-07,60,yes,120,Imported using global stage fallback',
+        ',PRJ-TIM-002,,Analysis,2026-05-07,60,yes,120,Imported using global stage fallback',
     ]);
 
     $file = UploadedFile::fake()->createWithContent('time-entries-global-stage.csv', $csvContent);
@@ -135,7 +132,7 @@ test('time entries csv resolves stage name from global stages when project has n
     $importedRow = TimeEntry::query()->where('notes', 'Imported using global stage fallback')->firstOrFail();
 
     expect($importedRow->project_id)->toBe($project->id)
-        ->and($importedRow->project_stage_id)->toBe($globalStage->id);
+        ->and($importedRow->stage?->name)->toBe($globalStage->name);
 });
 
 test('time entries import routes require authentication', function () {
