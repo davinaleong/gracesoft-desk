@@ -12,15 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            AdminUserSeeder::class,
-            ProjectStageSeeder::class,
-            TransactionCategorySeeder::class,
-            PaymentMethodSeeder::class,
-            AccountSeeder::class,
-            ProjectSeeder::class,
-            ProjectMapSeeder::class,
-            CsvProjectWorklogSeeder::class,
-            LedgerPrototypeSeeder::class,
+            MarketingDemoSeeder::class,
         ]);
     }
 }
