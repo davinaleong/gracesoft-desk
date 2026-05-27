@@ -69,12 +69,17 @@
             <div class="desk-report-grid">
                 <div class="desk-card desk-card-body">
                     <h3 class="desk-card-title">{{ __('Expense Breakdown') }}</h3>
+                    @php
+                        $expenseRows = collect($report['expense_by_category'] ?? [])->filter(
+                            fn($row) => is_array($row) || is_object($row),
+                        );
+                    @endphp
                     <ul class="space-y-2">
-                        @forelse ($report['expense_by_category'] as $row)
+                        @forelse ($expenseRows as $row)
                             <li
                                 class="flex justify-between rounded-md px-2 py-1 text-sm transition-colors duration-150 hover:bg-slate-100">
-                                <span>{{ $row->category_name }}</span>
-                                <span class="font-medium">@deskMoney((float) $row->total_amount)</span>
+                                <span>{{ data_get($row, 'category_name', __('Uncategorized')) }}</span>
+                                <span class="font-medium">@deskMoney((float) data_get($row, 'total_amount', 0))</span>
                             </li>
                         @empty
                             <li class="desk-empty-panel">{{ __('No expense data in selected range.') }}</li>
@@ -84,12 +89,17 @@
 
                 <div class="desk-card desk-card-body">
                     <h3 class="desk-card-title">{{ __('Income Breakdown') }}</h3>
+                    @php
+                        $incomeRows = collect($report['income_by_category'] ?? [])->filter(
+                            fn($row) => is_array($row) || is_object($row),
+                        );
+                    @endphp
                     <ul class="space-y-2">
-                        @forelse ($report['income_by_category'] as $row)
+                        @forelse ($incomeRows as $row)
                             <li
                                 class="flex justify-between rounded-md px-2 py-1 text-sm transition-colors duration-150 hover:bg-slate-100">
-                                <span>{{ $row->category_name }}</span>
-                                <span class="font-medium">@deskMoney((float) $row->total_amount)</span>
+                                <span>{{ data_get($row, 'category_name', __('Uncategorized')) }}</span>
+                                <span class="font-medium">@deskMoney((float) data_get($row, 'total_amount', 0))</span>
                             </li>
                         @empty
                             <li class="desk-empty-panel">{{ __('No income data in selected range.') }}</li>

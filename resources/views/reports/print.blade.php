@@ -5,6 +5,12 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title }}</title>
+    @if ($reportType === 'finance')
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
+            rel="stylesheet">
+    @endif
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -40,6 +46,12 @@
             text-transform: uppercase;
             letter-spacing: 0.04em;
         }
+
+        @if ($reportType === 'finance')
+            body {
+                font-family: 'Montserrat', Arial, sans-serif;
+            }
+        @endif
     </style>
 </head>
 
@@ -60,13 +72,22 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($report['transactions'] as $transaction)
+                @php
+                    $transactions = collect($report['transactions'] ?? [])->filter(
+                        fn($row) => is_array($row) || is_object($row),
+                    );
+                @endphp
+
+                @foreach ($transactions as $transaction)
                     <tr>
-                        <td><span style="font-family: monospace;">{{ $transaction->transaction_code }}</span></td>
-                        <td>@deskDate($transaction->transaction_date)</td>
-                        <td>{{ $transaction->type }} / {{ $transaction->direction }}</td>
-                        <td>{{ $transaction->status }}</td>
-                        <td>@deskMoney((float) $transaction->net_amount)</td>
+                        <td><span
+                                style="font-family: monospace;">{{ data_get($transaction, 'transaction_code', '-') }}</span>
+                        </td>
+                        <td>@deskDate((string) data_get($transaction, 'transaction_date', now()->toDateString()))</td>
+                        <td>{{ data_get($transaction, 'type', '-') }} / {{ data_get($transaction, 'direction', '-') }}
+                        </td>
+                        <td>{{ data_get($transaction, 'status', '-') }}</td>
+                        <td>@deskMoney((float) data_get($transaction, 'net_amount', 0))</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -85,7 +106,8 @@
             <tbody>
                 @foreach ($report['project_summary'] as $row)
                     <tr>
-                        <td><span style="font-family: monospace;">{{ $row->code }}</span> - {{ $row->name }}</td>
+                        <td><span style="font-family: monospace;">{{ $row->code }}</span> - {{ $row->name }}
+                        </td>
                         <td>@deskDuration((int) $row->duration_minutes)</td>
                         <td>@deskMoney((float) $row->billable_amount)</td>
                     </tr>

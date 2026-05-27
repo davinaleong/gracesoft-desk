@@ -1,0 +1,13 @@
+project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes
+,DEMO-LAUNCH,,Discovery,2026-05-02,90,yes,180,Marketing goals workshop and campaign scope alignment
+,DEMO-LAUNCH,,Analysis,2026-05-04,120,yes,180,Funnel baseline analysis and KPI definition
+,DEMO-LAUNCH,,Design,2026-05-06,105,yes,180,Landing page message hierarchy and CTA wireframe review
+,DEMO-LAUNCH,,Development,2026-05-08,150,yes,195,Analytics events implementation planning with dev team
+,DEMO-LAUNCH,,Testing,2026-05-10,75,yes,180,UTM and conversion tracking QA across paid channels
+,DEMO-LAUNCH,,Deployment,2026-05-12,60,yes,180,Launch readiness checklist and campaign handover
+,DEMO-HQX,,Analysis,2026-05-14,90,yes,190,Executive dashboard metric mapping for marketing ROI
+,DEMO-HQX,,Development,2026-05-16,120,yes,205,Marketing insights widget refinement with product team
+,DEMO-HQX,,Testing,2026-05-18,60,yes,190,Dashboard acceptance testing with leadership stakeholders
+,DEMO-CRM,,Analysis,2026-05-20,90,yes,175,Lead lifecycle segmentation and nurture path definition
+,DEMO-CRM,,Maintenance,2026-05-22,75,no,0,Weekly campaign performance review and backlog grooming
+,DEMO-SUPPORT,,Maintenance,2026-05-24,60,no,0,Customer feedback synthesis for marketing enablement updates
