@@ -51,8 +51,8 @@ class TransactionFactory extends Factory
             'is_billable' => false,
         ]);
 
-        $amount = (float) fake()->randomFloat(2, 10, 1000);
-        $gst = (float) fake()->randomFloat(2, 0, 100);
+        $amount = (float) fake()->randomFloat(2, 100, 1000);
+        $gst = (float) fake()->randomFloat(2, 0, round($amount * 0.09, 2));
 
         return [
             'account_id' => $account->id,

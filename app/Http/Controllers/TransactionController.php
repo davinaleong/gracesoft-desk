@@ -63,7 +63,7 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction): View
     {
-        $transaction->load(['account', 'category', 'paymentMethod', 'project']);
+        $transaction->load(['account', 'category', 'paymentMethod', 'project', 'documents']);
 
         return view('transactions.show', [
             'transaction' => $transaction,

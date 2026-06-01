@@ -28,6 +28,8 @@
             'time-entry-deleted' => __('Time entry has been removed.'),
             'transaction-created' => __('Transaction saved successfully.'),
             'transaction-updated' => __('Transaction details have been updated.'),
+            'document-uploaded' => __('Document uploaded successfully.'),
+            'document-deleted' => __('Document has been deleted.'),
             'system-settings-updated' => __('System settings have been saved.'),
             'password-updated' => __('Your password has been updated.'),
             'profile-updated' => __('Your profile details have been updated.'),

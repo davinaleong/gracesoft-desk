@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectImportController;
@@ -56,6 +57,12 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
 
     Route::get('/settings/system', [SystemSettingsController::class, 'edit'])->name('settings.system.edit');
     Route::put('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');
+
+    Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
+    Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+    Route::get('/documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
+    Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
 });
 
 Route::middleware('auth')->group(function () {

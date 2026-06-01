@@ -22,6 +22,7 @@
                     <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">{{ __('Projects') }}</x-nav-link>
                     <x-nav-link :href="route('time-entries.index')" :active="request()->routeIs('time-entries.*')">{{ __('Time Entries') }}</x-nav-link>
                     <x-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.*')">{{ __('Transactions') }}</x-nav-link>
+                    <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.*')">{{ __('Documents') }}</x-nav-link>
                     <x-nav-link :href="route('reports.finance')" :active="request()->routeIs('reports.*')">{{ __('Reports') }}</x-nav-link>
                     <x-nav-link :href="route('settings.system.edit')" :active="request()->routeIs('settings.system.*')">{{ __('System Settings') }}</x-nav-link>
                 </div>
@@ -48,6 +49,7 @@
                 :active="request()->routeIs('time-entries.*')">{{ __('Time Entries') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('transactions.index')"
                 :active="request()->routeIs('transactions.*')">{{ __('Transactions') }}</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.*')">{{ __('Documents') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('reports.finance')" :active="request()->routeIs('reports.*')">{{ __('Reports') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('settings.system.edit')"
                 :active="request()->routeIs('settings.system.*')">{{ __('System Settings') }}</x-responsive-nav-link>
