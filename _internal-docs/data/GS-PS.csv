@@ -1,0 +1,22 @@
+project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes
+,GS-PS,,Development,2026-05-31,60,yes,120,[cfb3215] feat: build full GraceSoft PaperStack landing site
+,GS-PS,,Analysis,2026-05-31,20,yes,120,[c2bce33] Added a doc spec for company branding guidelines.
+,GS-PS,,Discovery,2026-05-31,20,yes,120,[2faf005] Imported assets and spec docs.
+,GS-PS,,Discovery,2026-05-31,20,yes,120,[146448f] Initial commit from Astro
+,GS-PS,,Analysis,2026-05-31,20,yes,120,[a3c5953] Added md spec for zip module.
+,GS-PS,,Analysis,2026-05-31,20,yes,120,[1fffbe7] Added a new TODO item.
+,GS-PS,,Development,2026-05-31,45,yes,120,[246b3d4] fix(list): explicitly set disc/decimal markers to survive CSS reset
+,GS-PS,,Development,2026-05-31,60,yes,120,[28e40f4] feat: add ps-list component (ul + ol)
+,GS-PS,,Development,2026-05-31,45,yes,120,[6de4df0] fix: checkbox/radio UI bugs in playground
+,GS-PS,,Development,2026-05-30,45,yes,120,[1834f78] WIP fixing bugs.
+,GS-PS,,Design,2026-05-30,45,yes,120,[6b08ab1] fix(tokens): correct colour role assignments across the system
+,GS-PS,,Design,2026-05-30,45,yes,120,[a92c3cd] fix(tokens): wire legacy tokens to --ps-* system in light.scss
+,GS-PS,,Design,2026-05-30,60,yes,120,[e146e72] refactor(playground): remove legacy data-theme switcher
+,GS-PS,,Design,2026-05-30,45,yes,120,[1cbf7c6] fix(tokens): move @layer declaration to forwarded file
+,GS-PS,,Design,2026-05-30,60,yes,120,[47c2cd5] feat(icons): include full Lucide icon set by default
+,GS-PS,,Deployment,2026-05-30,30,yes,120,[f003a55] chore(release): prep v0.2.0 packages for npm publish
+,GS-PS,,Testing,2026-05-30,45,yes,120,[915624c] chore(scripts): add WCAG AA contrast checker; Phase 2+3 checks pass
+,GS-PS,,Development,2026-05-30,60,yes,120,[4fad2f0] feat(monetisation): Phase 5 launch setup
+,GS-PS,,Analysis,2026-05-30,20,yes,120,[83afcd3] docs(tokens): add MIGRATION.md for data-theme to three-axis upgrade path
+,GS-PS,,Development,2026-05-30,60,yes,120,[98fd8c5] refactor(components): replace hardcoded status hex values with CSS custom properties
+,GS-PS,,Analysis,2026-05-30,20,yes,120,[2b9e1a3] feat(playground): add three-axis paper/ink/mode controls; add tokens README
