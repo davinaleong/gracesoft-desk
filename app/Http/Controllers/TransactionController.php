@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Models\Account;
+use App\Models\Document;
 use App\Models\PaymentMethod;
 use App\Models\Project;
 use App\Models\Transaction;
@@ -65,8 +66,11 @@ class TransactionController extends Controller
     {
         $transaction->load(['account', 'category', 'paymentMethod', 'project', 'documents']);
 
+        $unlinkedDocuments = Document::query()->whereNull('documentable_id')->orderBy('name')->get();
+
         return view('transactions.show', [
             'transaction' => $transaction,
+            'unlinkedDocuments' => $unlinkedDocuments,
         ]);
     }
 

@@ -57,11 +57,52 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-semibold text-gray-700">{{ __('Documents') }}</h3>
-                        <button type="button"
-                            onclick="document.getElementById('proj-upload-panel').classList.toggle('hidden')"
-                            class="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
-                            {{ __('Attach Document') }}
-                        </button>
+                        <div class="flex items-center gap-2">
+                            @if ($unlinkedDocuments->isNotEmpty())
+                                <button type="button"
+                                    onclick="document.getElementById('proj-link-panel').classList.toggle('hidden')"
+                                    class="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                                    {{ __('Link Existing') }}
+                                </button>
+                            @endif
+                            <button type="button"
+                                onclick="document.getElementById('proj-upload-panel').classList.toggle('hidden')"
+                                class="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                                {{ __('Attach Document') }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="proj-link-panel" class="hidden mb-6 border border-gray-200 rounded-md p-4 bg-gray-50">
+                        <form method="POST" action="" class="space-y-3" id="proj-link-form">
+                            @csrf
+                            <input type="hidden" name="documentable_type" value="project">
+                            <input type="hidden" name="documentable_uuid" value="{{ $project->uuid }}">
+                            <input type="hidden" name="redirect_back" value="project">
+
+                            <div>
+                                <x-input-label for="proj-link-doc" :value="__('Select Document')" />
+                                <select id="proj-link-doc" name="document_uuid" required
+                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
+                                    <option value="">{{ __('— choose a document —') }}</option>
+                                    @foreach ($unlinkedDocuments as $unlinked)
+                                        <option value="{{ $unlinked->uuid }}">{{ $unlinked->name }}
+                                            ({{ $unlinked->formattedSize() }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <x-primary-button id="proj-link-submit">{{ __('Link') }}</x-primary-button>
+                            </div>
+                        </form>
+                        <script>
+                            document.getElementById('proj-link-doc').addEventListener('change', function() {
+                                var uuid = this.value;
+                                var form = document.getElementById('proj-link-form');
+                                form.action = '/documents/' + uuid + '/attach';
+                            });
+                        </script>
                     </div>
 
                     <div id="proj-upload-panel"

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
+use App\Models\Document;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -51,8 +52,11 @@ class ProjectController extends Controller
     {
         $project->load(['documents']);
 
+        $unlinkedDocuments = Document::query()->whereNull('documentable_id')->orderBy('name')->get();
+
         return view('projects.show', [
             'project' => $project,
+            'unlinkedDocuments' => $unlinkedDocuments,
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTimeEntryRequest;
 use App\Http\Requests\UpdateTimeEntryRequest;
+use App\Models\Document;
 use App\Models\Project;
 use App\Models\ProjectStage;
 use App\Models\TimeEntry;
@@ -62,8 +63,11 @@ class TimeEntryController extends Controller
     {
         $timeEntry->load(['project', 'stage', 'documents']);
 
+        $unlinkedDocuments = Document::query()->whereNull('documentable_id')->orderBy('name')->get();
+
         return view('time-entries.show', [
             'timeEntry' => $timeEntry,
+            'unlinkedDocuments' => $unlinkedDocuments,
         ]);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AttachDocumentRequest;
 use App\Http\Requests\StoreDocumentRequest;
 use App\Http\Requests\UpdateDocumentRequest;
 use App\Models\Document;
@@ -164,6 +165,47 @@ class DocumentController extends Controller
         return redirect()
             ->route('documents.index')
             ->with('status', 'document-deleted');
+    }
+
+    public function attach(AttachDocumentRequest $request, Document $document): RedirectResponse
+    {
+        $documentable = $this->resolveDocumentable(
+            $request->string('documentable_type')->toString(),
+            $request->string('documentable_uuid')->toString(),
+        );
+
+        if (! $documentable) {
+            return back()->withErrors(['documentable_uuid' => __('The selected record could not be found.')]);
+        }
+
+        $document->update([
+            'documentable_type' => get_class($documentable),
+            'documentable_id' => $documentable->getKey(),
+        ]);
+
+        $redirectBack = $request->input('redirect_back');
+
+        if ($redirectBack === 'transaction' && $documentable instanceof Transaction) {
+            return redirect()
+                ->route('transactions.show', $documentable)
+                ->with('status', 'document-attached');
+        }
+
+        if ($redirectBack === 'project' && $documentable instanceof Project) {
+            return redirect()
+                ->route('projects.show', $documentable)
+                ->with('status', 'document-attached');
+        }
+
+        if ($redirectBack === 'time-entry' && $documentable instanceof TimeEntry) {
+            return redirect()
+                ->route('time-entries.show', $documentable)
+                ->with('status', 'document-attached');
+        }
+
+        return redirect()
+            ->route('documents.index')
+            ->with('status', 'document-attached');
     }
 
     private function resolveDocumentable(string $type, string $uuid): ?object

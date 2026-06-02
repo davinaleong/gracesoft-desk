@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 function readyUserForDocuments(): User
 {
@@ -268,4 +269,117 @@ test('document name update requires a name', function () {
     $this->actingAs($user)
         ->put(route('documents.update', $document), ['name' => ''])
         ->assertSessionHasErrors('name');
+});
+
+test('existing document can be attached to a transaction', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $transaction = Transaction::factory()->create(['amount' => 200, 'gst_amount' => 20, 'net_amount' => 180]);
+    $document = Document::factory()->create(['user_id' => $user->id]);
+
+    $this->actingAs($user)
+        ->post(route('documents.attach', $document), [
+            'documentable_type' => 'transaction',
+            'documentable_uuid' => $transaction->uuid,
+            'redirect_back' => 'transaction',
+        ])
+        ->assertRedirect(route('transactions.show', $transaction))
+        ->assertSessionHas('status', 'document-attached');
+
+    expect($document->fresh()->documentable_id)->toBe($transaction->id);
+    expect($document->fresh()->documentable_type)->toBe(Transaction::class);
+});
+
+test('existing document can be attached to a project', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $project = Project::factory()->create();
+    $document = Document::factory()->create(['user_id' => $user->id]);
+
+    $this->actingAs($user)
+        ->post(route('documents.attach', $document), [
+            'documentable_type' => 'project',
+            'documentable_uuid' => $project->uuid,
+            'redirect_back' => 'project',
+        ])
+        ->assertRedirect(route('projects.show', $project))
+        ->assertSessionHas('status', 'document-attached');
+
+    expect($document->fresh()->documentable_id)->toBe($project->id);
+    expect($document->fresh()->documentable_type)->toBe(Project::class);
+});
+
+test('existing document can be attached to a time entry', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $timeEntry = TimeEntry::factory()->create();
+    $document = Document::factory()->create(['user_id' => $user->id]);
+
+    $this->actingAs($user)
+        ->post(route('documents.attach', $document), [
+            'documentable_type' => 'time-entry',
+            'documentable_uuid' => $timeEntry->uuid,
+            'redirect_back' => 'time-entry',
+        ])
+        ->assertRedirect(route('time-entries.show', $timeEntry))
+        ->assertSessionHas('status', 'document-attached');
+
+    expect($document->fresh()->documentable_id)->toBe($timeEntry->id);
+    expect($document->fresh()->documentable_type)->toBe(TimeEntry::class);
+});
+
+test('attach requires valid documentable type', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $document = Document::factory()->create(['user_id' => $user->id]);
+
+    $this->actingAs($user)
+        ->post(route('documents.attach', $document), [
+            'documentable_type' => 'invalid',
+            'documentable_uuid' => (string) Str::uuid(),
+        ])
+        ->assertSessionHasErrors('documentable_type');
+});
+
+test('transaction show page displays link existing button when unlinked documents exist', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $transaction = Transaction::factory()->create(['amount' => 100, 'gst_amount' => 10, 'net_amount' => 90]);
+    Document::factory()->create(['user_id' => $user->id, 'name' => 'unlinked-file.pdf']);
+
+    $this->actingAs($user)
+        ->get(route('transactions.show', $transaction))
+        ->assertOk()
+        ->assertSee(__('Link Existing'));
+});
+
+test('project show page displays link existing button when unlinked documents exist', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $project = Project::factory()->create();
+    Document::factory()->create(['user_id' => $user->id, 'name' => 'unlinked-file.pdf']);
+
+    $this->actingAs($user)
+        ->get(route('projects.show', $project))
+        ->assertOk()
+        ->assertSee(__('Link Existing'));
+});
+
+test('time entry show page displays link existing button when unlinked documents exist', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $timeEntry = TimeEntry::factory()->create();
+    Document::factory()->create(['user_id' => $user->id, 'name' => 'unlinked-file.pdf']);
+
+    $this->actingAs($user)
+        ->get(route('time-entries.show', $timeEntry))
+        ->assertOk()
+        ->assertSee(__('Link Existing'));
 });
