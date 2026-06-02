@@ -97,37 +97,8 @@
                         </div>
                     </div>
 
-                    <div id="te-link-panel" class="hidden mb-6 border border-gray-200 rounded-md p-4 bg-gray-50">
-                        <form method="POST" action="" class="space-y-3" id="te-link-form">
-                            @csrf
-                            <input type="hidden" name="documentable_type" value="time-entry">
-                            <input type="hidden" name="documentable_uuid" value="{{ $timeEntry->uuid }}">
-                            <input type="hidden" name="redirect_back" value="time-entry">
-
-                            <div>
-                                <x-input-label for="te-link-doc" :value="__('Select Document')" />
-                                <select id="te-link-doc" name="document_uuid" required
-                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
-                                    <option value="">{{ __('— choose a document —') }}</option>
-                                    @foreach ($unlinkedDocuments as $unlinked)
-                                        <option value="{{ $unlinked->uuid }}">{{ $unlinked->name }}
-                                            ({{ $unlinked->formattedSize() }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="flex justify-end">
-                                <x-primary-button id="te-link-submit">{{ __('Link') }}</x-primary-button>
-                            </div>
-                        </form>
-                        <script>
-                            document.getElementById('te-link-doc').addEventListener('change', function() {
-                                var uuid = this.value;
-                                var form = document.getElementById('te-link-form');
-                                form.action = '/documents/' + uuid + '/attach';
-                            });
-                        </script>
-                    </div>
+                    <x-document-link-panel panel-id="te-link-panel" documentable-type="time-entry" :documentable-uuid="$timeEntry->uuid"
+                        redirect-back="time-entry" :documents="$unlinkedDocuments" />
 
                     <div id="te-upload-panel"
                         class="{{ $errors->has('file') || $errors->has('name') ? '' : 'hidden' }} mb-6 border border-gray-200 rounded-md p-4 bg-gray-50">

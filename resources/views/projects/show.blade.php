@@ -73,37 +73,8 @@
                         </div>
                     </div>
 
-                    <div id="proj-link-panel" class="hidden mb-6 border border-gray-200 rounded-md p-4 bg-gray-50">
-                        <form method="POST" action="" class="space-y-3" id="proj-link-form">
-                            @csrf
-                            <input type="hidden" name="documentable_type" value="project">
-                            <input type="hidden" name="documentable_uuid" value="{{ $project->uuid }}">
-                            <input type="hidden" name="redirect_back" value="project">
-
-                            <div>
-                                <x-input-label for="proj-link-doc" :value="__('Select Document')" />
-                                <select id="proj-link-doc" name="document_uuid" required
-                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
-                                    <option value="">{{ __('— choose a document —') }}</option>
-                                    @foreach ($unlinkedDocuments as $unlinked)
-                                        <option value="{{ $unlinked->uuid }}">{{ $unlinked->name }}
-                                            ({{ $unlinked->formattedSize() }})</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="flex justify-end">
-                                <x-primary-button id="proj-link-submit">{{ __('Link') }}</x-primary-button>
-                            </div>
-                        </form>
-                        <script>
-                            document.getElementById('proj-link-doc').addEventListener('change', function() {
-                                var uuid = this.value;
-                                var form = document.getElementById('proj-link-form');
-                                form.action = '/documents/' + uuid + '/attach';
-                            });
-                        </script>
-                    </div>
+                    <x-document-link-panel panel-id="proj-link-panel" documentable-type="project" :documentable-uuid="$project->uuid"
+                        redirect-back="project" :documents="$unlinkedDocuments" />
 
                     <div id="proj-upload-panel"
                         class="{{ $errors->has('file') || $errors->has('name') ? '' : 'hidden' }} mb-6 border border-gray-200 rounded-md p-4 bg-gray-50">
