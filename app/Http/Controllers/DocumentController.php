@@ -36,7 +36,7 @@ class DocumentController extends Controller
 
         $extension = $file->getClientOriginalExtension() ?: ($file->guessExtension() ?? 'bin');
         $storageFilename = Str::uuid().'.'.$extension;
-        $storageDir = 'documents/'.Str::uuid();
+        $storageDir = (string) Str::uuid();
         $path = $storageDir.'/'.$storageFilename;
 
         $stream = fopen($file->getPathname(), 'rb');

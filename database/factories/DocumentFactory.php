@@ -20,7 +20,7 @@ class DocumentFactory extends Factory
         return [
             'name' => $this->faker->word().'.'.$this->faker->fileExtension(),
             'disk' => 's3',
-            'path' => 'documents/'.$this->faker->uuid().'/'.$this->faker->word().'.pdf',
+            'path' => $this->faker->uuid().'/'.$this->faker->word().'.pdf',
             'mime_type' => 'application/pdf',
             'size' => $this->faker->numberBetween(1024, 5_000_000),
         ];
