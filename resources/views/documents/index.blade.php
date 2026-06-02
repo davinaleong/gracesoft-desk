@@ -27,6 +27,7 @@
                         <div>
                             <x-input-label for="file" :value="__('File')" />
                             <input id="file" name="file" type="file" required
+                                accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg,.webp,.gif"
                                 class="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring focus:ring-indigo-300">
                             <x-input-error :messages="$errors->get('file')" class="mt-1" />
                         </div>
@@ -81,6 +82,18 @@
                                                 <a href="{{ route('transactions.show', $document->documentable) }}"
                                                     class="text-blue-600 hover:text-blue-800">
                                                     {{ $document->documentable->transaction_code }}
+                                                </a>
+                                            @elseif ($document->documentable instanceof \App\Models\Project)
+                                                <a href="{{ route('projects.show', $document->documentable) }}"
+                                                    class="text-blue-600 hover:text-blue-800">
+                                                    {{ $document->documentable->code }} —
+                                                    {{ $document->documentable->name }}
+                                                </a>
+                                            @elseif ($document->documentable instanceof \App\Models\TimeEntry)
+                                                <a href="{{ route('time-entries.show', $document->documentable) }}"
+                                                    class="text-blue-600 hover:text-blue-800">
+                                                    {{ __('Time Entry') }}
+                                                    {{ $document->documentable->entry_date->format('d M Y') }}
                                                 </a>
                                             @else
                                                 &mdash;

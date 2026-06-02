@@ -1,5 +1,5 @@
 # TODO
 
 [x] Document Manager
-[ ] Link documents to other records
-[ ] After a record is created, prompt user if they want to create another new record without having to go back to the record listing page
+[x] Able to associate documents to other records
+[x] After a record is created, prompt user if they want to create another new record without having to go back to the record listing page

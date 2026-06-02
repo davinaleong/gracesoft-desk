@@ -48,10 +48,10 @@ class TimeEntryController extends Controller
         $payload['user_id'] = $request->user()?->id;
         $payload['billable_amount'] = $this->calculateBillableAmount($payload);
 
-        TimeEntry::query()->create($payload);
+        $timeEntry = TimeEntry::query()->create($payload);
 
         return redirect()
-            ->route('time-entries.index')
+            ->route('time-entries.show', $timeEntry)
             ->with('status', 'time-entry-created');
     }
 
@@ -60,7 +60,7 @@ class TimeEntryController extends Controller
      */
     public function show(TimeEntry $timeEntry): View
     {
-        $timeEntry->load(['project', 'stage']);
+        $timeEntry->load(['project', 'stage', 'documents']);
 
         return view('time-entries.show', [
             'timeEntry' => $timeEntry,

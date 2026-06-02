@@ -13,7 +13,16 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @if (session('status') === 'transaction-created')
+                <div
+                    class="flex items-center justify-between rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+                    <span>{{ __('Transaction saved. Would you like to create another one?') }}</span>
+                    <a href="{{ route('transactions.create') }}"
+                        class="ml-4 font-semibold underline hover:text-blue-600">{{ __('Create Another') }}</a>
+                </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 space-y-4">
                     <div>
@@ -82,6 +91,7 @@
                             <div>
                                 <x-input-label for="txn-file" :value="__('File')" />
                                 <input id="txn-file" name="file" type="file" required
+                                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.png,.jpg,.jpeg,.webp,.gif"
                                     class="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-md cursor-pointer focus:outline-none focus:ring focus:ring-indigo-300">
                                 <x-input-error :messages="$errors->get('file')" class="mt-1" />
                             </div>

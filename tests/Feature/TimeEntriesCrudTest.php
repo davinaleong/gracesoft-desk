@@ -72,7 +72,7 @@ test('time entry can be created and billable amount is calculated', function () 
 
     $timeEntry = TimeEntry::query()->firstOrFail();
 
-    $response->assertRedirect(route('time-entries.index'));
+    $response->assertRedirect(route('time-entries.show', $timeEntry));
 
     expect((float) $timeEntry->billable_amount)->toBe(300.0)
         ->and($timeEntry->user_id)->toBe($user->id);
@@ -214,4 +214,24 @@ test('time entries routes require authentication', function () {
     $response = $this->get(route('time-entries.show', $timeEntry));
 
     $response->assertRedirect(route('login'));
+});
+
+test('time entry show page prompts to add another after creation', function () {
+    $user = readyUserForTimeEntries();
+    $dependencies = timeEntryDependencies();
+
+    $timeEntry = TimeEntry::query()->create([
+        'project_id' => $dependencies['project']->id,
+        'project_stage_id' => $dependencies['stage']->id,
+        'user_id' => $user->id,
+        'entry_date' => now()->toDateString(),
+        'duration_minutes' => 60,
+        'is_billable' => false,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['status' => 'time-entry-created'])
+        ->get(route('time-entries.show', $timeEntry))
+        ->assertOk()
+        ->assertSee(__('Add Another'));
 });

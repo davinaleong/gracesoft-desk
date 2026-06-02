@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDocumentRequest;
 use App\Models\Document;
+use App\Models\Project;
+use App\Models\TimeEntry;
 use App\Models\Transaction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -78,6 +80,18 @@ class DocumentController extends Controller
                 ->with('status', 'document-uploaded');
         }
 
+        if ($redirectBack === 'project' && $documentable instanceof Project) {
+            return redirect()
+                ->route('projects.show', $documentable)
+                ->with('status', 'document-uploaded');
+        }
+
+        if ($redirectBack === 'time-entry' && $documentable instanceof TimeEntry) {
+            return redirect()
+                ->route('time-entries.show', $documentable)
+                ->with('status', 'document-uploaded');
+        }
+
         return redirect()
             ->route('documents.index')
             ->with('status', 'document-uploaded');
@@ -118,6 +132,18 @@ class DocumentController extends Controller
                 ->with('status', 'document-deleted');
         }
 
+        if ($redirectBack === 'project' && $documentable instanceof Project) {
+            return redirect()
+                ->route('projects.show', $documentable)
+                ->with('status', 'document-deleted');
+        }
+
+        if ($redirectBack === 'time-entry' && $documentable instanceof TimeEntry) {
+            return redirect()
+                ->route('time-entries.show', $documentable)
+                ->with('status', 'document-deleted');
+        }
+
         return redirect()
             ->route('documents.index')
             ->with('status', 'document-deleted');
@@ -127,6 +153,8 @@ class DocumentController extends Controller
     {
         return match ($type) {
             'transaction' => Transaction::query()->where('uuid', $uuid)->first(),
+            'project' => Project::query()->where('uuid', $uuid)->first(),
+            'time-entry' => TimeEntry::query()->where('uuid', $uuid)->first(),
             default => null,
         };
     }

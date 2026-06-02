@@ -222,3 +222,27 @@ test('transactions routes require authentication', function () {
 
     $response->assertRedirect(route('login'));
 });
+
+test('transaction show page prompts to create another after creation', function () {
+    $user = readyUserForTransactions();
+    $dependencies = transactionDependencies();
+
+    $transaction = Transaction::query()->create([
+        'account_id' => $dependencies['account']->id,
+        'transaction_category_id' => $dependencies['category']->id,
+        'payment_method_id' => $dependencies['paymentMethod']->id,
+        'type' => 'expense',
+        'direction' => 'out',
+        'status' => 'completed',
+        'transaction_date' => now()->toDateString(),
+        'amount' => 200,
+        'gst_amount' => 20,
+        'net_amount' => 180,
+    ]);
+
+    $this->actingAs($user)
+        ->withSession(['status' => 'transaction-created'])
+        ->get(route('transactions.show', $transaction))
+        ->assertOk()
+        ->assertSee(__('Create Another'));
+});

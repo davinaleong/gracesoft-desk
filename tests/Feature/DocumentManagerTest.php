@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Document;
+use App\Models\Project;
+use App\Models\TimeEntry;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -150,4 +152,80 @@ test('transaction show page displays linked documents', function () {
         ->get(route('transactions.show', $transaction))
         ->assertOk()
         ->assertSee('linked-receipt.pdf');
+});
+
+test('document can be linked to a project on upload', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $project = Project::factory()->create();
+    $file = UploadedFile::fake()->create('spec.pdf', 50, 'application/pdf');
+
+    $this->actingAs($user)
+        ->post(route('documents.store'), [
+            'file' => $file,
+            'documentable_type' => 'project',
+            'documentable_uuid' => $project->uuid,
+            'redirect_back' => 'project',
+        ])
+        ->assertRedirect(route('projects.show', $project))
+        ->assertSessionHas('status', 'document-uploaded');
+
+    expect($project->documents()->count())->toBe(1);
+});
+
+test('document can be linked to a time entry on upload', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $timeEntry = TimeEntry::factory()->create();
+    $file = UploadedFile::fake()->create('timesheet.pdf', 50, 'application/pdf');
+
+    $this->actingAs($user)
+        ->post(route('documents.store'), [
+            'file' => $file,
+            'documentable_type' => 'time-entry',
+            'documentable_uuid' => $timeEntry->uuid,
+            'redirect_back' => 'time-entry',
+        ])
+        ->assertRedirect(route('time-entries.show', $timeEntry))
+        ->assertSessionHas('status', 'document-uploaded');
+
+    expect($timeEntry->documents()->count())->toBe(1);
+});
+
+test('project show page displays linked documents', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $project = Project::factory()->create();
+    $document = Document::factory()->create([
+        'documentable_type' => Project::class,
+        'documentable_id' => $project->id,
+        'name' => 'project-brief.pdf',
+        'user_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('projects.show', $project))
+        ->assertOk()
+        ->assertSee('project-brief.pdf');
+});
+
+test('time entry show page displays linked documents', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $timeEntry = TimeEntry::factory()->create();
+    $document = Document::factory()->create([
+        'documentable_type' => TimeEntry::class,
+        'documentable_id' => $timeEntry->id,
+        'name' => 'timesheet-export.pdf',
+        'user_id' => $user->id,
+    ]);
+
+    $this->actingAs($user)
+        ->get(route('time-entries.show', $timeEntry))
+        ->assertOk()
+        ->assertSee('timesheet-export.pdf');
 });

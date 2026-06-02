@@ -95,3 +95,14 @@ test('projects routes require authentication', function () {
 
     $response->assertRedirect(route('login'));
 });
+
+test('project show page prompts to create another after creation', function () {
+    $user = readyUser();
+    $project = Project::factory()->create();
+
+    $this->actingAs($user)
+        ->withSession(['status' => 'project-created'])
+        ->get(route('projects.show', $project))
+        ->assertOk()
+        ->assertSee(__('Create Another'));
+});
