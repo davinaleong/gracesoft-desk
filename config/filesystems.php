@@ -56,7 +56,7 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'prefix' => env('AWS_PREFIX', ''),
+            'root' => env('AWS_PREFIX', ''),
             'throw' => true,
             'report' => false,
         ],
