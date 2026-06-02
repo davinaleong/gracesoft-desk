@@ -13,16 +13,20 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
-        $email = env('ADMIN_EMAIL', 'admin@gracesoft.dev');
+        $attributes = [
+            'name' => env('ADMIN_NAME', 'GraceSoft Admin'),
+            'email' => env('ADMIN_EMAIL', 'admin@gracesoft.dev'),
+            'password' => Hash::make(env('ADMIN_TEMP_PASSWORD', 'ChangeMe123!')),
+            'must_change_password' => true,
+            'password_changed_at' => null,
+        ];
 
-        User::query()->updateOrCreate(
-            ['email' => $email],
-            [
-                'name' => env('ADMIN_NAME', 'GraceSoft Admin'),
-                'password' => Hash::make(env('ADMIN_TEMP_PASSWORD', 'ChangeMe123!')),
-                'must_change_password' => true,
-                'password_changed_at' => null,
-            ]
-        );
+        $existing = User::query()->first();
+
+        if ($existing) {
+            $existing->update($attributes);
+        } else {
+            User::create($attributes);
+        }
     }
 }

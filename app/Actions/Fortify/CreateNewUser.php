@@ -22,6 +22,12 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
+        if (User::query()->exists()) {
+            throw ValidationException::withMessages([
+                'email' => 'GraceSoft Desk supports only one admin account.',
+            ]);
+        }
+
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
