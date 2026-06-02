@@ -109,6 +109,8 @@
                                                 class="text-blue-600 hover:text-blue-800">{{ __('Preview') }}</a>
                                             <a href="{{ route('documents.download', $document) }}"
                                                 class="text-indigo-600 hover:text-indigo-800">{{ __('Download') }}</a>
+                                            <a href="{{ route('documents.edit', $document) }}"
+                                                class="text-gray-600 hover:text-gray-900">{{ __('Edit') }}</a>
                                             <form method="POST" action="{{ route('documents.destroy', $document) }}"
                                                 class="inline"
                                                 onsubmit="return confirm('{{ __('Delete this document? This cannot be undone.') }}')">

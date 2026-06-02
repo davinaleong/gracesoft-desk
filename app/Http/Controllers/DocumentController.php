@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDocumentRequest;
+use App\Http\Requests\UpdateDocumentRequest;
 use App\Models\Document;
 use App\Models\Project;
 use App\Models\TimeEntry;
@@ -95,6 +96,22 @@ class DocumentController extends Controller
         return redirect()
             ->route('documents.index')
             ->with('status', 'document-uploaded');
+    }
+
+    public function edit(Document $document): View
+    {
+        return view('documents.edit', [
+            'document' => $document,
+        ]);
+    }
+
+    public function update(UpdateDocumentRequest $request, Document $document): RedirectResponse
+    {
+        $document->update(['name' => $request->string('name')->toString()]);
+
+        return redirect()
+            ->route('documents.index')
+            ->with('status', 'document-updated');
     }
 
     public function download(Document $document): RedirectResponse

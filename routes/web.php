@@ -60,6 +60,8 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
 
     Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
     Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
+    Route::get('/documents/{document}/edit', [DocumentController::class, 'edit'])->name('documents.edit');
+    Route::put('/documents/{document}', [DocumentController::class, 'update'])->name('documents.update');
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
     Route::get('/documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
     Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');

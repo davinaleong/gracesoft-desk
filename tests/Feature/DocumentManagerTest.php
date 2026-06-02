@@ -229,3 +229,43 @@ test('time entry show page displays linked documents', function () {
         ->assertOk()
         ->assertSee('timesheet-export.pdf');
 });
+
+test('document name can be updated', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $document = Document::factory()->create(['name' => 'old-name.pdf', 'user_id' => $user->id]);
+    Storage::disk('s3')->put($document->path, 'dummy');
+
+    $this->actingAs($user)
+        ->put(route('documents.update', $document), ['name' => 'new-name.pdf'])
+        ->assertRedirect(route('documents.index'))
+        ->assertSessionHas('status', 'document-updated');
+
+    expect($document->fresh()->name)->toBe('new-name.pdf');
+});
+
+test('document edit page is accessible', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $document = Document::factory()->create(['name' => 'test.pdf', 'user_id' => $user->id]);
+    Storage::disk('s3')->put($document->path, 'dummy');
+
+    $this->actingAs($user)
+        ->get(route('documents.edit', $document))
+        ->assertOk()
+        ->assertSee('test.pdf');
+});
+
+test('document name update requires a name', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForDocuments();
+    $document = Document::factory()->create(['name' => 'test.pdf', 'user_id' => $user->id]);
+    Storage::disk('s3')->put($document->path, 'dummy');
+
+    $this->actingAs($user)
+        ->put(route('documents.update', $document), ['name' => ''])
+        ->assertSessionHasErrors('name');
+});
