@@ -6,10 +6,12 @@ use App\Models\Account;
 use App\Models\PaymentMethod;
 use App\Models\Project;
 use App\Models\ProjectStage;
+use App\Models\Service;
 use App\Models\TimeEntry;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\User;
+use App\Models\Vendor;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -31,6 +33,20 @@ class MarketingDemoSeeder extends Seeder
             ->where('transaction_code', 'like', 'DEMO-TRX-%')
             ->forceDelete();
 
+        Service::query()
+            ->whereHas('vendor', fn ($q) => $q->whereIn('name', [
+                'Singtel', 'Amazon Web Services', 'Adobe', 'Cloudflare',
+                'GitHub', 'Figma', 'Postmark', 'Notion',
+            ]))
+            ->forceDelete();
+
+        Vendor::query()
+            ->whereIn('name', [
+                'Singtel', 'Amazon Web Services', 'Adobe', 'Cloudflare',
+                'GitHub', 'Figma', 'Postmark', 'Notion',
+            ])
+            ->forceDelete();
+
         $stagesByName = $this->seedProjectStages();
         $categoriesBySlug = $this->seedTransactionCategories();
         $methodsBySlug = $this->seedPaymentMethods();
@@ -40,6 +56,7 @@ class MarketingDemoSeeder extends Seeder
         $this->seedTimeEntries($projectsByCode, $stagesByName);
         $this->seedTransactions($projectsByCode, $categoriesBySlug, $methodsBySlug, $accountsByCode);
         $this->syncAccountBalances();
+        $this->seedVendorsAndServices();
     }
 
     private function seedAdminUser(): void
@@ -583,6 +600,127 @@ class MarketingDemoSeeder extends Seeder
                     'gst_amount' => $transaction['gst'],
                 ]
             );
+        }
+    }
+
+    private function seedVendorsAndServices(): void
+    {
+        $vendors = [
+            [
+                'name' => 'Singtel',
+                'category' => 'telco',
+                'website' => 'https://www.singtel.com',
+                'support_url' => 'https://www.singtel.com/personal/support',
+                'account_number' => 'SGL-8821-CORP',
+                'status' => 'active',
+                'notes' => 'Primary telco for mobile and broadband.',
+                'services' => [
+                    ['name' => 'Mobile Plan', 'plan' => 'XO 30', 'category' => 'communication', 'status' => 'active'],
+                    ['name' => 'Broadband', 'plan' => 'Home Fibre 2Gbps', 'category' => 'communication', 'status' => 'active'],
+                ],
+            ],
+            [
+                'name' => 'Amazon Web Services',
+                'category' => 'cloud',
+                'website' => 'https://aws.amazon.com',
+                'support_url' => 'https://aws.amazon.com/support',
+                'account_number' => 'AWS-ACC-441200',
+                'status' => 'active',
+                'notes' => 'Primary cloud infrastructure provider. Billing via consolidated invoice.',
+                'services' => [
+                    ['name' => 'S3 Storage', 'plan' => 'Pay-as-you-go', 'category' => 'storage', 'status' => 'active'],
+                    ['name' => 'EC2 Compute', 'plan' => 'On-Demand', 'category' => 'dev_tools', 'status' => 'active'],
+                    ['name' => 'SES Email', 'plan' => 'Pay-as-you-go', 'category' => 'communication', 'status' => 'active'],
+                    ['name' => 'CloudFront CDN', 'plan' => 'Pay-as-you-go', 'category' => 'security', 'status' => 'active'],
+                ],
+            ],
+            [
+                'name' => 'Adobe',
+                'category' => 'saas',
+                'website' => 'https://www.adobe.com',
+                'support_url' => 'https://helpx.adobe.com',
+                'account_number' => null,
+                'status' => 'active',
+                'notes' => 'Creative tools subscription for design team.',
+                'services' => [
+                    ['name' => 'Creative Cloud', 'plan' => 'All Apps', 'category' => 'design', 'status' => 'active'],
+                ],
+            ],
+            [
+                'name' => 'Cloudflare',
+                'category' => 'cloud',
+                'website' => 'https://www.cloudflare.com',
+                'support_url' => 'https://support.cloudflare.com',
+                'account_number' => null,
+                'status' => 'active',
+                'notes' => 'DNS, CDN and edge security for all production domains.',
+                'services' => [
+                    ['name' => 'DNS & CDN', 'plan' => 'Free', 'category' => 'security', 'status' => 'active'],
+                    ['name' => 'R2 Storage', 'plan' => 'Pay-as-you-go', 'category' => 'storage', 'status' => 'active'],
+                    ['name' => 'Zero Trust Access', 'plan' => 'Teams Free', 'category' => 'security', 'status' => 'active'],
+                ],
+            ],
+            [
+                'name' => 'GitHub',
+                'category' => 'saas',
+                'website' => 'https://github.com',
+                'support_url' => 'https://support.github.com',
+                'account_number' => null,
+                'status' => 'active',
+                'notes' => 'Source control and CI/CD for all engineering projects.',
+                'services' => [
+                    ['name' => 'Copilot', 'plan' => 'Individual', 'category' => 'dev_tools', 'status' => 'active'],
+                    ['name' => 'Actions', 'plan' => 'Free Tier', 'category' => 'dev_tools', 'status' => 'active'],
+                    ['name' => 'Advanced Security', 'plan' => 'Add-on', 'category' => 'security', 'status' => 'paused'],
+                ],
+            ],
+            [
+                'name' => 'Figma',
+                'category' => 'saas',
+                'website' => 'https://www.figma.com',
+                'support_url' => 'https://help.figma.com',
+                'account_number' => null,
+                'status' => 'active',
+                'notes' => 'Primary design and prototyping tool.',
+                'services' => [
+                    ['name' => 'Figma Professional', 'plan' => 'Professional', 'category' => 'design', 'status' => 'active'],
+                ],
+            ],
+            [
+                'name' => 'Postmark',
+                'category' => 'saas',
+                'website' => 'https://postmarkapp.com',
+                'support_url' => 'https://postmarkapp.com/support',
+                'account_number' => null,
+                'status' => 'active',
+                'notes' => 'Transactional email delivery for all Laravel apps.',
+                'services' => [
+                    ['name' => 'Transactional Email', 'plan' => '10k/month', 'category' => 'communication', 'status' => 'active'],
+                ],
+            ],
+            [
+                'name' => 'Notion',
+                'category' => 'saas',
+                'website' => 'https://www.notion.so',
+                'support_url' => 'https://www.notion.so/help',
+                'account_number' => null,
+                'status' => 'inactive',
+                'notes' => 'Previously used for internal knowledge base. Migrated to Confluence.',
+                'services' => [
+                    ['name' => 'Team Workspace', 'plan' => 'Plus', 'category' => 'productivity', 'status' => 'cancelled'],
+                ],
+            ],
+        ];
+
+        foreach ($vendors as $vendorData) {
+            $services = $vendorData['services'];
+            unset($vendorData['services']);
+
+            $vendor = Vendor::query()->create($vendorData);
+
+            foreach ($services as $serviceData) {
+                $vendor->services()->create($serviceData);
+            }
         }
     }
 
