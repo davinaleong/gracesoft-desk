@@ -27,6 +27,14 @@
                     <x-nav-link :href="route('settings.system.edit')" :active="request()->routeIs('settings.system.*')">{{ __('System Settings') }}</x-nav-link>
                 </div>
             </div>
+
+            <div class="space-y-2 p-6 pt-0">
+                <h2 class="text-xs font-bold uppercase tracking-wide text-indigo-300">{{ __('Registry') }}</h2>
+                <div class="space-y-1 text-sm">
+                    <x-nav-link :href="route('vendors.index')" :active="request()->routeIs('vendors.*')">{{ __('Vendors') }}</x-nav-link>
+                    <x-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">{{ __('Services') }}</x-nav-link>
+                </div>
+            </div>
         </div>
 
         <footer class="space-y-3 border-t border-indigo-500 p-6 text-sm">
@@ -53,6 +61,8 @@
             <x-responsive-nav-link :href="route('reports.finance')" :active="request()->routeIs('reports.*')">{{ __('Reports') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('settings.system.edit')"
                 :active="request()->routeIs('settings.system.*')">{{ __('System Settings') }}</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('vendors.index')" :active="request()->routeIs('vendors.*')">{{ __('Vendors') }}</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">{{ __('Services') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('profile.edit')">{{ __('Profile') }}</x-responsive-nav-link>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

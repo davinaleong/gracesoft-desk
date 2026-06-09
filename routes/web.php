@@ -7,11 +7,13 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectImportController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportExportController;
+use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\TimeEntryController;
 use App\Http\Controllers\TimeEntryImportController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionImportController;
+use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -66,6 +68,9 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
     Route::get('/documents/{document}/preview', [DocumentController::class, 'preview'])->name('documents.preview');
     Route::delete('/documents/{document}', [DocumentController::class, 'destroy'])->name('documents.destroy');
+
+    Route::resource('vendors', VendorController::class);
+    Route::resource('services', ServiceController::class);
 });
 
 Route::middleware('auth')->group(function () {
