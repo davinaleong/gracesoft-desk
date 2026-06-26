@@ -5,6 +5,7 @@ use App\Models\ProjectStage;
 use App\Models\TimeEntry;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 function readyUserForTimeEntriesImport(): User
 {
@@ -35,6 +36,8 @@ test('time entries import template csv can be downloaded', function () {
 });
 
 test('time entries csv can be previewed and committed with uuid-aware mapping', function () {
+    Storage::fake('s3');
+
     $user = readyUserForTimeEntriesImport();
 
     $project = Project::query()->create([
@@ -70,10 +73,16 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
 
     expect(session('time_entries_import_rows'))->toBeArray()->toHaveCount(2);
 
+    $csvPath = session('time_entries_import_csv_path');
+    expect($csvPath)->toBeString()->toStartWith('imports/time-entries/');
+    Storage::disk('s3')->assertExists($csvPath);
+
     $commitResponse = $this->actingAs($user)
         ->post(route('time-entries.import.commit'));
 
     $commitResponse->assertRedirect(route('time-entries.index'));
+
+    Storage::disk('s3')->assertMissing($csvPath);
 
     expect(TimeEntry::query()->count())->toBe(2)
         ->and(TimeEntry::query()->where('notes', 'Imported from UUID mapping')->exists())->toBeTrue()
@@ -88,6 +97,8 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
 });
 
 test('time entries csv resolves stage name from canonical global stages', function () {
+    Storage::fake('s3');
+
     $user = readyUserForTimeEntriesImport();
 
     $project = Project::query()->create([
@@ -124,15 +135,59 @@ test('time entries csv resolves stage name from canonical global stages', functi
 
     expect(session('time_entries_import_rows'))->toBeArray()->toHaveCount(1);
 
+    $csvPath = session('time_entries_import_csv_path');
+    Storage::disk('s3')->assertExists($csvPath);
+
     $commitResponse = $this->actingAs($user)
         ->post(route('time-entries.import.commit'));
 
     $commitResponse->assertRedirect(route('time-entries.index'));
 
+    Storage::disk('s3')->assertMissing($csvPath);
+
     $importedRow = TimeEntry::query()->where('notes', 'Imported using global stage fallback')->firstOrFail();
 
     expect($importedRow->project_id)->toBe($project->id)
         ->and($importedRow->stage?->name)->toBe($globalStage->name);
+});
+
+test('re-uploading csv for preview removes the previous file from s3', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForTimeEntriesImport();
+
+    $project = Project::query()->create([
+        'code' => 'PRJ-TIM-003',
+        'name' => 'Re-upload Project',
+        'status' => 'active',
+        'is_billable' => true,
+    ]);
+
+    $csvContent = implode("\n", [
+        'project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes',
+        ',PRJ-TIM-003,,,2026-05-08,45,no,,First upload',
+    ]);
+
+    $firstFile = UploadedFile::fake()->createWithContent('first.csv', $csvContent);
+
+    $this->actingAs($user)
+        ->post(route('time-entries.import.preview'), ['csv_file' => $firstFile])
+        ->assertOk();
+
+    $firstPath = session('time_entries_import_csv_path');
+    Storage::disk('s3')->assertExists($firstPath);
+
+    $secondFile = UploadedFile::fake()->createWithContent('second.csv', $csvContent);
+
+    $this->actingAs($user)
+        ->post(route('time-entries.import.preview'), ['csv_file' => $secondFile])
+        ->assertOk();
+
+    $secondPath = session('time_entries_import_csv_path');
+
+    Storage::disk('s3')->assertMissing($firstPath);
+    Storage::disk('s3')->assertExists($secondPath);
+    expect($secondPath)->not()->toBe($firstPath);
 });
 
 test('time entries import routes require authentication', function () {

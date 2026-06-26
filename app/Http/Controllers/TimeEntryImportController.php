@@ -9,7 +9,9 @@ use App\Models\TimeEntry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -40,7 +42,17 @@ class TimeEntryImportController extends Controller
 
     public function preview(ImportTimeEntriesCsvRequest $request): View
     {
-        $parsed = $this->parseCsv($request->file('csv_file'));
+        $previousPath = $request->session()->get('time_entries_import_csv_path');
+        if (is_string($previousPath) && $previousPath !== '') {
+            Storage::disk('s3')->delete($previousPath);
+        }
+
+        $file = $request->file('csv_file');
+        $storagePath = 'imports/time-entries/'.Str::uuid().'.csv';
+        Storage::disk('s3')->put($storagePath, file_get_contents($file->getRealPath()));
+        $request->session()->put('time_entries_import_csv_path', $storagePath);
+
+        $parsed = $this->parseCsv($file);
         $references = $this->buildReferences($parsed['valid_rows']);
 
         return view('time-entries.import-preview', [
@@ -70,7 +82,12 @@ class TimeEntryImportController extends Controller
             $createdCount++;
         }
 
-        $request->session()->forget('time_entries_import_rows');
+        $csvPath = $request->session()->get('time_entries_import_csv_path');
+        if (is_string($csvPath) && $csvPath !== '') {
+            Storage::disk('s3')->delete($csvPath);
+        }
+
+        $request->session()->forget(['time_entries_import_rows', 'time_entries_import_csv_path']);
 
         return redirect()
             ->route('time-entries.index')
