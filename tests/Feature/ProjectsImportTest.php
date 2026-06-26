@@ -3,6 +3,7 @@
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 function readyUserForProjectsImport(): User
 {
@@ -33,6 +34,8 @@ test('projects import template csv can be downloaded', function () {
 });
 
 test('projects csv can be previewed and committed by code mapping while ignoring id columns', function () {
+    Storage::fake('s3');
+
     $user = readyUserForProjectsImport();
 
     Project::query()->create([
@@ -59,10 +62,16 @@ test('projects csv can be previewed and committed by code mapping while ignoring
 
     expect(session('projects_import_rows'))->toBeArray()->toHaveCount(2);
 
+    $csvPath = session('projects_import_csv_path');
+    expect($csvPath)->toBeString()->toStartWith('imports/projects/');
+    Storage::disk('s3')->assertExists($csvPath);
+
     $commitResponse = $this->actingAs($user)
         ->post(route('projects.import.commit'));
 
     $commitResponse->assertRedirect(route('projects.index'));
+
+    Storage::disk('s3')->assertMissing($csvPath);
 
     $updatedProject = Project::query()->where('code', 'PRJ-IMP-001')->firstOrFail();
     $newProject = Project::query()->where('code', 'PRJ-IMP-002')->firstOrFail();
@@ -73,6 +82,38 @@ test('projects csv can be previewed and committed by code mapping while ignoring
         ->and($newProject->name)->toBe('Imported New Project')
         ->and($newProject->is_billable)->toBeFalse()
         ->and($newProject->uuid)->not()->toBe('22222222-2222-2222-2222-222222222222');
+});
+
+test('re-uploading projects csv for preview removes the previous file from s3', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForProjectsImport();
+
+    $csvContent = implode("\n", [
+        'code,name,status,is_billable',
+        'PRJ-REUP-001,Re-upload Project,active,yes',
+    ]);
+
+    $firstFile = UploadedFile::fake()->createWithContent('first.csv', $csvContent);
+
+    $this->actingAs($user)
+        ->post(route('projects.import.preview'), ['csv_file' => $firstFile])
+        ->assertOk();
+
+    $firstPath = session('projects_import_csv_path');
+    Storage::disk('s3')->assertExists($firstPath);
+
+    $secondFile = UploadedFile::fake()->createWithContent('second.csv', $csvContent);
+
+    $this->actingAs($user)
+        ->post(route('projects.import.preview'), ['csv_file' => $secondFile])
+        ->assertOk();
+
+    $secondPath = session('projects_import_csv_path');
+
+    Storage::disk('s3')->assertMissing($firstPath);
+    Storage::disk('s3')->assertExists($secondPath);
+    expect($secondPath)->not()->toBe($firstPath);
 });
 
 test('projects import routes require authentication', function () {

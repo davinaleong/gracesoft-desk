@@ -7,7 +7,9 @@ use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -38,7 +40,17 @@ class ProjectImportController extends Controller
 
     public function preview(ImportProjectsCsvRequest $request): View
     {
-        $parsed = $this->parseCsv($request->file('csv_file'));
+        $previousPath = $request->session()->get('projects_import_csv_path');
+        if (is_string($previousPath) && $previousPath !== '') {
+            Storage::disk('s3')->delete($previousPath);
+        }
+
+        $file = $request->file('csv_file');
+        $storagePath = 'imports/projects/'.Str::uuid().'.csv';
+        Storage::disk('s3')->put($storagePath, file_get_contents($file->getRealPath()));
+        $request->session()->put('projects_import_csv_path', $storagePath);
+
+        $parsed = $this->parseCsv($file);
 
         return view('projects.import-preview', [
             'headers' => $parsed['headers'],
@@ -73,7 +85,12 @@ class ProjectImportController extends Controller
             }
         }
 
-        $request->session()->forget('projects_import_rows');
+        $csvPath = $request->session()->get('projects_import_csv_path');
+        if (is_string($csvPath) && $csvPath !== '') {
+            Storage::disk('s3')->delete($csvPath);
+        }
+
+        $request->session()->forget(['projects_import_rows', 'projects_import_csv_path']);
 
         return redirect()
             ->route('projects.index')

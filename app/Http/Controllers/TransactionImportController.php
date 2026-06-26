@@ -12,7 +12,9 @@ use App\Support\TransactionIntegrity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -43,7 +45,17 @@ class TransactionImportController extends Controller
 
     public function preview(ImportTransactionsCsvRequest $request): View
     {
-        $parsed = $this->parseCsv($request->file('csv_file'));
+        $previousPath = $request->session()->get('transactions_import_csv_path');
+        if (is_string($previousPath) && $previousPath !== '') {
+            Storage::disk('s3')->delete($previousPath);
+        }
+
+        $file = $request->file('csv_file');
+        $storagePath = 'imports/transactions/'.Str::uuid().'.csv';
+        Storage::disk('s3')->put($storagePath, file_get_contents($file->getRealPath()));
+        $request->session()->put('transactions_import_csv_path', $storagePath);
+
+        $parsed = $this->parseCsv($file);
 
         return view('transactions.import-preview', [
             'headers' => $parsed['headers'],
@@ -78,7 +90,12 @@ class TransactionImportController extends Controller
             }
         }
 
-        $request->session()->forget('transactions_import_rows');
+        $csvPath = $request->session()->get('transactions_import_csv_path');
+        if (is_string($csvPath) && $csvPath !== '') {
+            Storage::disk('s3')->delete($csvPath);
+        }
+
+        $request->session()->forget(['transactions_import_rows', 'transactions_import_csv_path']);
 
         return redirect()
             ->route('transactions.index')

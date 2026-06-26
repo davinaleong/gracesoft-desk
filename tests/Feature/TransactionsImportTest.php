@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 function readyUserForTransactionsImport(): User
 {
@@ -75,6 +76,8 @@ test('transactions import template csv can be downloaded', function () {
 });
 
 test('transactions csv can be previewed and committed with transaction code upsert and uuid mapping', function () {
+    Storage::fake('s3');
+
     $user = readyUserForTransactionsImport();
     $dependencies = transactionImportDependencies();
 
@@ -112,10 +115,16 @@ test('transactions csv can be previewed and committed with transaction code upse
 
     expect(session('transactions_import_rows'))->toBeArray()->toHaveCount(2);
 
+    $csvPath = session('transactions_import_csv_path');
+    expect($csvPath)->toBeString()->toStartWith('imports/transactions/');
+    Storage::disk('s3')->assertExists($csvPath);
+
     $commitResponse = $this->actingAs($user)
         ->post(route('transactions.import.commit'));
 
     $commitResponse->assertRedirect(route('transactions.index'));
+
+    Storage::disk('s3')->assertMissing($csvPath);
 
     expect(Transaction::query()->count())->toBe(2)
         ->and(Transaction::query()->where('transaction_code', 'TRX-IMPORT-001')->exists())->toBeTrue()
@@ -133,7 +142,42 @@ test('transactions csv can be previewed and committed with transaction code upse
         ->and($created->project_id)->toBe($dependencies['project']->id);
 });
 
+test('re-uploading transactions csv for preview removes the previous file from s3', function () {
+    Storage::fake('s3');
+
+    $user = readyUserForTransactionsImport();
+    $dependencies = transactionImportDependencies();
+
+    $csvContent = implode("\n", [
+        'account_code,type,direction,status,transaction_date,amount,gst_amount',
+        $dependencies['account']->code.',expense,out,completed,2026-05-08,100,0',
+    ]);
+
+    $firstFile = UploadedFile::fake()->createWithContent('first.csv', $csvContent);
+
+    $this->actingAs($user)
+        ->post(route('transactions.import.preview'), ['csv_file' => $firstFile])
+        ->assertOk();
+
+    $firstPath = session('transactions_import_csv_path');
+    Storage::disk('s3')->assertExists($firstPath);
+
+    $secondFile = UploadedFile::fake()->createWithContent('second.csv', $csvContent);
+
+    $this->actingAs($user)
+        ->post(route('transactions.import.preview'), ['csv_file' => $secondFile])
+        ->assertOk();
+
+    $secondPath = session('transactions_import_csv_path');
+
+    Storage::disk('s3')->assertMissing($firstPath);
+    Storage::disk('s3')->assertExists($secondPath);
+    expect($secondPath)->not()->toBe($firstPath);
+});
+
 test('transactions import preview rejects rows that violate money in and gst integrity rules', function () {
+    Storage::fake('s3');
+
     $user = readyUserForTransactionsImport();
     $dependencies = transactionImportDependencies();
 
