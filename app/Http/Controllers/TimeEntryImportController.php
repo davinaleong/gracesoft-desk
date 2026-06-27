@@ -57,6 +57,7 @@ class TimeEntryImportController extends Controller
         $references = $this->buildReferences($parsed['valid_rows']);
 
         return view('time-entries.import-preview', [
+            'csvPath' => $storagePath,
             'headers' => $parsed['headers'],
             'validRows' => $parsed['valid_rows'],
             'invalidRows' => $parsed['invalid_rows'],
@@ -76,8 +77,10 @@ class TimeEntryImportController extends Controller
                 ->with('status', 'No import data found. Please upload and preview a CSV file first.');
         }
 
+        $csvPath = (string) $request->input('csv_path', '');
+
         if ($validRows === []) {
-            $this->cleanupImportSession($request);
+            $this->cleanupCsvFromS3($csvPath);
 
             return redirect()
                 ->route('time-entries.import.create')
@@ -95,7 +98,7 @@ class TimeEntryImportController extends Controller
             });
         }
 
-        $this->cleanupImportSession($request);
+        $this->cleanupCsvFromS3($csvPath);
 
         return redirect()
             ->route('time-entries.index')
@@ -103,22 +106,22 @@ class TimeEntryImportController extends Controller
     }
 
     /**
-     * Returns valid rows from session (fast path) or by re-parsing from S3 (fallback).
-     * Returns null if no import context exists at all.
+     * Resolves valid rows by downloading and re-parsing the CSV from S3.
+     * The S3 path is submitted via a hidden form field — no session dependency.
+     * Returns null if the path is missing, invalid, or the S3 file is gone.
      *
      * @return array<int, array<string, mixed>>|null
      */
     private function resolveImportRows(Request $request): ?array
     {
-        $sessionRows = $request->session()->get('time_entries_import_rows');
-
-        if (is_array($sessionRows) && $sessionRows !== []) {
-            return $sessionRows;
-        }
-
-        $csvPath = $request->session()->get('time_entries_import_csv_path');
+        $csvPath = $request->input('csv_path');
 
         if (! is_string($csvPath) || $csvPath === '') {
+            return null;
+        }
+
+        // Restrict to the expected S3 prefix to prevent arbitrary file access.
+        if (! str_starts_with($csvPath, 'imports/time-entries/')) {
             return null;
         }
 
@@ -147,15 +150,11 @@ class TimeEntryImportController extends Controller
         return $parsed['valid_rows'];
     }
 
-    private function cleanupImportSession(Request $request): void
+    private function cleanupCsvFromS3(string $csvPath): void
     {
-        $csvPath = $request->session()->get('time_entries_import_csv_path');
-
-        if (is_string($csvPath) && $csvPath !== '') {
+        if (str_starts_with($csvPath, 'imports/time-entries/')) {
             Storage::disk('s3')->delete($csvPath);
         }
-
-        $request->session()->forget(['time_entries_import_rows', 'time_entries_import_csv_path']);
     }
 
     /**

@@ -76,7 +76,7 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
     Storage::disk('s3')->assertExists($csvPath);
 
     $commitResponse = $this->actingAs($user)
-        ->post(route('time-entries.import.commit'));
+        ->post(route('time-entries.import.commit'), ['csv_path' => $csvPath]);
 
     $commitResponse->assertRedirect(route('time-entries.index'));
 
@@ -135,7 +135,7 @@ test('time entries csv resolves stage name from canonical global stages', functi
     Storage::disk('s3')->assertExists($csvPath);
 
     $commitResponse = $this->actingAs($user)
-        ->post(route('time-entries.import.commit'));
+        ->post(route('time-entries.import.commit'), ['csv_path' => $csvPath]);
 
     $commitResponse->assertRedirect(route('time-entries.index'));
 
