@@ -9,6 +9,7 @@ use App\Models\TimeEntry;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -67,31 +68,94 @@ class TimeEntryImportController extends Controller
 
     public function commit(Request $request): RedirectResponse
     {
-        $rows = $request->session()->get('time_entries_import_rows', []);
+        $validRows = $this->resolveImportRows($request);
 
-        if (! is_array($rows) || $rows === []) {
+        if ($validRows === null) {
             return redirect()
                 ->route('time-entries.import.create')
-                ->with('status', 'No import data found. Upload and preview a CSV file first.');
+                ->with('status', 'No import data found. Please upload and preview a CSV file first.');
+        }
+
+        if ($validRows === []) {
+            $this->cleanupImportSession($request);
+
+            return redirect()
+                ->route('time-entries.import.create')
+                ->with('status', 'No valid rows found in the import file.');
         }
 
         $createdCount = 0;
 
-        foreach ($rows as $row) {
-            TimeEntry::query()->create($row);
-            $createdCount++;
+        foreach (array_chunk($validRows, 50) as $chunk) {
+            DB::transaction(function () use ($chunk, &$createdCount): void {
+                foreach ($chunk as $row) {
+                    TimeEntry::query()->create($row);
+                    $createdCount++;
+                }
+            });
+        }
+
+        $this->cleanupImportSession($request);
+
+        return redirect()
+            ->route('time-entries.index')
+            ->with('status', sprintf('Time entries import completed. Created: %d.', $createdCount));
+    }
+
+    /**
+     * Returns valid rows from session (fast path) or by re-parsing from S3 (fallback).
+     * Returns null if no import context exists at all.
+     *
+     * @return array<int, array<string, mixed>>|null
+     */
+    private function resolveImportRows(Request $request): ?array
+    {
+        $sessionRows = $request->session()->get('time_entries_import_rows');
+
+        if (is_array($sessionRows) && $sessionRows !== []) {
+            return $sessionRows;
         }
 
         $csvPath = $request->session()->get('time_entries_import_csv_path');
+
+        if (! is_string($csvPath) || $csvPath === '') {
+            return null;
+        }
+
+        if (! Storage::disk('s3')->exists($csvPath)) {
+            return null;
+        }
+
+        $csvContents = Storage::disk('s3')->get($csvPath);
+
+        if (! is_string($csvContents) || $csvContents === '') {
+            return null;
+        }
+
+        $handle = fopen('php://temp', 'r+');
+
+        if ($handle === false) {
+            return null;
+        }
+
+        fwrite($handle, $csvContents);
+        rewind($handle);
+
+        $parsed = $this->parseFromHandle($handle);
+        fclose($handle);
+
+        return $parsed['valid_rows'];
+    }
+
+    private function cleanupImportSession(Request $request): void
+    {
+        $csvPath = $request->session()->get('time_entries_import_csv_path');
+
         if (is_string($csvPath) && $csvPath !== '') {
             Storage::disk('s3')->delete($csvPath);
         }
 
         $request->session()->forget(['time_entries_import_rows', 'time_entries_import_csv_path']);
-
-        return redirect()
-            ->route('time-entries.index')
-            ->with('status', sprintf('Time entries import completed. Created: %d.', $createdCount));
     }
 
     /**
@@ -120,6 +184,19 @@ class TimeEntryImportController extends Controller
             ];
         }
 
+        return $this->parseFromPath($path);
+    }
+
+    /**
+     * @return array{
+     *     headers: array<int, string>,
+     *     valid_rows: array<int, array<string, mixed>>,
+     *     invalid_rows: array<int, array<string, mixed>>,
+     *     missing_headers: array<int, string>
+     * }
+     */
+    private function parseFromPath(string $path): array
+    {
         $handle = fopen($path, 'rb');
 
         if ($handle === false) {
@@ -135,6 +212,25 @@ class TimeEntryImportController extends Controller
             ];
         }
 
+        $parsed = $this->parseFromHandle($handle);
+        fclose($handle);
+
+        request()->session()->put('time_entries_import_rows', $parsed['valid_rows']);
+
+        return $parsed;
+    }
+
+    /**
+     * @param  resource  $handle
+     * @return array{
+     *     headers: array<int, string>,
+     *     valid_rows: array<int, array<string, mixed>>,
+     *     invalid_rows: array<int, array<string, mixed>>,
+     *     missing_headers: array<int, string>
+     * }
+     */
+    private function parseFromHandle($handle): array
+    {
         $headerRow = fgetcsv($handle) ?: [];
         $headers = array_map(fn ($value): string => strtolower(trim((string) $value)), $headerRow);
 
@@ -222,10 +318,6 @@ class TimeEntryImportController extends Controller
 
             $validRows[] = $validator->validated();
         }
-
-        fclose($handle);
-
-        request()->session()->put('time_entries_import_rows', $validRows);
 
         return [
             'headers' => $headers,

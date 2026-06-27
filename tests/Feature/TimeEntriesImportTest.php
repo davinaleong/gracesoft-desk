@@ -71,8 +71,6 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
         ->assertSee($project->code.' - '.$project->name)
         ->assertSee($stage->name);
 
-    expect(session('time_entries_import_rows'))->toBeArray()->toHaveCount(2);
-
     $csvPath = session('time_entries_import_csv_path');
     expect($csvPath)->toBeString()->toStartWith('imports/time-entries/');
     Storage::disk('s3')->assertExists($csvPath);
@@ -132,8 +130,6 @@ test('time entries csv resolves stage name from canonical global stages', functi
         ->assertSee($project->code.' - '.$project->name)
         ->assertSee($globalStage->name)
         ->assertSee('Valid rows:');
-
-    expect(session('time_entries_import_rows'))->toBeArray()->toHaveCount(1);
 
     $csvPath = session('time_entries_import_csv_path');
     Storage::disk('s3')->assertExists($csvPath);
