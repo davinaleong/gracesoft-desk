@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ImportTimeEntriesCsvRequest;
+use App\Models\ImportBatch;
 use App\Models\Project;
 use App\Models\ProjectStage;
 use App\Models\TimeEntry;
@@ -43,21 +44,41 @@ class TimeEntryImportController extends Controller
 
     public function preview(ImportTimeEntriesCsvRequest $request): View
     {
-        $previousPath = $request->session()->get('time_entries_import_csv_path');
-        if (is_string($previousPath) && $previousPath !== '') {
-            Storage::disk('s3')->delete($previousPath);
+        $userId = $request->user()?->id;
+
+        // Delete old pending batches for this user+type (and their S3 files)
+        $oldBatches = ImportBatch::query()
+            ->where('user_id', $userId)
+            ->where('type', 'time_entries')
+            ->get();
+
+        foreach ($oldBatches as $oldBatch) {
+            if (is_string($oldBatch->csv_s3_path) && $oldBatch->csv_s3_path !== '') {
+                Storage::disk('s3')->delete($oldBatch->csv_s3_path);
+            }
+            $oldBatch->delete();
         }
 
         $file = $request->file('csv_file');
         $storagePath = 'imports/time-entries/'.Str::uuid().'.csv';
         Storage::disk('s3')->put($storagePath, file_get_contents($file->getRealPath()));
-        $request->session()->put('time_entries_import_csv_path', $storagePath);
 
         $parsed = $this->parseCsv($file);
         $references = $this->buildReferences($parsed['valid_rows']);
 
+        $batch = ImportBatch::query()->create([
+            'token' => (string) Str::uuid(),
+            'type' => 'time_entries',
+            'user_id' => $userId,
+            'csv_s3_path' => $storagePath,
+            'valid_rows' => $parsed['valid_rows'],
+            'invalid_rows' => $parsed['invalid_rows'],
+            'status' => 'pending',
+            'expires_at' => now()->addHours(2),
+        ]);
+
         return view('time-entries.import-preview', [
-            'csvPath' => $storagePath,
+            'token' => $batch->token,
             'headers' => $parsed['headers'],
             'validRows' => $parsed['valid_rows'],
             'invalidRows' => $parsed['invalid_rows'],
@@ -69,18 +90,28 @@ class TimeEntryImportController extends Controller
 
     public function commit(Request $request): RedirectResponse
     {
-        $validRows = $this->resolveImportRows($request);
+        $token = $request->input('token');
 
-        if ($validRows === null) {
+        $batch = ImportBatch::query()
+            ->where('token', $token)
+            ->where('type', 'time_entries')
+            ->where('status', 'pending')
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if (! $batch) {
             return redirect()
                 ->route('time-entries.import.create')
                 ->with('status', 'No import data found. Please upload and preview a CSV file first.');
         }
 
-        $csvPath = (string) $request->input('csv_path', '');
+        $validRows = $batch->valid_rows ?? [];
 
         if ($validRows === []) {
-            $this->cleanupCsvFromS3($csvPath);
+            if (is_string($batch->csv_s3_path) && $batch->csv_s3_path !== '') {
+                Storage::disk('s3')->delete($batch->csv_s3_path);
+            }
+            $batch->delete();
 
             return redirect()
                 ->route('time-entries.import.create')
@@ -98,63 +129,15 @@ class TimeEntryImportController extends Controller
             });
         }
 
-        $this->cleanupCsvFromS3($csvPath);
+        if (is_string($batch->csv_s3_path) && $batch->csv_s3_path !== '') {
+            Storage::disk('s3')->delete($batch->csv_s3_path);
+        }
+
+        $batch->delete();
 
         return redirect()
             ->route('time-entries.index')
             ->with('status', sprintf('Time entries import completed. Created: %d.', $createdCount));
-    }
-
-    /**
-     * Resolves valid rows by downloading and re-parsing the CSV from S3.
-     * The S3 path is submitted via a hidden form field — no session dependency.
-     * Returns null if the path is missing, invalid, or the S3 file is gone.
-     *
-     * @return array<int, array<string, mixed>>|null
-     */
-    private function resolveImportRows(Request $request): ?array
-    {
-        $csvPath = $request->input('csv_path');
-
-        if (! is_string($csvPath) || $csvPath === '') {
-            return null;
-        }
-
-        // Restrict to the expected S3 prefix to prevent arbitrary file access.
-        if (! str_starts_with($csvPath, 'imports/time-entries/')) {
-            return null;
-        }
-
-        if (! Storage::disk('s3')->exists($csvPath)) {
-            return null;
-        }
-
-        $csvContents = Storage::disk('s3')->get($csvPath);
-
-        if (! is_string($csvContents) || $csvContents === '') {
-            return null;
-        }
-
-        $handle = fopen('php://temp', 'r+');
-
-        if ($handle === false) {
-            return null;
-        }
-
-        fwrite($handle, $csvContents);
-        rewind($handle);
-
-        $parsed = $this->parseFromHandle($handle);
-        fclose($handle);
-
-        return $parsed['valid_rows'];
-    }
-
-    private function cleanupCsvFromS3(string $csvPath): void
-    {
-        if (str_starts_with($csvPath, 'imports/time-entries/')) {
-            Storage::disk('s3')->delete($csvPath);
-        }
     }
 
     /**
@@ -213,8 +196,6 @@ class TimeEntryImportController extends Controller
 
         $parsed = $this->parseFromHandle($handle);
         fclose($handle);
-
-        request()->session()->put('time_entries_import_rows', $parsed['valid_rows']);
 
         return $parsed;
     }

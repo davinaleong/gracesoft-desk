@@ -23,7 +23,7 @@
 
                     <form method="POST" action="{{ route('time-entries.import.commit') }}">
                         @csrf
-                        <input type="hidden" name="csv_path" value="{{ $csvPath }}">
+                        <input type="hidden" name="token" value="{{ $token }}">
                         <x-primary-button :disabled="$validRows === []">{{ __('Commit Import') }}</x-primary-button>
                     </form>
                 </div>

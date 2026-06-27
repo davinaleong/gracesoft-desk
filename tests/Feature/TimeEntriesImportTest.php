@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ImportBatch;
 use App\Models\Project;
 use App\Models\ProjectStage;
 use App\Models\TimeEntry;
@@ -71,16 +72,20 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
         ->assertSee($project->code.' - '.$project->name)
         ->assertSee($stage->name);
 
-    $csvPath = session('time_entries_import_csv_path');
-    expect($csvPath)->toBeString()->toStartWith('imports/time-entries/');
-    Storage::disk('s3')->assertExists($csvPath);
+    $batch = ImportBatch::query()->where('type', 'time_entries')->latest('id')->first();
+    $token = $batch->token;
+
+    expect($batch->csv_s3_path)->toBeString()->toStartWith('imports/time-entries/');
+    Storage::disk('s3')->assertExists($batch->csv_s3_path);
 
     $commitResponse = $this->actingAs($user)
-        ->post(route('time-entries.import.commit'), ['csv_path' => $csvPath]);
+        ->post(route('time-entries.import.commit'), ['token' => $token]);
 
     $commitResponse->assertRedirect(route('time-entries.index'));
 
-    Storage::disk('s3')->assertMissing($csvPath);
+    Storage::disk('s3')->assertMissing($batch->csv_s3_path);
+
+    expect(ImportBatch::query()->count())->toBe(0);
 
     expect(TimeEntry::query()->count())->toBe(2)
         ->and(TimeEntry::query()->where('notes', 'Imported from UUID mapping')->exists())->toBeTrue()
@@ -131,15 +136,15 @@ test('time entries csv resolves stage name from canonical global stages', functi
         ->assertSee($globalStage->name)
         ->assertSee('Valid rows:');
 
-    $csvPath = session('time_entries_import_csv_path');
-    Storage::disk('s3')->assertExists($csvPath);
+    $batch = ImportBatch::query()->where('type', 'time_entries')->latest('id')->first();
+    Storage::disk('s3')->assertExists($batch->csv_s3_path);
 
     $commitResponse = $this->actingAs($user)
-        ->post(route('time-entries.import.commit'), ['csv_path' => $csvPath]);
+        ->post(route('time-entries.import.commit'), ['token' => $batch->token]);
 
     $commitResponse->assertRedirect(route('time-entries.index'));
 
-    Storage::disk('s3')->assertMissing($csvPath);
+    Storage::disk('s3')->assertMissing($batch->csv_s3_path);
 
     $importedRow = TimeEntry::query()->where('notes', 'Imported using global stage fallback')->firstOrFail();
 
@@ -170,7 +175,8 @@ test('re-uploading csv for preview removes the previous file from s3', function 
         ->post(route('time-entries.import.preview'), ['csv_file' => $firstFile])
         ->assertOk();
 
-    $firstPath = session('time_entries_import_csv_path');
+    $firstBatch = ImportBatch::query()->where('type', 'time_entries')->latest('id')->first();
+    $firstPath = $firstBatch->csv_s3_path;
     Storage::disk('s3')->assertExists($firstPath);
 
     $secondFile = UploadedFile::fake()->createWithContent('second.csv', $csvContent);
@@ -179,11 +185,15 @@ test('re-uploading csv for preview removes the previous file from s3', function 
         ->post(route('time-entries.import.preview'), ['csv_file' => $secondFile])
         ->assertOk();
 
-    $secondPath = session('time_entries_import_csv_path');
+    $secondBatch = ImportBatch::query()->where('type', 'time_entries')->latest('id')->first();
+    $secondPath = $secondBatch->csv_s3_path;
 
     Storage::disk('s3')->assertMissing($firstPath);
     Storage::disk('s3')->assertExists($secondPath);
     expect($secondPath)->not()->toBe($firstPath);
+
+    // Old batch record should be deleted
+    expect(ImportBatch::query()->count())->toBe(1);
 });
 
 test('time entries import routes require authentication', function () {
