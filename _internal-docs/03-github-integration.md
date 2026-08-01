@@ -17,10 +17,10 @@
 
 ## Milestone 2: GitHub connection
 
-- [ ] Install/configure Laravel Socialite (GitHub driver)
-- [ ] `github_connections` table (encrypted token storage)
-- [ ] Settings page: "Connect GitHub" / "Disconnect" UI + connection status
-- [ ] Tests: OAuth callback handling, token encryption, disconnect flow
+- [x] Install/configure Laravel Socialite (GitHub driver)
+- [x] `github_connections` table (encrypted token storage)
+- [x] Settings page: "Connect GitHub" / "Disconnect" UI + connection status
+- [x] Tests: OAuth callback handling, token encryption, disconnect flow
 
 ## Milestone 3: Project ↔ Repo linking
 

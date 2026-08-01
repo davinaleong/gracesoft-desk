@@ -6,11 +6,11 @@
 
 ### Findings
 
-| Question | Finding |
-|---|---|
-| Is `time_entries.stage` a free string or FK? | **FK** — `project_stage_id` (nullable) → `project_stages.id`. Already normalised. No backfill needed. |
-| Is `projects.is_billable` a boolean flag or a rate? | **Both.** `is_billable` (boolean) + `hourly_rate` (decimal) exist on `projects` since the 2026-08-01 migration. |
-| Is `billable` on time entries a flag or a computed amount? | **Computed.** `billable_amount = (duration_minutes / 60) × project.hourly_rate`. Stored as `decimal(12,2)`. |
+| Question                                                   | Finding                                                                                                         |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Is `time_entries.stage` a free string or FK?               | **FK** — `project_stage_id` (nullable) → `project_stages.id`. Already normalised. No backfill needed.           |
+| Is `projects.is_billable` a boolean flag or a rate?        | **Both.** `is_billable` (boolean) + `hourly_rate` (decimal) exist on `projects` since the 2026-08-01 migration. |
+| Is `billable` on time entries a flag or a computed amount? | **Computed.** `billable_amount = (duration_minutes / 60) × project.hourly_rate`. Stored as `decimal(12,2)`.     |
 
 ### Key Schema Notes
 
@@ -27,20 +27,20 @@
 
 ### What was built
 
-| File | Notes |
-|---|---|
-| `2026_08_01_082615_add_keywords_and_is_default_to_project_stages_table` | Adds `keywords` (JSON nullable) and `is_default` (boolean, default false) |
-| `app/Models/ProjectStage.php` | Added `keywords`, `is_default` to fillable; casts: `keywords → array`, `is_default → boolean` |
-| `app/Http/Controllers/ProjectStageController.php` | Full CRUD + `moveUp` / `moveDown` for sort_order reordering |
-| `app/Http/Requests/StoreProjectStageRequest.php` | Validates name (unique), status, keywords, is_default |
-| `app/Http/Requests/UpdateProjectStageRequest.php` | Same as Store but ignores current stage on unique check |
-| `resources/views/settings/project-stages/index.blade.php` | List with ▲▼ reorder buttons, keyword tag pills, status badge |
-| `resources/views/settings/project-stages/create.blade.php` | Create form with keyword help text |
-| `resources/views/settings/project-stages/edit.blade.php` | Edit form, keywords pre-populated as comma string |
-| `resources/views/layouts/navigation.blade.php` | "Project Stages" link added under Settings (desktop + mobile) |
-| `resources/views/layouts/app.blade.php` | Flash messages for stage CRUD actions |
-| `routes/web.php` | 8 routes: index, create, store, edit, update, destroy, move-up, move-down |
-| `tests/Feature/ProjectStagesCrudTest.php` | 8 tests: index, create+keywords, keyword normalisation, update, delete-unused, delete-in-use, reorder, auth |
+| File                                                                    | Notes                                                                                                       |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `2026_08_01_082615_add_keywords_and_is_default_to_project_stages_table` | Adds `keywords` (JSON nullable) and `is_default` (boolean, default false)                                   |
+| `app/Models/ProjectStage.php`                                           | Added `keywords`, `is_default` to fillable; casts: `keywords → array`, `is_default → boolean`               |
+| `app/Http/Controllers/ProjectStageController.php`                       | Full CRUD + `moveUp` / `moveDown` for sort_order reordering                                                 |
+| `app/Http/Requests/StoreProjectStageRequest.php`                        | Validates name (unique), status, keywords, is_default                                                       |
+| `app/Http/Requests/UpdateProjectStageRequest.php`                       | Same as Store but ignores current stage on unique check                                                     |
+| `resources/views/settings/project-stages/index.blade.php`               | List with ▲▼ reorder buttons, keyword tag pills, status badge                                               |
+| `resources/views/settings/project-stages/create.blade.php`              | Create form with keyword help text                                                                          |
+| `resources/views/settings/project-stages/edit.blade.php`                | Edit form, keywords pre-populated as comma string                                                           |
+| `resources/views/layouts/navigation.blade.php`                          | "Project Stages" link added under Settings (desktop + mobile)                                               |
+| `resources/views/layouts/app.blade.php`                                 | Flash messages for stage CRUD actions                                                                       |
+| `routes/web.php`                                                        | 8 routes: index, create, store, edit, update, destroy, move-up, move-down                                   |
+| `tests/Feature/ProjectStagesCrudTest.php`                               | 8 tests: index, create+keywords, keyword normalisation, update, delete-unused, delete-in-use, reorder, auth |
 
 ### Design decisions
 
@@ -51,10 +51,41 @@
 
 ---
 
-## Next: Milestone 2 — GitHub Connection
+## Milestone 2 — GitHub Connection ✅
+
+**Completed:** 2026-08-01
+
+### What was built
+
+| File                                                  | Notes                                                                                                                                     |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `laravel/socialite`                                   | Installed via Composer (v5)                                                                                                               |
+| `2026_08_01_101345_create_github_connections_table`   | `user_id` (unique FK), `github_id`, `github_login`, `access_token` (encrypted), `token_scope`, `connected_at`                             |
+| `app/Models/GithubConnection.php`                     | `access_token` cast to `encrypted`; `connected_at` cast to `datetime`; belongs to User                                                    |
+| `app/Models/User.php`                                 | Added `githubConnection()` HasOne relationship                                                                                            |
+| `app/Http/Controllers/GitHubConnectionController.php` | `show`, `redirect`, `callback`, `destroy`                                                                                                 |
+| `resources/views/settings/github/show.blade.php`      | Connected/disconnected states, connection details, disconnect confirm                                                                     |
+| `resources/views/layouts/navigation.blade.php`        | "GitHub" link added under Settings                                                                                                        |
+| `config/services.php`                                 | GitHub driver config (`client_id`, `client_secret`, `redirect`)                                                                           |
+| `.env`                                                | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GITHUB_REDIRECT_URI` placeholders                                                            |
+| `routes/web.php`                                      | `settings.github.show`, `settings.github.redirect`, `settings.github.destroy`, `settings.github.callback`                                 |
+| `tests/Feature/GitHubConnectionTest.php`              | 7 tests: page access, not-connected state, connected state, callback stores connection, callback updates existing, disconnect, auth guard |
+
+### Design decisions
+
+- **Token encrypted at rest** using Laravel's `encrypted` cast — no plaintext token in the DB.
+- **Callback route exempt from `password.changed`/`twofactor` middleware** — GitHub redirects back mid-OAuth flow before those guards run.
+- **`updateOrCreate` on callback** — reconnecting replaces the old token cleanly.
+- **Single connection per user** — `user_id` has a unique index; the model uses `HasOne`.
+- **Scopes requested:** `repo` + `read:user` (minimum needed for Milestone 3 repo picker and webhook registration).
+
+---
+
+## Next: Milestone 3 — Project ↔ Repo Linking
 
 Upcoming work:
-- Install/configure Laravel Socialite (GitHub driver)
-- `github_connections` table (encrypted token storage)  
-- Settings page: "Connect GitHub" / "Disconnect" UI + connection status
-- Tests: OAuth callback, token encryption, disconnect flow
+
+- Add `github_repo` and `github_webhook_secret` (nullable) to `projects`
+- Repo picker UI on project form (calls GitHub API using stored token)
+- Auto-register webhook (`push` event) on repo link; remove on unlink
+- Tests: webhook registration/removal, repo picker with mocked GitHub API

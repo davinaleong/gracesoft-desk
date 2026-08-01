@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\GitHubConnectionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectImportController;
@@ -81,7 +82,14 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
 
     Route::resource('vendors', VendorController::class);
     Route::resource('services', ServiceController::class);
+
+    Route::get('/settings/github', [GitHubConnectionController::class, 'show'])->name('settings.github.show');
+    Route::get('/settings/github/redirect', [GitHubConnectionController::class, 'redirect'])->name('settings.github.redirect');
+    Route::delete('/settings/github', [GitHubConnectionController::class, 'destroy'])->name('settings.github.destroy');
 });
+
+// GitHub OAuth callback — exempt from password.changed / twofactor middleware (arrives mid-flow)
+Route::middleware('auth')->get('/settings/github/callback', [GitHubConnectionController::class, 'callback'])->name('settings.github.callback');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

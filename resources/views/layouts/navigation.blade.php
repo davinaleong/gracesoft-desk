@@ -26,6 +26,7 @@
                     <x-nav-link :href="route('reports.finance')" :active="request()->routeIs('reports.*')">{{ __('Reports') }}</x-nav-link>
                     <x-nav-link :href="route('settings.system.edit')" :active="request()->routeIs('settings.system.*')">{{ __('System Settings') }}</x-nav-link>
                     <x-nav-link :href="route('settings.project-stages.index')" :active="request()->routeIs('settings.project-stages.*')">{{ __('Project Stages') }}</x-nav-link>
+                    <x-nav-link :href="route('settings.github.show')" :active="request()->routeIs('settings.github.*')">{{ __('GitHub') }}</x-nav-link>
                 </div>
             </div>
 
