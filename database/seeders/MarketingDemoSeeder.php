@@ -352,7 +352,6 @@ class MarketingDemoSeeder extends Seeder
                     $entryDate = $today
                         ->subDays($plan['start_days_ago'] - ($entryIndex * 2) - $session)
                         ->toDateString();
-                    $hourlyRate = $project->is_billable ? 165 + (($entryIndex % 4) * 15) : 0;
 
                     TimeEntry::query()->create([
                         'project_id' => $project->id,
@@ -361,7 +360,6 @@ class MarketingDemoSeeder extends Seeder
                         'entry_date' => $entryDate,
                         'duration_minutes' => $durationMinutes,
                         'is_billable' => (bool) $project->is_billable,
-                        'hourly_rate' => $hourlyRate,
                         'notes' => sprintf(
                             'Demo Seed: %s | %s | %s',
                             $project->code,

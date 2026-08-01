@@ -25,6 +25,7 @@ class TimeEntryFactory extends Factory
             'name' => 'Time Entry Factory Project',
             'status' => 'active',
             'is_billable' => true,
+            'hourly_rate' => 100.00,
         ]);
 
         $stage = ProjectStage::query()->first() ?? ProjectStage::query()->create([
@@ -36,7 +37,7 @@ class TimeEntryFactory extends Factory
         $user = User::query()->first();
 
         $durationMinutes = fake()->numberBetween(30, 240);
-        $hourlyRate = (float) fake()->randomFloat(2, 60, 200);
+        $hourlyRate = (float) $project->hourly_rate;
 
         return [
             'project_id' => $project->id,
@@ -45,7 +46,6 @@ class TimeEntryFactory extends Factory
             'entry_date' => now()->toDateString(),
             'duration_minutes' => $durationMinutes,
             'is_billable' => true,
-            'hourly_rate' => $hourlyRate,
             'billable_amount' => round(($durationMinutes / 60) * $hourlyRate, 2),
             'notes' => fake()->sentence(),
         ];

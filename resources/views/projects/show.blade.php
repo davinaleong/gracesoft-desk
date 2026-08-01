@@ -46,6 +46,11 @@
                     </div>
 
                     <div>
+                        <p class="text-xs text-gray-500 uppercase">{{ __('Hourly Rate') }}</p>
+                        <p class="text-base">@deskMoney((float) ($project->hourly_rate ?? 0))</p>
+                    </div>
+
+                    <div>
                         <p class="text-xs text-gray-500 uppercase">{{ __('Description') }}</p>
                         <p class="text-base">{{ $project->description ?: __('No description.') }}</p>
                     </div>

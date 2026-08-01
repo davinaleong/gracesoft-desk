@@ -31,7 +31,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <x-input-label for="entry_date" :value="__('Entry Date')" />
             <x-text-input id="entry_date" name="entry_date" type="date" class="mt-1 block w-full" :value="old(
@@ -49,13 +49,6 @@
             <x-text-input id="duration_minutes" name="duration_minutes" type="number" min="1"
                 class="mt-1 block w-full" :value="old('duration_minutes', $timeEntry->duration_minutes ?? 60)" required />
             <x-input-error :messages="$errors->get('duration_minutes')" class="mt-2" />
-        </div>
-
-        <div>
-            <x-input-label for="hourly_rate" :value="__('Hourly Rate')" />
-            <x-text-input id="hourly_rate" name="hourly_rate" type="number" min="0" step="0.01"
-                class="mt-1 block w-full" :value="old('hourly_rate', $timeEntry->hourly_rate ?? '0.00')" />
-            <x-input-error :messages="$errors->get('hourly_rate')" class="mt-2" />
         </div>
     </div>
 

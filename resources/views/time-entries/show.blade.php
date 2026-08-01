@@ -57,7 +57,7 @@
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">{{ __('Hourly Rate') }}</dt>
-                            <dd class="text-base">@deskMoney((float) ($timeEntry->hourly_rate ?? 0))</dd>
+                            <dd class="text-base">@deskMoney((float) ($timeEntry->project?->hourly_rate ?? 0))</dd>
                         </div>
                         <div>
                             <dt class="text-sm text-gray-500">{{ __('Billable Amount') }}</dt>

@@ -25,6 +25,7 @@ class ProjectFactory extends Factory
             'starts_on' => now()->subDays(10)->toDateString(),
             'ends_on' => now()->addDays(20)->toDateString(),
             'is_billable' => true,
+            'hourly_rate' => (float) fake()->randomFloat(2, 60, 200),
         ];
     }
 }

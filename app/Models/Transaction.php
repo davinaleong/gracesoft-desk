@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasPublicUuid;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -47,17 +48,21 @@ class Transaction extends Model
             self::fillUuid($transaction);
 
             if (empty($transaction->transaction_code)) {
-                $transaction->transaction_code = self::generateTransactionCode();
+                $date = filled($transaction->transaction_date)
+                    ? Carbon::parse($transaction->transaction_date)
+                    : null;
+                $transaction->transaction_code = self::generateTransactionCode($date);
             }
         });
     }
 
-    protected static function generateTransactionCode(): string
+    protected static function generateTransactionCode(?\DateTimeInterface $date = null): string
     {
+        $date ??= now();
         do {
             $candidate = sprintf(
                 'TRX-%s-%s',
-                now()->format('Ymd'),
+                $date->format('Ymd'),
                 strtoupper(Str::random(6))
             );
         } while (self::query()->where('transaction_code', $candidate)->exists());

@@ -34,7 +34,6 @@ class TimeEntry extends Model
         'entry_date',
         'duration_minutes',
         'is_billable',
-        'hourly_rate',
         'billable_amount',
         'notes',
     ];
@@ -46,7 +45,6 @@ class TimeEntry extends Model
         return [
             'entry_date' => 'date',
             'is_billable' => 'boolean',
-            'hourly_rate' => 'decimal:2',
             'billable_amount' => 'decimal:2',
         ];
     }
@@ -84,13 +82,19 @@ class TimeEntry extends Model
     private static function deriveBillingValues(self $entry): void
     {
         $durationMinutes = max(0, (int) ($entry->duration_minutes ?? 0));
-        $hourlyRate = max(0, (float) ($entry->hourly_rate ?? 0));
         $isBillable = (bool) ($entry->is_billable ?? false);
 
         $entry->duration_minutes = $durationMinutes;
-        $entry->hourly_rate = $hourlyRate;
 
-        if (! $isBillable || $durationMinutes === 0 || $hourlyRate === 0.0) {
+        if (! $isBillable || $durationMinutes === 0) {
+            $entry->billable_amount = 0;
+
+            return;
+        }
+
+        $hourlyRate = (float) Project::query()->where('id', $entry->project_id)->value('hourly_rate');
+
+        if ($hourlyRate <= 0.0) {
             $entry->billable_amount = 0;
 
             return;

@@ -28,7 +28,6 @@ class UpdateTimeEntryRequest extends FormRequest
             'entry_date' => ['required', 'date'],
             'duration_minutes' => ['required', 'integer', 'min:1'],
             'is_billable' => ['required', 'boolean'],
-            'hourly_rate' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
         ];
     }

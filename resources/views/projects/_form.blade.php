@@ -55,6 +55,13 @@
             @checked(old('is_billable', $project->is_billable ?? true))>
         <x-input-label for="is_billable" :value="__('Billable Project')" />
     </div>
+
+    <div>
+        <x-input-label for="hourly_rate" :value="__('Hourly Rate')" />
+        <x-text-input id="hourly_rate" name="hourly_rate" type="number" min="0" step="0.01"
+            class="mt-1 block w-full" :value="old('hourly_rate', $project->hourly_rate ?? '0.00')" />
+        <x-input-error :messages="$errors->get('hourly_rate')" class="mt-2" />
+    </div>
 </div>
 
 <div class="mt-6 flex items-center gap-3">

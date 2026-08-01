@@ -71,7 +71,6 @@ class CsvProjectWorklogSeeder extends Seeder
                 $durationHours = $this->parseDecimal($row['duration (hours)'] ?? null);
                 $durationMinutes = max(1, (int) round($durationHours * 60));
                 $billableCost = $this->parseDecimal($row['billable cost (sgd)'] ?? null);
-                $hourlyRate = $durationHours > 0 ? round($billableCost / $durationHours, 2) : 0.0;
                 $entryDate = trim((string) ($row['started date'] ?? ''));
 
                 if ($entryDate === '') {
@@ -94,7 +93,6 @@ class CsvProjectWorklogSeeder extends Seeder
                     'notes' => $notes,
                     'user_id' => $defaultUserId,
                     'is_billable' => $billableCost > 0,
-                    'hourly_rate' => $hourlyRate,
                 ]);
             }
         }

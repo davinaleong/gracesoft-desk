@@ -48,6 +48,7 @@ class UpdateProjectRequest extends FormRequest
             'starts_on' => ['nullable', 'date'],
             'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on'],
             'is_billable' => ['required', 'boolean'],
+            'hourly_rate' => ['nullable', 'numeric', 'min:0'],
         ];
     }
 }

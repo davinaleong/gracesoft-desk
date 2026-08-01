@@ -33,7 +33,7 @@ test('time entries import template csv can be downloaded', function () {
         ->get(route('time-entries.import.template'))
         ->assertOk()
         ->assertDownload('time-entries-import-template.csv')
-        ->assertStreamedContent("project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,hourly_rate,notes\n,PRJ-001,,Development,2026-07-15,90,yes,120,\"Frontend build and QA\"\n");
+        ->assertStreamedContent("project_uuid,project_code,stage_uuid,stage_name,entry_date,duration_minutes,is_billable,notes\n,PRJ-001,,Development,2026-07-15,90,yes,\"Frontend build and QA\"\n");
 });
 
 test('time entries csv can be previewed and committed with uuid-aware mapping', function () {
@@ -46,6 +46,7 @@ test('time entries csv can be previewed and committed with uuid-aware mapping', 
         'name' => 'Time Import Project',
         'status' => 'active',
         'is_billable' => true,
+        'hourly_rate' => 120,
     ]);
 
     $stage = ProjectStage::query()->create([

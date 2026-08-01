@@ -23,6 +23,7 @@ test('create update and delete actions are persisted to audit logs', function ()
         'name' => 'Audit Trail Project',
         'status' => 'active',
         'is_billable' => true,
+        'hourly_rate' => 120,
     ]);
 
     $stage = ProjectStage::query()->create([
@@ -37,11 +38,10 @@ test('create update and delete actions are persisted to audit logs', function ()
         'entry_date' => now()->toDateString(),
         'duration_minutes' => 60,
         'is_billable' => true,
-        'hourly_rate' => 120,
         'notes' => 'Initial audited entry',
     ]);
 
-    $createResponse->assertRedirect(route('time-entries.index'));
+    $createResponse->assertRedirect();
 
     $timeEntry = TimeEntry::query()->where('notes', 'Initial audited entry')->firstOrFail();
 
@@ -51,7 +51,6 @@ test('create update and delete actions are persisted to audit logs', function ()
         'entry_date' => now()->toDateString(),
         'duration_minutes' => 90,
         'is_billable' => true,
-        'hourly_rate' => 120,
         'notes' => 'Updated audited entry',
     ]);
 

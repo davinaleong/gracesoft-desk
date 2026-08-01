@@ -18,5 +18,5 @@ test('global flash alert is rendered from status key', function () {
         ->withSession(['status' => 'project-created'])
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertSee('Project created successfully.');
+        ->assertSee('Project saved successfully.');
 });

@@ -47,7 +47,6 @@ class TimeEntryController extends Controller
         $payload = $request->validated();
         $payload = $this->resolveForeignKeys($payload);
         $payload['user_id'] = $request->user()?->id;
-        $payload['billable_amount'] = $this->calculateBillableAmount($payload);
 
         $timeEntry = TimeEntry::query()->create($payload);
 
@@ -92,7 +91,6 @@ class TimeEntryController extends Controller
     {
         $payload = $request->validated();
         $payload = $this->resolveForeignKeys($payload);
-        $payload['billable_amount'] = $this->calculateBillableAmount($payload);
 
         $timeEntry->update($payload);
 
@@ -111,25 +109,6 @@ class TimeEntryController extends Controller
         return redirect()
             ->route('time-entries.index')
             ->with('status', 'time-entry-deleted');
-    }
-
-    /**
-     * @param  array<string, mixed>  $payload
-     */
-    private function calculateBillableAmount(array $payload): float
-    {
-        if (! ((bool) $payload['is_billable'])) {
-            return 0;
-        }
-
-        $minutes = (int) $payload['duration_minutes'];
-        $hourlyRate = (float) ($payload['hourly_rate'] ?? 0);
-
-        if ($minutes <= 0 || $hourlyRate <= 0) {
-            return 0;
-        }
-
-        return round(($minutes / 60) * $hourlyRate, 2);
     }
 
     /**

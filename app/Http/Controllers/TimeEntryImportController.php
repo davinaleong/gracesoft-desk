@@ -28,8 +28,8 @@ class TimeEntryImportController extends Controller
                 return;
             }
 
-            fputcsv($handle, ['project_uuid', 'project_code', 'stage_uuid', 'stage_name', 'entry_date', 'duration_minutes', 'is_billable', 'hourly_rate', 'notes']);
-            fputcsv($handle, ['', 'PRJ-001', '', 'Development', '2026-07-15', '90', 'yes', '120', 'Frontend build and QA']);
+            fputcsv($handle, ['project_uuid', 'project_code', 'stage_uuid', 'stage_name', 'entry_date', 'duration_minutes', 'is_billable', 'notes']);
+            fputcsv($handle, ['', 'PRJ-001', '', 'Development', '2026-07-15', '90', 'yes', 'Frontend build and QA']);
 
             fclose($handle);
         }, 'time-entries-import-template.csv', [
@@ -260,7 +260,6 @@ class TimeEntryImportController extends Controller
 
             $durationMinutes = (int) ($mapped['duration_minutes'] ?? 0);
             $isBillable = $this->normalizeBoolean($mapped['is_billable'] ?? '1');
-            $hourlyRate = $this->nullableFloat($mapped['hourly_rate'] ?? null);
 
             $payload = [
                 'project_id' => $project->id,
@@ -269,8 +268,7 @@ class TimeEntryImportController extends Controller
                 'entry_date' => trim((string) ($mapped['entry_date'] ?? '')),
                 'duration_minutes' => $durationMinutes,
                 'is_billable' => $isBillable,
-                'hourly_rate' => $hourlyRate,
-                'billable_amount' => $this->calculateBillableAmount($durationMinutes, $isBillable, $hourlyRate),
+                'billable_amount' => $this->calculateBillableAmount($durationMinutes, $isBillable, (float) $project->hourly_rate),
                 'notes' => $this->nullableString($mapped['notes'] ?? null),
             ];
 
@@ -281,7 +279,6 @@ class TimeEntryImportController extends Controller
                 'entry_date' => ['required', 'date'],
                 'duration_minutes' => ['required', 'integer', 'min:1'],
                 'is_billable' => ['required', 'boolean'],
-                'hourly_rate' => ['nullable', 'numeric', 'min:0'],
                 'billable_amount' => ['required', 'numeric', 'min:0'],
                 'notes' => ['nullable', 'string'],
             ]);
@@ -378,9 +375,9 @@ class TimeEntryImportController extends Controller
         return in_array($normalized, ['1', 'true', 'yes', 'y'], true);
     }
 
-    private function calculateBillableAmount(int $durationMinutes, bool $isBillable, ?float $hourlyRate): float
+    private function calculateBillableAmount(int $durationMinutes, bool $isBillable, float $hourlyRate): float
     {
-        if (! $isBillable || $durationMinutes <= 0 || is_null($hourlyRate) || $hourlyRate <= 0) {
+        if (! $isBillable || $durationMinutes <= 0 || $hourlyRate <= 0) {
             return 0;
         }
 

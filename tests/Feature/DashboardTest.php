@@ -26,6 +26,7 @@ test('dashboard displays aggregated metrics', function () {
         'name' => 'Dashboard Pilot Project',
         'status' => 'active',
         'is_billable' => true,
+        'hourly_rate' => 100,
     ]);
 
     $stage = ProjectStage::query()->create([
@@ -41,8 +42,6 @@ test('dashboard displays aggregated metrics', function () {
         'entry_date' => now()->toDateString(),
         'duration_minutes' => 120,
         'is_billable' => true,
-        'hourly_rate' => 100,
-        'billable_amount' => 200,
     ]);
 
     $account = Account::query()->create([

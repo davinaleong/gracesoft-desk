@@ -31,6 +31,7 @@ class Project extends Model
         'starts_on',
         'ends_on',
         'is_billable',
+        'hourly_rate',
     ];
 
     protected $hidden = ['id'];
@@ -41,6 +42,7 @@ class Project extends Model
             'starts_on' => 'date',
             'ends_on' => 'date',
             'is_billable' => 'boolean',
+            'hourly_rate' => 'decimal:2',
         ];
     }
 
