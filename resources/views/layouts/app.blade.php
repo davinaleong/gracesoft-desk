@@ -23,6 +23,10 @@
         $flashMessage = match ($status) {
             'project-created' => __('Project saved successfully.'),
             'project-updated' => __('Project details have been updated.'),
+            'project-stage-created' => __('Stage added successfully.'),
+            'project-stage-updated' => __('Stage updated successfully.'),
+            'project-stage-deleted' => __('Stage deleted.'),
+            'project-stage-in-use' => __('This stage cannot be deleted because time entries are assigned to it.'),
             'time-entry-created' => __('Time entry added successfully.'),
             'time-entry-updated' => __('Time entry has been updated.'),
             'time-entry-deleted' => __('Time entry has been removed.'),

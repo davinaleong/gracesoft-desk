@@ -23,9 +23,19 @@ class ProjectStage extends Model
         'name',
         'sort_order',
         'status',
+        'keywords',
+        'is_default',
     ];
 
     protected $hidden = ['id'];
+
+    protected function casts(): array
+    {
+        return [
+            'keywords' => 'array',
+            'is_default' => 'boolean',
+        ];
+    }
 
     public function timeEntries(): HasMany
     {

@@ -25,6 +25,7 @@
                     <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.*')">{{ __('Documents') }}</x-nav-link>
                     <x-nav-link :href="route('reports.finance')" :active="request()->routeIs('reports.*')">{{ __('Reports') }}</x-nav-link>
                     <x-nav-link :href="route('settings.system.edit')" :active="request()->routeIs('settings.system.*')">{{ __('System Settings') }}</x-nav-link>
+                    <x-nav-link :href="route('settings.project-stages.index')" :active="request()->routeIs('settings.project-stages.*')">{{ __('Project Stages') }}</x-nav-link>
                 </div>
             </div>
 
@@ -61,6 +62,8 @@
             <x-responsive-nav-link :href="route('reports.finance')" :active="request()->routeIs('reports.*')">{{ __('Reports') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('settings.system.edit')"
                 :active="request()->routeIs('settings.system.*')">{{ __('System Settings') }}</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('settings.project-stages.index')"
+                :active="request()->routeIs('settings.project-stages.*')">{{ __('Project Stages') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('vendors.index')" :active="request()->routeIs('vendors.*')">{{ __('Vendors') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">{{ __('Services') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('profile.edit')">{{ __('Profile') }}</x-responsive-nav-link>

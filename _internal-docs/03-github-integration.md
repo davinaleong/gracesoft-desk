@@ -2,18 +2,18 @@
 
 ## Milestone 0: Schema audit (do first)
 
-- [ ] Inspect current `time_entries` table — confirm whether `stage` is a free string or already a foreign key
-- [ ] Inspect current `projects` table — confirm existing billable field (boolean vs rate-based)
-- [ ] Confirm whether `billable` on the Time Entries table is a flag or a computed currency amount (duration × rate)
-- [ ] Document findings before touching migrations
+- [x] Inspect current `time_entries` table — confirm whether `stage` is a free string or already a foreign key
+- [x] Inspect current `projects` table — confirm existing billable field (boolean vs rate-based)
+- [x] Confirm whether `billable` on the Time Entries table is a flag or a computed currency amount (duration × rate)
+- [x] Document findings before touching migrations
 
 ## Milestone 1: SDLC Stages (Settings)
 
-- [ ] Create `sdlc_stages` migration: `id, uuid, name, slug, keywords (json), sort_order, is_default, timestamps`
-- [ ] If `time_entries.stage` is currently a free string, write backfill migration mapping existing values (Development, Testing, Deployment, Maintenance, Analysis, etc.) to new `sdlc_stages` rows
-- [ ] Add `stage_id` foreign key to `time_entries`, deprecate/drop old string column after backfill
-- [ ] Build Settings → SDLC Stages CRUD page (list, reorder, add/edit/delete, keyword tags per stage)
-- [ ] Tests: seeding, reordering, keyword storage, backfill migration correctness
+- [x] Create `sdlc_stages` migration: `id, uuid, name, slug, keywords (json), sort_order, is_default, timestamps`
+- [x] If `time_entries.stage` is currently a free string, write backfill migration mapping existing values (Development, Testing, Deployment, Maintenance, Analysis, etc.) to new `sdlc_stages` rows
+- [x] Add `stage_id` foreign key to `time_entries`, deprecate/drop old string column after backfill
+- [x] Build Settings → SDLC Stages CRUD page (list, reorder, add/edit/delete, keyword tags per stage)
+- [x] Tests: seeding, reordering, keyword storage, backfill migration correctness
 
 ## Milestone 2: GitHub connection
 
@@ -71,6 +71,6 @@
 
 ## Open questions to resolve before Milestone 1
 
-- [ ] Is `stage` on `time_entries` already normalized, or free text?
-- [ ] Is `billable` a boolean flag or a computed rate × duration amount?
+- [x] Is `stage` on `time_entries` already normalized, or free text? → **FK to `project_stages`**
+- [x] Is `billable` a boolean flag or a computed rate × duration amount? → **Both: `is_billable` flag + `billable_amount` computed field**
 - [ ] What AI provider should `CommitSummarizer` target by default?

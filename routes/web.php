@@ -5,6 +5,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectImportController;
+use App\Http\Controllers\ProjectStageController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ReportExportController;
 use App\Http\Controllers\ServiceController;
@@ -59,6 +60,15 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
 
     Route::get('/settings/system', [SystemSettingsController::class, 'edit'])->name('settings.system.edit');
     Route::put('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');
+
+    Route::get('/settings/project-stages', [ProjectStageController::class, 'index'])->name('settings.project-stages.index');
+    Route::get('/settings/project-stages/create', [ProjectStageController::class, 'create'])->name('settings.project-stages.create');
+    Route::post('/settings/project-stages', [ProjectStageController::class, 'store'])->name('settings.project-stages.store');
+    Route::get('/settings/project-stages/{projectStage}/edit', [ProjectStageController::class, 'edit'])->name('settings.project-stages.edit');
+    Route::put('/settings/project-stages/{projectStage}', [ProjectStageController::class, 'update'])->name('settings.project-stages.update');
+    Route::delete('/settings/project-stages/{projectStage}', [ProjectStageController::class, 'destroy'])->name('settings.project-stages.destroy');
+    Route::patch('/settings/project-stages/{projectStage}/move-up', [ProjectStageController::class, 'moveUp'])->name('settings.project-stages.move-up');
+    Route::patch('/settings/project-stages/{projectStage}/move-down', [ProjectStageController::class, 'moveDown'])->name('settings.project-stages.move-down');
 
     Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
     Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');
