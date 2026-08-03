@@ -33,7 +33,8 @@ class PendingCommitController extends Controller
         abort_unless($commit->project_id === $project->id, 404);
 
         $matcher = new CommitStageMatcherService;
-        $suggestedStage = $matcher->match($commit->message, $commit->branch ?? '');
+        $suggestedStage = $matcher->match($commit->message, $commit->branch ?? '')
+            ?? $commit->aiSuggestedStage;
         $stages = ProjectStage::query()->orderBy('sort_order')->get();
 
         return view('projects.pending-commits.convert', [

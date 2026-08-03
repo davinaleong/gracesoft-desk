@@ -41,4 +41,9 @@ return [
         'redirect' => env('GITHUB_REDIRECT_URI', '/settings/github/callback'),
     ],
 
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+    ],
+
 ];

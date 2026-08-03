@@ -30,6 +30,8 @@ class CommitTimeEntry extends Model
         'author_email',
         'committed_at',
         'message',
+        'ai_summary',
+        'ai_suggested_stage_id',
         'additions',
         'deletions',
         'changed_files',
@@ -61,5 +63,10 @@ class CommitTimeEntry extends Model
     public function convertedTimeEntry(): BelongsTo
     {
         return $this->belongsTo(TimeEntry::class, 'converted_time_entry_id');
+    }
+
+    public function aiSuggestedStage(): BelongsTo
+    {
+        return $this->belongsTo(ProjectStage::class, 'ai_suggested_stage_id');
     }
 }

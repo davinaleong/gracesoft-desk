@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\SummarizeCommit;
 use App\Models\CommitTimeEntry;
 use App\Models\Project;
 use Carbon\Carbon;
@@ -71,7 +72,7 @@ class WebhookController extends Controller
                     + count($commit['modified'] ?? []);
             }
 
-            CommitTimeEntry::updateOrCreate(
+            $entry = CommitTimeEntry::updateOrCreate(
                 ['project_id' => $project->id, 'sha' => $sha],
                 [
                     'branch' => $branch,
@@ -87,6 +88,11 @@ class WebhookController extends Controller
                     'status' => 'pending',
                 ]
             );
+
+            // Only dispatch AI summarization for newly created rows.
+            if ($entry->wasRecentlyCreated) {
+                SummarizeCommit::dispatch($entry);
+            }
         }
     }
 }

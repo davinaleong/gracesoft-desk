@@ -169,16 +169,16 @@ Upcoming work:
 
 ### What was built
 
-| File | Notes |
-| ---- | ----- |
-| `app/Services/CommitStageMatcherService.php` | `match(message, branch)`: scans `project_stages` ordered by `sort_order`, returns first stage whose keywords appear in message+branch (case-insensitive). `snapDuration(minutes)`: rounds to nearest 15 min (min 15). |
-| `app/Http/Controllers/PendingCommitController.php` | `index()` lists pending commits; `create()` shows convert form with suggested stage; `store()` snaps duration, creates `TimeEntry`, marks commit `approved` |
-| `resources/views/projects/pending-commits/index.blade.php` | Table: date, branch, author, message, diff stats, Convert link |
-| `resources/views/projects/pending-commits/convert.blade.php` | Conversion form: stage picker pre-selected by keyword match, date from commit, duration with step=15, billable from project, notes prefilled from commit message |
-| `resources/views/projects/show.blade.php` | "Review Commits" link added to GitHub section |
-| `resources/views/layouts/app.blade.php` | `commit-converted` flash message |
-| `routes/web.php` | `GET/POST /projects/{project}/pending-commits/{commit}/convert`, `GET /projects/{project}/pending-commits` |
-| `tests/Feature/PendingCommitReviewTest.php` | 12 tests: keyword matching, branch matching, case-insensitivity, null match, duration snapping, review screen access/filtering, convert form, conversion flow, 15-min snapping, cross-project 404 guard |
+| File                                                         | Notes                                                                                                                                                                                                                 |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/Services/CommitStageMatcherService.php`                 | `match(message, branch)`: scans `project_stages` ordered by `sort_order`, returns first stage whose keywords appear in message+branch (case-insensitive). `snapDuration(minutes)`: rounds to nearest 15 min (min 15). |
+| `app/Http/Controllers/PendingCommitController.php`           | `index()` lists pending commits; `create()` shows convert form with suggested stage; `store()` snaps duration, creates `TimeEntry`, marks commit `approved`                                                           |
+| `resources/views/projects/pending-commits/index.blade.php`   | Table: date, branch, author, message, diff stats, Convert link                                                                                                                                                        |
+| `resources/views/projects/pending-commits/convert.blade.php` | Conversion form: stage picker pre-selected by keyword match, date from commit, duration with step=15, billable from project, notes prefilled from commit message                                                      |
+| `resources/views/projects/show.blade.php`                    | "Review Commits" link added to GitHub section                                                                                                                                                                         |
+| `resources/views/layouts/app.blade.php`                      | `commit-converted` flash message                                                                                                                                                                                      |
+| `routes/web.php`                                             | `GET/POST /projects/{project}/pending-commits/{commit}/convert`, `GET /projects/{project}/pending-commits`                                                                                                            |
+| `tests/Feature/PendingCommitReviewTest.php`                  | 12 tests: keyword matching, branch matching, case-insensitivity, null match, duration snapping, review screen access/filtering, convert form, conversion flow, 15-min snapping, cross-project 404 guard               |
 
 ### Design decisions
 

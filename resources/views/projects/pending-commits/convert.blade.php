@@ -31,6 +31,9 @@
                             {{ __('Suggested stage:') }} {{ $suggestedStage->name }}
                         </div>
                     @endif
+                    @if ($commit->ai_summary)
+                        <p class="mt-2 text-xs text-gray-500 italic">{{ __('AI note:') }} {{ $commit->ai_summary }}</p>
+                    @endif
                 </div>
             </div>
 
