@@ -48,11 +48,11 @@
 
 ## Milestone 6: AI summary + AI stage fallback
 
-- [ ] `CommitSummarizer` interface (swappable AI provider)
-- [ ] Job: generate human-readable note from commit message(s)/diff stats
-- [ ] AI stage fallback: only invoked when no keyword match; passes defined stage list to LLM
-- [ ] Unmatched-and-unresolved commits stay `assigned_stage_id = null` for manual review (no silent guessing)
-- [ ] Tests: summarizer interface contract, fallback trigger conditions, provider mocking
+- [x] `CommitSummarizer` interface (swappable AI provider)
+- [x] Job: generate human-readable note from commit message(s)/diff stats
+- [x] AI stage fallback: only invoked when no keyword match; passes defined stage list to LLM
+- [x] Unmatched-and-unresolved commits stay `assigned_stage_id = null` for manual review (no silent guessing)
+- [x] Tests: summarizer interface contract, fallback trigger conditions, provider mocking
 
 ## Milestone 7: Squash UI
 
@@ -73,4 +73,4 @@
 
 - [x] Is `stage` on `time_entries` already normalized, or free text? → **FK to `project_stages`**
 - [x] Is `billable` a boolean flag or a computed rate × duration amount? → **Both: `is_billable` flag + `billable_amount` computed field**
-- [ ] What AI provider should `CommitSummarizer` target by default?
+- [x] What AI provider should `CommitSummarizer` target by default? → **OpenAI** (`gpt-4o-mini`), swappable via the `CommitSummarizer` interface; falls back to `NullCommitSummarizer` when no API key is configured.

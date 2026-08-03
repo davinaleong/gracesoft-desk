@@ -191,4 +191,35 @@ Upcoming work:
 
 ---
 
-## Next: Milestone 6 — AI Summary + AI Stage Fallback
+## Milestone 6 — AI Summary + AI Stage Fallback ✅
+
+**Completed:** 2026-08-03
+
+### What was built
+
+| File                                                            | Notes                                                                                                                                                     |
+| ---------------------------------------------------------------| ---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `app/Contracts/CommitSummarizer.php`                            | Interface: `summarize(array $commits, array $stageNames): SummaryResult`                                                                                  |
+| `app/Support/SummaryResult.php`                                 | Readonly DTO: `summary`, `suggestedStageName`                                                                                                             |
+| `app/Services/OpenAiCommitSummarizer.php`                       | Calls OpenAI Chat Completions (`response_format: json_object`), prompts for a 1–2 sentence note + stage suggestion from the project's stage list          |
+| `app/Services/NullCommitSummarizer.php`                         | No-op fallback — returns an empty summary/no suggestion when no API key is configured                                                                     |
+| `app/Providers/AppServiceProvider.php`                          | Binds `CommitSummarizer` → `OpenAiCommitSummarizer` when `services.openai.api_key` is set, else `NullCommitSummarizer`                                    |
+| `app/Jobs/SummarizeCommit.php`                                  | Queued job; skips AI entirely if `CommitStageMatcherService` already found a keyword match; otherwise calls the bound summarizer and stores the result    |
+| `2026_08_03_025743_add_ai_fields_to_commit_time_entries_table`  | Adds `ai_summary` (text, nullable) and `ai_suggested_stage_id` (FK → `project_stages`, nullable, `nullOnDelete`)                                          |
+| `app/Models/CommitTimeEntry.php`                                | Added `ai_summary`, `ai_suggested_stage_id` to fillable; `aiSuggestedStage()` relation                                                                    |
+| `app/Http/Controllers/WebhookController.php`                   | Dispatches `SummarizeCommit` for newly-created commit rows only (not re-deliveries)                                                                       |
+| `app/Http/Controllers/PendingCommitController.php`              | `create()` falls back to `$commit->aiSuggestedStage` when the keyword matcher finds nothing                                                               |
+| `resources/views/projects/pending-commits/convert.blade.php`   | Shows the AI-generated note ("AI note: …") when present                                                                                                   |
+| `config/services.php`, `.env.example`                          | `OPENAI_API_KEY` / `OPENAI_MODEL` (default `gpt-4o-mini`); `GITHUB_*` vars also backfilled into `.env.example` (missed in Milestone 2)                    |
+| `tests/Feature/AiSummaryTest.php`                               | 5 tests: interface contract (both implementations), skip-on-keyword-match, provider called on no-match, unknown-stage-name → null, dispatch-on-webhook   |
+
+### Design decisions
+
+- **AI is a fallback, never a silent override.** `SummarizeCommit` only calls the LLM when `CommitStageMatcherService` finds no keyword match — keyword rules always win when present.
+- **Unknown stage names from the LLM resolve to `null`**, not a guess — `ai_suggested_stage_id` is only set when the returned name matches an existing `project_stages.name` exactly. A bad/unavailable suggestion still leaves the commit fully visible for manual review; nothing is auto-approved.
+- **Swappable provider via DI binding**, not a config `match()` — `AppServiceProvider` binds `CommitSummarizer` to `OpenAiCommitSummarizer` or `NullCommitSummarizer` based solely on whether an API key is present, so tests and local dev without a key never make network calls.
+- **`NullCommitSummarizer` as the safe default** — a fresh checkout with no `OPENAI_API_KEY` still ingests and reviews commits normally; it just won't get AI notes/suggestions.
+
+---
+
+## Next: Milestone 7 — Squash UI
