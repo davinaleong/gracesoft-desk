@@ -19,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'password.changed' => EnsurePasswordChanged::class,
             'twofactor.configured' => EnsureTwoFactorIsConfigured::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/github/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -32,11 +32,11 @@
 
 ## Milestone 4: Commit ingestion (no AI yet)
 
-- [ ] `commit_time_entries` table (raw commit capture + status field)
-- [ ] Webhook endpoint `POST /webhooks/github/{project_uuid}` with HMAC signature verification
-- [ ] Parse `push` payload, upsert commit rows as `pending`
-- [ ] Fetch commit stats (additions/deletions) via GitHub API where not in payload
-- [ ] Tests: signature verification (valid/invalid), payload parsing, duplicate commit handling
+- [x] `commit_time_entries` table (raw commit capture + status field)
+- [x] Webhook endpoint `POST /webhooks/github/{project_uuid}` with HMAC signature verification
+- [x] Parse `push` payload, upsert commit rows as `pending`
+- [x] Fetch commit stats (additions/deletions) via GitHub API where not in payload
+- [x] Tests: signature verification (valid/invalid), payload parsing, duplicate commit handling
 
 ## Milestone 5: Rule-based stage matching + manual review screen
 

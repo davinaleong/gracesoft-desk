@@ -17,6 +17,7 @@ use App\Http\Controllers\TimeEntryImportController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionImportController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -96,8 +97,8 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
 // GitHub OAuth callback — exempt from password.changed / twofactor middleware (arrives mid-flow)
 Route::middleware('auth')->get('/settings/github/callback', [GitHubConnectionController::class, 'callback'])->name('settings.github.callback');
 
-// GitHub push webhook — public endpoint, verified by HMAC signature (Milestone 4)
-Route::post('/webhooks/github/{project:uuid}', fn () => response()->noContent())->name('webhooks.github');
+// GitHub push webhook — HMAC-verified, exempt from auth/CSRF (Milestone 4)
+Route::post('/webhooks/github/{project:uuid}', [WebhookController::class, 'github'])->name('webhooks.github');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

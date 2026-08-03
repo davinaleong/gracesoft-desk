@@ -98,16 +98,16 @@ Upcoming work:
 
 ### What was built
 
-| File | Notes |
-| ---- | ----- |
-| `2026_08_03_022012_add_github_fields_to_projects_table` | Adds `github_repo` (string nullable), `github_webhook_id` (unsignedBigInteger nullable), `github_webhook_secret` (text nullable, encrypted) |
-| `app/Models/Project.php` | Added three new fields to fillable; casts: `github_webhook_id → integer`, `github_webhook_secret → encrypted` |
-| `app/Services/GitHubService.php` | `listRepositories()` (paginated), `registerWebhook()`, `removeWebhook()` (404-tolerant). Uses `Illuminate\Support\Facades\Http` with Bearer token. |
-| `app/Http/Controllers/ProjectGithubController.php` | `repos()` JSON endpoint, `store()` link + register webhook, `destroy()` unlink + remove webhook |
-| `resources/views/projects/show.blade.php` | GitHub Repository section: shows linked repo + Unlink button; or repo picker (Alpine.js datalist) when connected; or prompt to connect GitHub |
-| `resources/views/layouts/app.blade.php` | Added `@stack('scripts')`, flash messages for `github-repo-linked` and `github-repo-unlinked` |
-| `routes/web.php` | `GET /settings/github/repos` (JSON), `POST /projects/{project}/github`, `DELETE /projects/{project}/github`, placeholder `POST /webhooks/github/{project:uuid}` (Milestone 4) |
-| `tests/Feature/ProjectGithubTest.php` | 12 tests: repos JSON (connected/no-connection/auth), link (success/invalid-format/no-connection/relink), unlink (success/404-tolerant), show page (linked/link prompt/connect prompt) |
+| File                                                    | Notes                                                                                                                                                                                 |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `2026_08_03_022012_add_github_fields_to_projects_table` | Adds `github_repo` (string nullable), `github_webhook_id` (unsignedBigInteger nullable), `github_webhook_secret` (text nullable, encrypted)                                           |
+| `app/Models/Project.php`                                | Added three new fields to fillable; casts: `github_webhook_id → integer`, `github_webhook_secret → encrypted`                                                                         |
+| `app/Services/GitHubService.php`                        | `listRepositories()` (paginated), `registerWebhook()`, `removeWebhook()` (404-tolerant). Uses `Illuminate\Support\Facades\Http` with Bearer token.                                    |
+| `app/Http/Controllers/ProjectGithubController.php`      | `repos()` JSON endpoint, `store()` link + register webhook, `destroy()` unlink + remove webhook                                                                                       |
+| `resources/views/projects/show.blade.php`               | GitHub Repository section: shows linked repo + Unlink button; or repo picker (Alpine.js datalist) when connected; or prompt to connect GitHub                                         |
+| `resources/views/layouts/app.blade.php`                 | Added `@stack('scripts')`, flash messages for `github-repo-linked` and `github-repo-unlinked`                                                                                         |
+| `routes/web.php`                                        | `GET /settings/github/repos` (JSON), `POST /projects/{project}/github`, `DELETE /projects/{project}/github`, placeholder `POST /webhooks/github/{project:uuid}` (Milestone 4)         |
+| `tests/Feature/ProjectGithubTest.php`                   | 12 tests: repos JSON (connected/no-connection/auth), link (success/invalid-format/no-connection/relink), unlink (success/404-tolerant), show page (linked/link prompt/connect prompt) |
 
 ### Design decisions
 
@@ -129,3 +129,34 @@ Upcoming work:
 - Parse `push` payload, upsert commit rows as `pending`
 - Fetch commit stats (additions/deletions) via GitHub API where not in payload
 - Tests: signature verification (valid/invalid), payload parsing, duplicate commit handling
+
+---
+
+## Milestone 4 — Commit Ingestion (no AI yet) ✅
+
+**Completed:** 2026-08-03
+
+### What was built
+
+| File | Notes |
+| ---- | ----- |
+| `2026_08_03_023951_create_commit_time_entries_table` | `id, uuid, project_id FK, sha (40), branch, author_name, author_email, committed_at, message, additions, deletions, changed_files, status (pending/approved/squashed/ignored), squashed_into FK (self), converted_time_entry_id FK, timestamps` |
+| `app/Models/CommitTimeEntry.php` | Full fillable + casts; `HasPublicUuid`; relations: `project`, `squashedInto`, `convertedTimeEntry` |
+| `database/factories/CommitTimeEntryFactory.php` | Realistic defaults with `Project::factory()` association |
+| `app/Http/Controllers/WebhookController.php` | `github()`: HMAC verification → ingestPush(); `ingestPush()`: upserts commits with `updateOrCreate`, computes `changed_files` from added/removed/modified arrays |
+| `bootstrap/app.php` | CSRF exclusion for `webhooks/github/*` |
+| `routes/web.php` | `POST /webhooks/github/{project:uuid}` wired to `WebhookController@github` |
+| `tests/Feature/CommitIngestionTest.php` | 8 tests: valid HMAC, bad HMAC, no signature, unknown UUID, push payload parsing, duplicate suppression, non-push event, multi-commit push |
+
+### Design decisions
+
+- **HMAC via `hash_equals`** — constant-time comparison prevents timing attacks.
+- **CSRF excluded** for webhook path — receives from GitHub, no session.
+- **`updateOrCreate` on `(project_id, sha)`** — makes ingestion idempotent; re-delivered webhooks don't duplicate rows.
+- **`changed_files` computed from payload arrays** (`added + removed + modified` count) — avoids extra API call when GitHub includes file lists in push payload.
+- **`squashed_into` / `converted_time_entry_id`** nullable FKs pre-wired for Milestones 5 and 7.
+- **Test server vars** (`HTTP_X_HUB_SIGNATURE_256`) passed directly to `call()` — reliable header delivery in SQLite test environment.
+
+---
+
+## Next: Milestone 5 — Rule-Based Stage Matching + Manual Review Screen
