@@ -34,6 +34,22 @@
                     @if ($commit->ai_summary)
                         <p class="mt-2 text-xs text-gray-500 italic">{{ __('AI note:') }} {{ $commit->ai_summary }}</p>
                     @endif
+
+                    @if ($squashedCommits->isNotEmpty())
+                        <div class="mt-3 border-t border-gray-100 pt-3">
+                            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">
+                                {{ __('Squashed with :count more commit(s)', ['count' => $squashedCommits->count()]) }}
+                            </p>
+                            <ul class="space-y-1 max-h-40 overflow-y-auto">
+                                @foreach ($squashedCommits as $squashed)
+                                    <li class="text-xs text-gray-600 flex gap-2">
+                                        <span class="font-mono text-gray-400">{{ substr($squashed->sha, 0, 8) }}</span>
+                                        <span>{{ Str::limit($squashed->message, 80) }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                 </div>
             </div>
 
@@ -92,7 +108,7 @@
                             <div>
                                 <x-input-label for="notes" :value="__('Notes')" />
                                 <textarea id="notes" name="notes" rows="3"
-                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('notes', $commit->message) }}</textarea>
+                                    class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('notes', $defaultNotes) }}</textarea>
                                 <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                             </div>
                         </div>

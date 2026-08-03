@@ -222,4 +222,31 @@ Upcoming work:
 
 ---
 
-## Next: Milestone 7 — Squash UI
+## Milestone 7 — Squash UI ✅
+
+**Completed:** 2026-08-03
+
+### What was built
+
+| File                                                          | Notes                                                                                                                                                                       |
+| ----------------------------------------------------------------| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `app/Jobs/SummarizeSquashedCommits.php`                         | Queued job; gathers the anchor + all commits with `squashed_into = anchor.id`, runs the keyword matcher/AI summarizer over the **combined** text once, stores on the anchor |
+| `app/Http/Controllers/PendingCommitController.php`              | New `squash()` action; `index()` computes `suggestedBatches` (M8 hook); `create()` aggregates squash-group messages/branches for stage suggestion + default notes; `store()` now also marks squashed children `approved` with the same `converted_time_entry_id` |
+| `routes/web.php`                                                | `POST /projects/{project}/pending-commits/squash` → `projects.pending-commits.squash`                                                                                     |
+| `resources/views/projects/pending-commits/index.blade.php`     | Checkbox per row + "Squash Selected" button wrapping the table in a form                                                                                                   |
+| `resources/views/projects/pending-commits/convert.blade.php`   | Shows the squashed-group commit list when converting an anchor; notes default to the AI summary (or concatenated messages) instead of just the anchor's own message       |
+| `resources/views/layouts/app.blade.php`                        | `commits-squashed` flash message; generic `$errors->any()` banner added for non-field validation failures (e.g. "select at least two commits")                            |
+| `tests/Feature/SquashCommitsTest.php`                           | 7 tests: grouping, min-2 validation, cross-project guard, child approval on conversion, duration snapping, AI runs once on the full group, AI skipped when keyword matches |
+
+### Design decisions
+
+- **No new schema.** `squashed_into` and `converted_time_entry_id` on `commit_time_entries` were already wired in Milestone 4 for exactly this purpose.
+- **Anchor = earliest commit in the selection.** The oldest selected commit becomes the row that gets converted; the rest are marked `status = squashed` with `squashed_into` pointing at it. Arbitrary but deterministic — avoids "youngest wins" surprising a reviewer scanning by date.
+- **AI summary runs once per group, on demand.** `SummarizeSquashedCommits` is dispatched at squash time (not per original commit) — this replaces whatever `ai_summary` the anchor had from Milestone 6's per-commit fallback with one coherent note over the whole set, keeping the "keyword rules win over AI" rule intact by re-checking the matcher against the combined text first.
+- **Converting the anchor also finalizes its children.** `store()` bulk-updates everything with `squashed_into = anchor.id` to `approved` + the same `converted_time_entry_id`, so the group's history stays queryable (which commits fed into which time entry) without a second review pass.
+- **Fixed a pre-existing bug while adding squash-store tests:** `PendingCommitController::store()` read `$validated['project_stage_uuid']` directly, which throws an "undefined array key" error when the field is omitted entirely (Laravel's `nullable` validation rule doesn't add absent keys to `$validated`). Changed to `$validated['project_stage_uuid'] ?? null`-style guard. This affects the plain single-commit convert flow too, not just squash.
+- **Generic error banner added to `app.blade.php`** — the squash action can fail validation from a page with no per-field error slot (the index table isn't a "form" in the usual single-purpose sense), so a shared `$errors->any()` banner was added at the layout level for this and future cases.
+
+---
+
+## Next: Milestone 8 — Smart Batching/Queueing

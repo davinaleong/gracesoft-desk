@@ -95,6 +95,7 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::delete('/projects/{project}/github', [ProjectGithubController::class, 'destroy'])->name('projects.github.destroy');
 
     Route::get('/projects/{project}/pending-commits', [PendingCommitController::class, 'index'])->name('projects.pending-commits.index');
+    Route::post('/projects/{project}/pending-commits/squash', [PendingCommitController::class, 'squash'])->name('projects.pending-commits.squash');
     Route::get('/projects/{project}/pending-commits/{commit}/convert', [PendingCommitController::class, 'create'])->name('projects.pending-commits.create');
     Route::post('/projects/{project}/pending-commits/{commit}/convert', [PendingCommitController::class, 'store'])->name('projects.pending-commits.store');
 });

@@ -56,10 +56,10 @@
 
 ## Milestone 7: Squash UI
 
-- [ ] Multi-select commits on review screen → "Squash into one entry"
-- [ ] Squash action: create one `time_entries` row, mark children `processed` with `squashed_into` set
-- [ ] AI summary runs on squashed set (not per-commit) for a coherent note
-- [ ] Tests: squash grouping, child-row state transitions, duration handling on squash
+- [x] Multi-select commits on review screen → "Squash into one entry"
+- [x] Squash action: create one `time_entries` row, mark children `processed` with `squashed_into` set
+- [x] AI summary runs on squashed set (not per-commit) for a coherent note
+- [x] Tests: squash grouping, child-row state transitions, duration handling on squash
 
 ## Milestone 8: Smart batching/queueing
 

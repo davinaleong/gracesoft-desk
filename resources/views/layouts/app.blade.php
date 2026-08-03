@@ -51,6 +51,7 @@
             'github-repo-linked' => __('GitHub repository linked successfully.'),
             'github-repo-unlinked' => __('GitHub repository has been unlinked.'),
             'commit-converted' => __('Commit converted to time entry.'),
+            'commits-squashed' => __('Commits squashed. Review the combined entry below.'),
             default => is_string($status) ? $status : null,
         };
     @endphp
@@ -69,6 +70,18 @@
                     <div role="status" aria-live="polite"
                         class="rounded-md border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
                         {{ $flashMessage }}
+                    </div>
+                </div>
+            @endif
+
+            @if ($errors->any() && ! $flashMessage)
+                <div class="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+                    <div role="alert" class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                        <ul class="list-disc list-inside">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 </div>
             @endif
