@@ -69,13 +69,17 @@
                                 <a href="https://github.com/{{ $project->github_repo }}" target="_blank" rel="noopener noreferrer"
                                     class="text-indigo-600 hover:underline font-mono text-sm">{{ $project->github_repo }}</a>
                             </div>
-                            <form method="POST" action="{{ route('projects.github.destroy', $project) }}"
-                                onsubmit="return confirm('{{ __('Remove the GitHub repository link and delete the webhook?') }}')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    class="text-sm text-red-600 hover:text-red-800 font-semibold">{{ __('Unlink') }}</button>
-                            </form>
+                            <div class="flex items-center gap-4">
+                                <a href="{{ route('projects.pending-commits.index', $project) }}"
+                                    class="text-sm text-indigo-600 hover:text-indigo-800 font-semibold">{{ __('Review Commits') }}</a>
+                                <form method="POST" action="{{ route('projects.github.destroy', $project) }}"
+                                    onsubmit="return confirm('{{ __('Remove the GitHub repository link and delete the webhook?') }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="text-sm text-red-600 hover:text-red-800 font-semibold">{{ __('Unlink') }}</button>
+                                </form>
+                            </div>
                         </div>
                     @elseif (auth()->user()->githubConnection)
                         <div>

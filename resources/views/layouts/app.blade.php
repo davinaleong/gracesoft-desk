@@ -50,6 +50,7 @@
             ),
             'github-repo-linked' => __('GitHub repository linked successfully.'),
             'github-repo-unlinked' => __('GitHub repository has been unlinked.'),
+            'commit-converted' => __('Commit converted to time entry.'),
             default => is_string($status) ? $status : null,
         };
     @endphp

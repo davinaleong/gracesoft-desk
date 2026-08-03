@@ -138,15 +138,15 @@ Upcoming work:
 
 ### What was built
 
-| File | Notes |
-| ---- | ----- |
+| File                                                 | Notes                                                                                                                                                                                                                                           |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `2026_08_03_023951_create_commit_time_entries_table` | `id, uuid, project_id FK, sha (40), branch, author_name, author_email, committed_at, message, additions, deletions, changed_files, status (pending/approved/squashed/ignored), squashed_into FK (self), converted_time_entry_id FK, timestamps` |
-| `app/Models/CommitTimeEntry.php` | Full fillable + casts; `HasPublicUuid`; relations: `project`, `squashedInto`, `convertedTimeEntry` |
-| `database/factories/CommitTimeEntryFactory.php` | Realistic defaults with `Project::factory()` association |
-| `app/Http/Controllers/WebhookController.php` | `github()`: HMAC verification → ingestPush(); `ingestPush()`: upserts commits with `updateOrCreate`, computes `changed_files` from added/removed/modified arrays |
-| `bootstrap/app.php` | CSRF exclusion for `webhooks/github/*` |
-| `routes/web.php` | `POST /webhooks/github/{project:uuid}` wired to `WebhookController@github` |
-| `tests/Feature/CommitIngestionTest.php` | 8 tests: valid HMAC, bad HMAC, no signature, unknown UUID, push payload parsing, duplicate suppression, non-push event, multi-commit push |
+| `app/Models/CommitTimeEntry.php`                     | Full fillable + casts; `HasPublicUuid`; relations: `project`, `squashedInto`, `convertedTimeEntry`                                                                                                                                              |
+| `database/factories/CommitTimeEntryFactory.php`      | Realistic defaults with `Project::factory()` association                                                                                                                                                                                        |
+| `app/Http/Controllers/WebhookController.php`         | `github()`: HMAC verification → ingestPush(); `ingestPush()`: upserts commits with `updateOrCreate`, computes `changed_files` from added/removed/modified arrays                                                                                |
+| `bootstrap/app.php`                                  | CSRF exclusion for `webhooks/github/*`                                                                                                                                                                                                          |
+| `routes/web.php`                                     | `POST /webhooks/github/{project:uuid}` wired to `WebhookController@github`                                                                                                                                                                      |
+| `tests/Feature/CommitIngestionTest.php`              | 8 tests: valid HMAC, bad HMAC, no signature, unknown UUID, push payload parsing, duplicate suppression, non-push event, multi-commit push                                                                                                       |
 
 ### Design decisions
 
@@ -160,3 +160,35 @@ Upcoming work:
 ---
 
 ## Next: Milestone 5 — Rule-Based Stage Matching + Manual Review Screen
+
+---
+
+## Milestone 5 — Rule-Based Stage Matching + Manual Review Screen ✅
+
+**Completed:** 2026-08-03
+
+### What was built
+
+| File | Notes |
+| ---- | ----- |
+| `app/Services/CommitStageMatcherService.php` | `match(message, branch)`: scans `project_stages` ordered by `sort_order`, returns first stage whose keywords appear in message+branch (case-insensitive). `snapDuration(minutes)`: rounds to nearest 15 min (min 15). |
+| `app/Http/Controllers/PendingCommitController.php` | `index()` lists pending commits; `create()` shows convert form with suggested stage; `store()` snaps duration, creates `TimeEntry`, marks commit `approved` |
+| `resources/views/projects/pending-commits/index.blade.php` | Table: date, branch, author, message, diff stats, Convert link |
+| `resources/views/projects/pending-commits/convert.blade.php` | Conversion form: stage picker pre-selected by keyword match, date from commit, duration with step=15, billable from project, notes prefilled from commit message |
+| `resources/views/projects/show.blade.php` | "Review Commits" link added to GitHub section |
+| `resources/views/layouts/app.blade.php` | `commit-converted` flash message |
+| `routes/web.php` | `GET/POST /projects/{project}/pending-commits/{commit}/convert`, `GET /projects/{project}/pending-commits` |
+| `tests/Feature/PendingCommitReviewTest.php` | 12 tests: keyword matching, branch matching, case-insensitivity, null match, duration snapping, review screen access/filtering, convert form, conversion flow, 15-min snapping, cross-project 404 guard |
+
+### Design decisions
+
+- **Keyword matcher is stateless service** — no DB write, easily mockable.
+- **`snapDuration` is a static method** — used in both controller and tests without DI.
+- **Stage pre-selected but editable** — the `suggested_stage` sets the default `<select>` value but the user can override.
+- **Duration uses `step=15` in HTML** — enforces 15-min increments in the browser; server also snaps on save.
+- **Billable default from project** — `$project->is_billable` pre-ticks the checkbox.
+- **`abort_unless` cross-project guard** — prevents converting a commit from project B via project A's route.
+
+---
+
+## Next: Milestone 6 — AI Summary + AI Stage Fallback

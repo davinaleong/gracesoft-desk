@@ -40,11 +40,11 @@
 
 ## Milestone 5: Rule-based stage matching + manual review screen
 
-- [ ] Keyword matcher: commit message/branch → `sdlc_stages.keywords`, ordered by `sort_order`
-- [ ] Review screen `/projects/{project}/pending-commits` — reuse Time Entries table layout/columns
-- [ ] Action: convert single commit → `time_entries` row (stage prefilled, billable from project, duration manual)
-- [ ] Duration input snaps to existing increments (5/15-min steps) to match table conventions
-- [ ] Tests: keyword matching accuracy, manual conversion flow, duration snapping
+- [x] Keyword matcher: commit message/branch → `sdlc_stages.keywords`, ordered by `sort_order`
+- [x] Review screen `/projects/{project}/pending-commits` — reuse Time Entries table layout/columns
+- [x] Action: convert single commit → `time_entries` row (stage prefilled, billable from project, duration manual)
+- [x] Duration input snaps to existing increments (5/15-min steps) to match table conventions
+- [x] Tests: keyword matching accuracy, manual conversion flow, duration snapping
 
 ## Milestone 6: AI summary + AI stage fallback
 

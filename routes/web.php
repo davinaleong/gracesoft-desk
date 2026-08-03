@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GitHubConnectionController;
+use App\Http\Controllers\PendingCommitController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectGithubController;
@@ -92,6 +93,10 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
 
     Route::post('/projects/{project}/github', [ProjectGithubController::class, 'store'])->name('projects.github.store');
     Route::delete('/projects/{project}/github', [ProjectGithubController::class, 'destroy'])->name('projects.github.destroy');
+
+    Route::get('/projects/{project}/pending-commits', [PendingCommitController::class, 'index'])->name('projects.pending-commits.index');
+    Route::get('/projects/{project}/pending-commits/{commit}/convert', [PendingCommitController::class, 'create'])->name('projects.pending-commits.create');
+    Route::post('/projects/{project}/pending-commits/{commit}/convert', [PendingCommitController::class, 'store'])->name('projects.pending-commits.store');
 });
 
 // GitHub OAuth callback — exempt from password.changed / twofactor middleware (arrives mid-flow)
