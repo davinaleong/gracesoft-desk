@@ -48,6 +48,8 @@
             'archive-mode-read-only' => __(
                 'Archive mode is enabled. This action is blocked while the desk is read-only.',
             ),
+            'github-repo-linked' => __('GitHub repository linked successfully.'),
+            'github-repo-unlinked' => __('GitHub repository has been unlinked.'),
             default => is_string($status) ? $status : null,
         };
     @endphp
@@ -85,6 +87,7 @@
             </main>
         </div>
     </div>
+    @stack('scripts')
 </body>
 
 </html>

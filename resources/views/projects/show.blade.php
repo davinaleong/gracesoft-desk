@@ -57,6 +57,69 @@
                 </div>
             </div>
 
+            {{-- GitHub Repository --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" x-data="repoPicker()">
+                <div class="p-6 text-gray-900">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-4">{{ __('GitHub Repository') }}</h3>
+
+                    @if ($project->github_repo)
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs text-gray-500 uppercase">{{ __('Linked Repository') }}</p>
+                                <a href="https://github.com/{{ $project->github_repo }}" target="_blank" rel="noopener noreferrer"
+                                    class="text-indigo-600 hover:underline font-mono text-sm">{{ $project->github_repo }}</a>
+                            </div>
+                            <form method="POST" action="{{ route('projects.github.destroy', $project) }}"
+                                onsubmit="return confirm('{{ __('Remove the GitHub repository link and delete the webhook?') }}')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit"
+                                    class="text-sm text-red-600 hover:text-red-800 font-semibold">{{ __('Unlink') }}</button>
+                            </form>
+                        </div>
+                    @elseif (auth()->user()->githubConnection)
+                        <div>
+                            <button type="button" @click="loadRepos"
+                                class="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 mb-3">
+                                {{ __('Link Repository') }}
+                            </button>
+
+                            <div x-show="loading" class="text-sm text-gray-500">{{ __('Loading repositories…') }}</div>
+
+                            <div x-show="repos.length > 0 && !loading">
+                                <form method="POST" action="{{ route('projects.github.store', $project) }}" class="flex items-center gap-3">
+                                    @csrf
+                                    <div class="flex-1">
+                                        <input type="text" list="repo-list" name="github_repo" x-model="selected"
+                                            placeholder="{{ __('Search repositories…') }}"
+                                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
+                                            required>
+                                        <datalist id="repo-list">
+                                            <template x-for="repo in repos" :key="repo.full_name">
+                                                <option :value="repo.full_name"></option>
+                                            </template>
+                                        </datalist>
+                                    </div>
+                                    <x-primary-button>{{ __('Link') }}</x-primary-button>
+                                </form>
+                            </div>
+
+                            <div x-show="error" class="text-sm text-red-600" x-text="error"></div>
+
+                            @error('github_repo')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-500">
+                            {{ __('Connect') }}
+                            <a href="{{ route('settings.github.show') }}" class="text-indigo-600 hover:underline">{{ __('GitHub') }}</a>
+                            {{ __('in Settings to link a repository.') }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+
             {{-- Documents --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
@@ -142,4 +205,32 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        function repoPicker() {
+            return {
+                repos: [],
+                selected: '',
+                loading: false,
+                error: '',
+                async loadRepos() {
+                    this.loading = true;
+                    this.error = '';
+                    try {
+                        const res = await fetch('{{ route('settings.github.repos') }}', {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        if (!res.ok) throw new Error('Failed to load repositories.');
+                        this.repos = await res.json();
+                    } catch (e) {
+                        this.error = e.message;
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            };
+        }
+    </script>
+    @endpush
 </x-app-layout>

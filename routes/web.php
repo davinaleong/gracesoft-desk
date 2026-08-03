@@ -5,6 +5,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GitHubConnectionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectGithubController;
 use App\Http\Controllers\ProjectImportController;
 use App\Http\Controllers\ProjectStageController;
 use App\Http\Controllers\ReportController;
@@ -85,11 +86,18 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
 
     Route::get('/settings/github', [GitHubConnectionController::class, 'show'])->name('settings.github.show');
     Route::get('/settings/github/redirect', [GitHubConnectionController::class, 'redirect'])->name('settings.github.redirect');
+    Route::get('/settings/github/repos', [ProjectGithubController::class, 'repos'])->name('settings.github.repos');
     Route::delete('/settings/github', [GitHubConnectionController::class, 'destroy'])->name('settings.github.destroy');
+
+    Route::post('/projects/{project}/github', [ProjectGithubController::class, 'store'])->name('projects.github.store');
+    Route::delete('/projects/{project}/github', [ProjectGithubController::class, 'destroy'])->name('projects.github.destroy');
 });
 
 // GitHub OAuth callback — exempt from password.changed / twofactor middleware (arrives mid-flow)
 Route::middleware('auth')->get('/settings/github/callback', [GitHubConnectionController::class, 'callback'])->name('settings.github.callback');
+
+// GitHub push webhook — public endpoint, verified by HMAC signature (Milestone 4)
+Route::post('/webhooks/github/{project:uuid}', fn () => response()->noContent())->name('webhooks.github');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

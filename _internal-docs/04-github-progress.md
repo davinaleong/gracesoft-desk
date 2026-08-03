@@ -89,3 +89,43 @@ Upcoming work:
 - Repo picker UI on project form (calls GitHub API using stored token)
 - Auto-register webhook (`push` event) on repo link; remove on unlink
 - Tests: webhook registration/removal, repo picker with mocked GitHub API
+
+---
+
+## Milestone 3 — Project ↔ Repo Linking ✅
+
+**Completed:** 2026-08-03
+
+### What was built
+
+| File | Notes |
+| ---- | ----- |
+| `2026_08_03_022012_add_github_fields_to_projects_table` | Adds `github_repo` (string nullable), `github_webhook_id` (unsignedBigInteger nullable), `github_webhook_secret` (text nullable, encrypted) |
+| `app/Models/Project.php` | Added three new fields to fillable; casts: `github_webhook_id → integer`, `github_webhook_secret → encrypted` |
+| `app/Services/GitHubService.php` | `listRepositories()` (paginated), `registerWebhook()`, `removeWebhook()` (404-tolerant). Uses `Illuminate\Support\Facades\Http` with Bearer token. |
+| `app/Http/Controllers/ProjectGithubController.php` | `repos()` JSON endpoint, `store()` link + register webhook, `destroy()` unlink + remove webhook |
+| `resources/views/projects/show.blade.php` | GitHub Repository section: shows linked repo + Unlink button; or repo picker (Alpine.js datalist) when connected; or prompt to connect GitHub |
+| `resources/views/layouts/app.blade.php` | Added `@stack('scripts')`, flash messages for `github-repo-linked` and `github-repo-unlinked` |
+| `routes/web.php` | `GET /settings/github/repos` (JSON), `POST /projects/{project}/github`, `DELETE /projects/{project}/github`, placeholder `POST /webhooks/github/{project:uuid}` (Milestone 4) |
+| `tests/Feature/ProjectGithubTest.php` | 12 tests: repos JSON (connected/no-connection/auth), link (success/invalid-format/no-connection/relink), unlink (success/404-tolerant), show page (linked/link prompt/connect prompt) |
+
+### Design decisions
+
+- **`github_webhook_secret` encrypted at rest** using Laravel's `encrypted` cast — never plaintext in DB.
+- **Relink flow** calls `removeWebhook` on the previous repo before registering the new one.
+- **404-tolerant `removeWebhook`** — if the webhook was already deleted on GitHub's side, the DB fields are still cleared cleanly.
+- **Repo picker uses `<datalist>`** + Alpine.js `loadRepos()` — no heavy JS dependency, lazy-loaded on click.
+- **`@stack('scripts')` added** to app layout to support page-level inline scripts going forward.
+- **Webhook placeholder route** (`/webhooks/github/{project:uuid}`) added now so `route('webhooks.github', $project)` resolves during Milestone 3 registration; full handler implemented in Milestone 4.
+
+---
+
+## Next: Milestone 4 — Commit Ingestion (no AI yet)
+
+Upcoming work:
+
+- `commit_time_entries` table (raw commit capture + status field)
+- Webhook endpoint `POST /webhooks/github/{project_uuid}` with HMAC signature verification
+- Parse `push` payload, upsert commit rows as `pending`
+- Fetch commit stats (additions/deletions) via GitHub API where not in payload
+- Tests: signature verification (valid/invalid), payload parsing, duplicate commit handling

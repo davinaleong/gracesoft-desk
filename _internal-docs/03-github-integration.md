@@ -24,11 +24,11 @@
 
 ## Milestone 3: Project ↔ Repo linking
 
-- [ ] Add `github_repo`, `github_webhook_secret` (nullable) to `projects`
-- [ ] Add `default_hourly_rate` / confirm billable field per Milestone 0 findings
-- [ ] Repo picker UI on project form (calls GitHub API using stored token)
-- [ ] Auto-register webhook (`push` event) on repo link; remove webhook on unlink
-- [ ] Tests: webhook registration/removal, repo picker with mocked GitHub API
+- [x] Add `github_repo`, `github_webhook_secret` (nullable) to `projects`
+- [x] Add `default_hourly_rate` / confirm billable field per Milestone 0 findings
+- [x] Repo picker UI on project form (calls GitHub API using stored token)
+- [x] Auto-register webhook (`push` event) on repo link; remove webhook on unlink
+- [x] Tests: webhook registration/removal, repo picker with mocked GitHub API
 
 ## Milestone 4: Commit ingestion (no AI yet)
 

@@ -32,6 +32,9 @@ class Project extends Model
         'ends_on',
         'is_billable',
         'hourly_rate',
+        'github_repo',
+        'github_webhook_id',
+        'github_webhook_secret',
     ];
 
     protected $hidden = ['id'];
@@ -43,6 +46,8 @@ class Project extends Model
             'ends_on' => 'date',
             'is_billable' => 'boolean',
             'hourly_rate' => 'decimal:2',
+            'github_webhook_id' => 'integer',
+            'github_webhook_secret' => 'encrypted',
         ];
     }
 
