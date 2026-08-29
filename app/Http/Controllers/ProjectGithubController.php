@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ProjectGithubController extends Controller
 {
@@ -32,7 +33,14 @@ class ProjectGithubController extends Controller
     public function store(Request $request, Project $project): RedirectResponse
     {
         $validated = $request->validate([
-            'github_repo' => ['required', 'string', 'regex:/^[^\/]+\/[^\/]+$/'],
+            'github_repo' => [
+                'required',
+                'string',
+                'regex:/^[^\/]+\/[^\/]+$/',
+                Rule::unique('projects', 'github_repo')->ignore($project->id),
+            ],
+        ], [
+            'github_repo.unique' => __('This repository is already linked to another project.'),
         ]);
 
         $connection = Auth::user()->githubConnection;

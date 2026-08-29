@@ -99,6 +99,44 @@ test('linking a repo requires github connection', function () {
         ->assertForbidden();
 });
 
+test('linking a repo already linked to another project is rejected', function () {
+    $user = githubReadyUser();
+    withGitHubConnection($user);
+    Project::factory()->create(['github_repo' => 'octocat/hello-world']);
+    $project = Project::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('projects.github.store', $project), ['github_repo' => 'octocat/hello-world'])
+        ->assertSessionHasErrors('github_repo');
+
+    $project->refresh();
+    expect($project->github_repo)->toBeNull();
+});
+
+test('relinking a project to the same repo it already holds is allowed', function () {
+    $user = githubReadyUser();
+    withGitHubConnection($user);
+    $project = Project::factory()->create([
+        'github_repo' => 'octocat/hello-world',
+        'github_webhook_id' => 111,
+        'github_webhook_secret' => 'old-secret',
+    ]);
+
+    Http::fake([
+        'https://api.github.com/repos/octocat/hello-world/hooks/111' => Http::response(null, 204),
+        'https://api.github.com/repos/octocat/hello-world/hooks' => Http::response(['id' => 222], 201),
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('projects.github.store', $project), ['github_repo' => 'octocat/hello-world'])
+        ->assertSessionDoesntHaveErrors('github_repo')
+        ->assertRedirect(route('projects.show', $project));
+
+    $project->refresh();
+    expect($project->github_repo)->toBe('octocat/hello-world')
+        ->and($project->github_webhook_id)->toBe(222);
+});
+
 test('relinking a repo removes the old webhook first', function () {
     $user = githubReadyUser();
     withGitHubConnection($user);
