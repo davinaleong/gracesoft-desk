@@ -89,6 +89,7 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::get('/settings/github', [GitHubConnectionController::class, 'show'])->name('settings.github.show');
     Route::get('/settings/github/redirect', [GitHubConnectionController::class, 'redirect'])->name('settings.github.redirect');
     Route::get('/settings/github/repos', [ProjectGithubController::class, 'repos'])->name('settings.github.repos');
+    Route::get('/settings/github/branches', [ProjectGithubController::class, 'branches'])->name('settings.github.branches');
     Route::delete('/settings/github', [GitHubConnectionController::class, 'destroy'])->name('settings.github.destroy');
 
     Route::post('/projects/{project}/github', [ProjectGithubController::class, 'store'])->name('projects.github.store');

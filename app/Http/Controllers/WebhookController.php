@@ -52,6 +52,13 @@ class WebhookController extends Controller
             return;
         }
 
+        // Projects linked before branch tracking have no github_branch set
+        // and keep ingesting every branch; once a branch is chosen, pushes
+        // to any other branch are ignored.
+        if ($project->github_branch && $project->github_branch !== $branch) {
+            return;
+        }
+
         $pushBatchUuid = (string) Str::uuid();
 
         $isLargePush = app(PushSizeThresholdService::class)->isLargePush($project, count($commits));

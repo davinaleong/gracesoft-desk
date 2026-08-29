@@ -29,7 +29,26 @@ class ProjectGithubController extends Controller
         return response()->json($repos);
     }
 
-    /** Link a GitHub repository to a project and register a push webhook. */
+    /** JSON endpoint used by the branch picker to list a repository's branches. */
+    public function branches(Request $request): JsonResponse
+    {
+        $connection = Auth::user()->githubConnection;
+
+        if (! $connection) {
+            return response()->json(['error' => 'No GitHub connection found.'], 403);
+        }
+
+        $validated = $request->validate([
+            'repo' => ['required', 'string', 'regex:/^[^\/]+\/[^\/]+$/'],
+        ]);
+
+        $service = new GitHubService($connection->access_token);
+        $branches = $service->listBranches($validated['repo']);
+
+        return response()->json($branches);
+    }
+
+    /** Link a GitHub repository + branch to a project and register a push webhook. */
     public function store(Request $request, Project $project): RedirectResponse
     {
         $validated = $request->validate([
@@ -39,6 +58,7 @@ class ProjectGithubController extends Controller
                 'regex:/^[^\/]+\/[^\/]+$/',
                 Rule::unique('projects', 'github_repo')->ignore($project->id),
             ],
+            'github_branch' => ['required', 'string'],
         ], [
             'github_repo.unique' => __('This repository is already linked to another project.'),
         ]);
@@ -58,6 +78,7 @@ class ProjectGithubController extends Controller
 
         $project->update([
             'github_repo' => $validated['github_repo'],
+            'github_branch' => $validated['github_branch'],
             'github_webhook_id' => $webhookId,
             'github_webhook_secret' => $secret,
         ]);
@@ -78,6 +99,7 @@ class ProjectGithubController extends Controller
 
         $project->update([
             'github_repo' => null,
+            'github_branch' => null,
             'github_webhook_id' => null,
             'github_webhook_secret' => null,
         ]);

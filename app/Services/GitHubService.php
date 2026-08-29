@@ -18,7 +18,7 @@ class GitHubService
             ->baseUrl(self::API_BASE);
     }
 
-    /** @return array<int, array{full_name: string, private: bool}> */
+    /** @return array<int, array{full_name: string, private: bool, default_branch: string}> */
     public function listRepositories(): array
     {
         $repos = [];
@@ -41,7 +41,29 @@ class GitHubService
         return array_map(fn (array $r) => [
             'full_name' => $r['full_name'],
             'private' => $r['private'],
+            'default_branch' => $r['default_branch'] ?? 'main',
         ], $repos);
+    }
+
+    /** @return array<int, string> */
+    public function listBranches(string $repo): array
+    {
+        $branches = [];
+        $page = 1;
+
+        do {
+            $response = $this->client()->get("/repos/{$repo}/branches", [
+                'per_page' => 100,
+                'page' => $page,
+            ]);
+
+            $response->throw();
+            $batch = $response->json();
+            $branches = array_merge($branches, $batch);
+            $page++;
+        } while (count($batch) === 100);
+
+        return array_map(fn (array $b) => $b['name'], $branches);
     }
 
     /** @param array<string, mixed> $config */

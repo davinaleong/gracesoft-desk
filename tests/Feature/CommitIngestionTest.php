@@ -155,3 +155,59 @@ test('push payload with multiple commits creates multiple rows', function () {
     $this->assertDatabaseCount('commit_time_entries', 2);
     $this->assertDatabaseHas('commit_time_entries', ['branch' => 'feature/login']);
 });
+
+// ── Branch scoping ───────────────────────────────────────────────────────────
+
+test('a push to a non-tracked branch is ignored when a branch is set', function () {
+    $project = webhookProject(['github_branch' => 'main']);
+
+    $payload = [
+        'ref' => 'refs/heads/feature/other',
+        'commits' => [
+            ['id' => 'branch111111111111111111111111111111111', 'message' => 'Off-branch work', 'author' => ['name' => 'Alice', 'email' => 'a@example.com'], 'timestamp' => now()->toIso8601String(), 'added' => [], 'removed' => [], 'modified' => []],
+        ],
+    ];
+
+    $data = signedWebhookPost($project->uuid, $payload);
+
+    $this->call('POST', $data['url'], [], [], [], $data['server'], $data['body'])
+        ->assertNoContent();
+
+    $this->assertDatabaseEmpty('commit_time_entries');
+});
+
+test('a push to the tracked branch is ingested', function () {
+    $project = webhookProject(['github_branch' => 'main']);
+
+    $payload = [
+        'ref' => 'refs/heads/main',
+        'commits' => [
+            ['id' => 'branch222222222222222222222222222222222', 'message' => 'On-branch work', 'author' => ['name' => 'Alice', 'email' => 'a@example.com'], 'timestamp' => now()->toIso8601String(), 'added' => [], 'removed' => [], 'modified' => []],
+        ],
+    ];
+
+    $data = signedWebhookPost($project->uuid, $payload);
+
+    $this->call('POST', $data['url'], [], [], [], $data['server'], $data['body'])
+        ->assertNoContent();
+
+    $this->assertDatabaseCount('commit_time_entries', 1);
+});
+
+test('a project with no branch set ingests pushes from any branch', function () {
+    $project = webhookProject(['github_branch' => null]);
+
+    $payload = [
+        'ref' => 'refs/heads/whatever',
+        'commits' => [
+            ['id' => 'branch333333333333333333333333333333333', 'message' => 'Legacy project work', 'author' => ['name' => 'Alice', 'email' => 'a@example.com'], 'timestamp' => now()->toIso8601String(), 'added' => [], 'removed' => [], 'modified' => []],
+        ],
+    ];
+
+    $data = signedWebhookPost($project->uuid, $payload);
+
+    $this->call('POST', $data['url'], [], [], [], $data['server'], $data['body'])
+        ->assertNoContent();
+
+    $this->assertDatabaseCount('commit_time_entries', 1);
+});
