@@ -25,6 +25,8 @@ class CommitTimeEntry extends Model
     protected $fillable = [
         'project_id',
         'sha',
+        'push_batch_uuid',
+        'from_large_batch',
         'branch',
         'author_name',
         'author_email',
@@ -47,6 +49,7 @@ class CommitTimeEntry extends Model
             'additions' => 'integer',
             'deletions' => 'integer',
             'changed_files' => 'integer',
+            'from_large_batch' => 'boolean',
         ];
     }
 

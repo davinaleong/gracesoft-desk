@@ -249,4 +249,27 @@ Upcoming work:
 
 ---
 
-## Next: Milestone 8 — Smart Batching/Queueing
+## Milestone 8 — Smart Batching/Queueing ✅
+
+**Completed:** 2026-08-29
+
+### What was built
+
+| File                                                                       | Notes                                                                                                                                                        |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `2026_08_29_021318_add_push_batch_fields_to_commit_time_entries_table`      | Adds `push_batch_uuid` (uuid, nullable, indexed) and `from_large_batch` (boolean, default false, indexed)                                                    |
+| `app/Models/CommitTimeEntry.php`                                            | Added both fields to fillable; `from_large_batch → boolean` cast                                                                                              |
+| `app/Services/PushSizeThresholdService.php`                                 | `threshold(project)`: avg + 2×stddev over the last 10 push batches; falls back to a constant (10) when fewer than 3 prior pushes exist. `isLargePush()` helper |
+| `app/Services/CommitIngestionService.php`                                   | Extracted commit-upsert logic (previously inline in `WebhookController`) so both the sync path and the queued job share one implementation                    |
+| `app/Jobs/IngestLargePushBatch.php`                                         | Queued job; runs `CommitIngestionService::ingest()` with `fromLargeBatch = true`                                                                              |
+| `app/Http/Controllers/WebhookController.php`                                | Generates a `push_batch_uuid` per push; asks `PushSizeThresholdService` whether the push is large; dispatches `IngestLargePushBatch` instead of ingesting inline when it is |
+| `tests/Feature/SmartBatchingTest.php`                                       | 7 tests: avg+2stddev threshold math, missing-push-uuid history ignored, cold-start fallback, small push stays synchronous, large push dispatches to the queue, queued job tags rows correctly and skips per-commit AI, large batch shows up as a suggested squash group |
+
+### Design decisions
+
+- **`push_batch_uuid` is assigned to every push, not just large ones.** The rolling stat needs a complete history of push sizes to compute a meaningful average/stddev — if only large pushes were tagged, the threshold would never adapt to a project's normal push rhythm.
+- **Threshold = avg + 2×stddev, gated on ≥3 prior pushes.** Fewer than 3 data points makes stddev unreliable (a single big push would blow out the threshold for everyone after it); those cases fall back to a fixed constant (10 commits) instead.
+- **Rolling window is the last 10 pushes**, ordered by ingestion recency (`created_at`), not commit-authored time — a push's own commits can have arbitrary `committed_at` timestamps (rebases, backdated commits), but ingestion order reliably reflects push order.
+- **Large pushes skip per-commit AI summarization.** `CommitIngestionService` only dispatches `SummarizeCommit` for non-batch commits — a 200-commit push would otherwise fire 200 AI jobs. The batch is instead surfaced as a suggested squash group (Milestone 7 UI), and `SummarizeSquashedCommits` produces one coherent note if/when the reviewer actually squashes it.
+- **Ingestion logic extracted into `CommitIngestionService`** so the synchronous webhook path and the queued `IngestLargePushBatch` job can't drift apart — one method, two callers.
+- **Large-push detection happens before any DB writes**, using only `count($payload['commits'])` — no need to touch the database to decide whether to queue.

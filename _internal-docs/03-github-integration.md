@@ -63,11 +63,11 @@
 
 ## Milestone 8: Smart batching/queueing
 
-- [ ] Rolling commits-per-push stat per project (last N pushes)
-- [ ] Threshold logic (avg + 2×stddev, fallback constant for cold start)
-- [ ] Large pushes dispatched to queued batch job instead of sync processing
-- [ ] Large pushes default to review screen as suggested squash group
-- [ ] Tests: threshold calculation, queue dispatch, cold-start fallback
+- [x] Rolling commits-per-push stat per project (last N pushes)
+- [x] Threshold logic (avg + 2×stddev, fallback constant for cold start)
+- [x] Large pushes dispatched to queued batch job instead of sync processing
+- [x] Large pushes default to review screen as suggested squash group
+- [x] Tests: threshold calculation, queue dispatch, cold-start fallback
 
 ## Open questions to resolve before Milestone 1
 
