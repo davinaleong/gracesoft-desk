@@ -25,6 +25,29 @@ test('projects index is accessible', function () {
     $response->assertOk()->assertSee('PRJ-OPS-001');
 });
 
+test('projects index shows github link status', function () {
+    $user = readyUser();
+
+    Project::factory()->create([
+        'code' => 'PRJ-LINKED-001',
+        'name' => 'Linked Project',
+        'github_repo' => 'octocat/hello-world',
+        'github_branch' => 'main',
+    ]);
+
+    Project::factory()->create([
+        'code' => 'PRJ-UNLINKED-001',
+        'name' => 'Unlinked Project',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('projects.index'));
+
+    $response->assertOk()
+        ->assertSee('Linked')
+        ->assertSee('octocat/hello-world')
+        ->assertSee('Not linked');
+});
+
 test('project can be created with manual code', function () {
     $user = readyUser();
 
