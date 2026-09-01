@@ -1,5 +1,5 @@
 # TODO
 
-- [ ] Issues:
-    - [ ] Projects: Connect to Repo/Branch UI missing.
-    - [ ] Security: 2FA Authenticator Code not recognised.
+- [ ] Improvements:
+    - [ ] Dashboard: Graph of monthly cash flow
+    - [ ] Dashboard: Summary of monthly money in/out
