@@ -33,6 +33,7 @@ class Project extends Model
         'is_billable',
         'hourly_rate',
         'github_repo',
+        'github_branch',
         'github_webhook_id',
         'github_webhook_secret',
     ];

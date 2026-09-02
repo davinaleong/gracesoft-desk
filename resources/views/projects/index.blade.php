@@ -47,6 +47,9 @@
                                     <th scope="col"
                                         class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                                         {{ __('Billable') }}</th>
+                                    <th scope="col"
+                                        class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                        {{ __('GitHub') }}</th>
                                     <th scope="col" class="px-4 py-2"></th>
                                 </tr>
                             </thead>
@@ -58,6 +61,19 @@
                                         <td class="px-4 py-3 text-sm">{{ $project->status }}</td>
                                         <td class="px-4 py-3 text-sm">
                                             {{ $project->is_billable ? __('Yes') : __('No') }}</td>
+                                        <td class="px-4 py-3 text-sm">
+                                            @if ($project->github_repo)
+                                                <span class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs bg-green-100 text-green-700"
+                                                    title="{{ $project->github_repo }}{{ $project->github_branch ? '@'.$project->github_branch : '' }}">
+                                                    {{ __('Linked') }}
+                                                </span>
+                                                <span class="ml-1 font-mono text-xs text-gray-500">{{ Str::limit($project->github_repo, 24) }}</span>
+                                            @else
+                                                <span class="inline-block rounded px-2 py-0.5 text-xs bg-gray-100 text-gray-500">
+                                                    {{ __('Not linked') }}
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3 text-right text-sm">
                                             <a href="{{ route('projects.show', $project) }}"
                                                 aria-label="{{ __('View project :code', ['code' => $project->code]) }}"
@@ -66,7 +82,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td class="px-4 py-6 text-sm text-gray-500" colspan="5">
+                                        <td class="px-4 py-6 text-sm text-gray-500" colspan="6">
                                             {{ __('No projects yet.') }}</td>
                                     </tr>
                                 @endforelse

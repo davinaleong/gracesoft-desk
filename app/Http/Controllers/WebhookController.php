@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\SummarizeCommit;
-use App\Models\CommitTimeEntry;
+use App\Jobs\IngestLargePushBatch;
 use App\Models\Project;
-use Carbon\Carbon;
+use App\Services\CommitIngestionService;
+use App\Services\PushSizeThresholdService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Str;
 
 class WebhookController extends Controller
 {
@@ -51,48 +52,26 @@ class WebhookController extends Controller
             return;
         }
 
-        // Determine if commit stats need to be fetched separately
-        $firstCommit = $commits[0] ?? [];
-        $statsInPayload = isset($firstCommit['added'], $firstCommit['removed'], $firstCommit['modified']);
-
-        foreach ($commits as $commit) {
-            $sha = $commit['id'] ?? null;
-
-            if (! $sha) {
-                continue;
-            }
-
-            $additions = null;
-            $deletions = null;
-            $changedFiles = null;
-
-            if ($statsInPayload) {
-                $changedFiles = count($commit['added'] ?? [])
-                    + count($commit['removed'] ?? [])
-                    + count($commit['modified'] ?? []);
-            }
-
-            $entry = CommitTimeEntry::updateOrCreate(
-                ['project_id' => $project->id, 'sha' => $sha],
-                [
-                    'branch' => $branch,
-                    'author_name' => $commit['author']['name'] ?? null,
-                    'author_email' => $commit['author']['email'] ?? null,
-                    'committed_at' => isset($commit['timestamp'])
-                        ? Carbon::parse($commit['timestamp'])
-                        : null,
-                    'message' => $commit['message'] ?? '',
-                    'additions' => $additions,
-                    'deletions' => $deletions,
-                    'changed_files' => $changedFiles,
-                    'status' => 'pending',
-                ]
-            );
-
-            // Only dispatch AI summarization for newly created rows.
-            if ($entry->wasRecentlyCreated) {
-                SummarizeCommit::dispatch($entry);
-            }
+        // Projects linked before branch tracking have no github_branch set
+        // and keep ingesting every branch; once a branch is chosen, pushes
+        // to any other branch are ignored.
+        if ($project->github_branch && $project->github_branch !== $branch) {
+            return;
         }
+
+        $pushBatchUuid = (string) Str::uuid();
+
+        $isLargePush = app(PushSizeThresholdService::class)->isLargePush($project, count($commits));
+
+        // Large pushes are handed off to a queued job rather than processed
+        // inline — upserting hundreds of commits synchronously risks the
+        // webhook request timing out on GitHub's side.
+        if ($isLargePush) {
+            IngestLargePushBatch::dispatch($project, $branch, $commits, $pushBatchUuid);
+
+            return;
+        }
+
+        app(CommitIngestionService::class)->ingest($project, $branch, $commits, $pushBatchUuid, false);
     }
 }

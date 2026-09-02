@@ -68,6 +68,9 @@
                                 <p class="text-xs text-gray-500 uppercase">{{ __('Linked Repository') }}</p>
                                 <a href="https://github.com/{{ $project->github_repo }}" target="_blank" rel="noopener noreferrer"
                                     class="text-indigo-600 hover:underline font-mono text-sm">{{ $project->github_repo }}</a>
+                                @if ($project->github_branch)
+                                    <span class="ml-2 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-mono text-gray-600">{{ $project->github_branch }}</span>
+                                @endif
                             </div>
                             <div class="flex items-center gap-4">
                                 <a href="{{ route('projects.pending-commits.index', $project) }}"
@@ -91,12 +94,13 @@
                             <div x-show="loading" class="text-sm text-gray-500">{{ __('Loading repositories…') }}</div>
 
                             <div x-show="repos.length > 0 && !loading">
-                                <form method="POST" action="{{ route('projects.github.store', $project) }}" class="flex items-center gap-3">
+                                <form method="POST" action="{{ route('projects.github.store', $project) }}" class="flex items-start gap-3">
                                     @csrf
                                     <div class="flex-1">
                                         <input type="text" list="repo-list" name="github_repo" x-model="selected"
+                                            @input="onRepoInput"
                                             placeholder="{{ __('Search repositories…') }}"
-                                            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
+                                            class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm"
                                             required>
                                         <datalist id="repo-list">
                                             <template x-for="repo in repos" :key="repo.full_name">
@@ -104,13 +108,29 @@
                                             </template>
                                         </datalist>
                                     </div>
+                                    <div class="w-48">
+                                        <select name="github_branch" x-model="selectedBranch"
+                                            :disabled="branches.length === 0 || branchLoading"
+                                            class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm disabled:bg-gray-50 disabled:text-gray-400"
+                                            required>
+                                            <option value="" x-text="branchLoading ? '{{ __('Loading branches…') }}' : '{{ __('Select a branch…') }}'"></option>
+                                            <template x-for="branch in branches" :key="branch">
+                                                <option :value="branch" x-text="branch"></option>
+                                            </template>
+                                        </select>
+                                    </div>
                                     <x-primary-button>{{ __('Link') }}</x-primary-button>
                                 </form>
                             </div>
 
                             <div x-show="error" class="text-sm text-red-600" x-text="error"></div>
+                            <div x-show="branchError" class="text-sm text-red-600" x-text="branchError"></div>
 
                             @error('github_repo')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+
+                            @error('github_branch')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
@@ -218,6 +238,10 @@
                 selected: '',
                 loading: false,
                 error: '',
+                branches: [],
+                selectedBranch: '',
+                branchLoading: false,
+                branchError: '',
                 async loadRepos() {
                     this.loading = true;
                     this.error = '';
@@ -231,6 +255,34 @@
                         this.error = e.message;
                     } finally {
                         this.loading = false;
+                    }
+                },
+                onRepoInput() {
+                    const repo = this.repos.find(r => r.full_name === this.selected);
+                    this.branches = [];
+                    this.selectedBranch = '';
+                    this.branchError = '';
+
+                    if (repo) {
+                        this.loadBranches(repo.full_name, repo.default_branch);
+                    }
+                },
+                async loadBranches(fullName, defaultBranch) {
+                    this.branchLoading = true;
+                    this.branchError = '';
+                    try {
+                        const res = await fetch('{{ route('settings.github.branches') }}?repo=' + encodeURIComponent(fullName), {
+                            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                        });
+                        if (!res.ok) throw new Error('Failed to load branches.');
+                        this.branches = await res.json();
+                        this.selectedBranch = this.branches.includes(defaultBranch)
+                            ? defaultBranch
+                            : (this.branches[0] ?? '');
+                    } catch (e) {
+                        this.branchError = e.message;
+                    } finally {
+                        this.branchLoading = false;
                     }
                 }
             };

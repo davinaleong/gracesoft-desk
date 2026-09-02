@@ -21,10 +21,12 @@
                 <x-desk.kpi-card :label="__('Total Logged Hours')" :value="number_format((float) $dashboard['kpis']['total_logged_hours'], 2)" />
                 <x-desk.kpi-card :label="__('Total Billable Value')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['total_billable_value'])" />
                 <x-desk.kpi-card :label="__('Net Cashflow (This Month)')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['net_cashflow_this_month'])" :tone="(float) $dashboard['kpis']['net_cashflow_this_month'] >= 0 ? 'positive' : 'negative'" />
+                <x-desk.kpi-card :label="__('Money In (This Month)')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['money_in_this_month'])" tone="positive" />
+                <x-desk.kpi-card :label="__('Money Out (This Month)')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['money_out_this_month'])" tone="negative" />
             </div>
 
             <div class="desk-content-grid">
-                <x-desk.chart-card class="xl:col-span-2" :title="__('Monthly Net Cashflow')">
+                <x-desk.chart-card class="xl:col-span-2" :title="__('Monthly Cash Flow')">
                     <div id="monthly-cashflow-chart" class="h-80"></div>
                 </x-desk.chart-card>
 
@@ -151,16 +153,29 @@
                 },
                 stroke: {
                     curve: 'smooth',
-                    width: 3,
+                    width: [0, 0, 3],
                 },
-                series: [{
-                    name: 'Net Cashflow',
-                    data: @json($dashboard['monthly_cashflow']['values']),
-                }],
+                series: [
+                    {
+                        name: 'Money In',
+                        type: 'column',
+                        data: @json($dashboard['monthly_cashflow']['money_in']),
+                    },
+                    {
+                        name: 'Money Out',
+                        type: 'column',
+                        data: @json($dashboard['monthly_cashflow']['money_out']),
+                    },
+                    {
+                        name: 'Net',
+                        type: 'line',
+                        data: @json($dashboard['monthly_cashflow']['values']),
+                    },
+                ],
                 xaxis: {
                     categories: @json($dashboard['monthly_cashflow']['labels']),
                 },
-                colors: ['#111827'],
+                colors: ['#16A34A', '#DC2626', '#111827'],
                 dataLabels: {
                     enabled: false,
                 },
