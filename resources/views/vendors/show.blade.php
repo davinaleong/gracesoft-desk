@@ -52,7 +52,7 @@
                         <p class="text-base">
                             <span
                                 class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-                                {{ str_replace('_', ' ', ucfirst($vendor->category)) }}
+                                {{ $vendor->category?->name ?? '—' }}
                             </span>
                         </p>
                     </div>
@@ -155,7 +155,7 @@
                                             <td class="px-4 py-3 text-sm">
                                                 <span
                                                     class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-                                                    {{ str_replace('_', ' ', ucfirst($service->category)) }}
+                                                    {{ $service->category?->name ?? '—' }}
                                                 </span>
                                             </td>
                                             <td class="px-4 py-3 text-sm">

@@ -33,17 +33,18 @@
         </div>
 
         <div>
-            <x-input-label for="category" :value="__('Category')" />
-            <select id="category" name="category"
+            <x-input-label for="category_id" :value="__('Category')" />
+            <select id="category_id" name="category_id"
                 class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
                 required>
-                @foreach (['storage', 'communication', 'design', 'dev_tools', 'security', 'productivity', 'other'] as $value)
-                    <option value="{{ $value }}" @selected(old('category', $service->category ?? '') === $value)>
-                        {{ str_replace('_', ' ', ucfirst($value)) }}
+                <option value="">{{ __('Select a category') }}</option>
+                @foreach ($categories as $categoryOption)
+                    <option value="{{ $categoryOption->id }}" @selected((int) old('category_id', $service->category_id ?? '') === $categoryOption->id)>
+                        {{ $categoryOption->name }}
                     </option>
                 @endforeach
             </select>
-            <x-input-error :messages="$errors->get('category')" class="mt-2" />
+            <x-input-error :messages="$errors->get('category_id')" class="mt-2" />
         </div>
 
         <div>

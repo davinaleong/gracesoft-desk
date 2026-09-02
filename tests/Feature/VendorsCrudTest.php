@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use App\Models\User;
 use App\Models\Vendor;
 
@@ -14,7 +15,7 @@ function readyUserForVendors(): User
 
 test('vendors index is accessible', function () {
     $user = readyUserForVendors();
-    Vendor::factory()->create(['name' => 'Test Corp', 'category' => 'cloud']);
+    Vendor::factory()->create(['name' => 'Test Corp']);
 
     $response = $this->actingAs($user)->get(route('vendors.index'));
 
@@ -23,10 +24,11 @@ test('vendors index is accessible', function () {
 
 test('vendor can be created with generated vendor code', function () {
     $user = readyUserForVendors();
+    $category = Category::factory()->vendor()->create();
 
     $response = $this->actingAs($user)->post(route('vendors.store'), [
         'name' => 'Acme Ltd',
-        'category' => 'saas',
+        'category_id' => $category->id,
         'website' => 'https://acme.example.com',
         'status' => 'active',
     ]);
@@ -35,6 +37,18 @@ test('vendor can be created with generated vendor code', function () {
     $response->assertRedirect(route('vendors.show', $vendor));
     expect($vendor->vendor_code)->toStartWith('VND-');
     expect($vendor->uuid)->not->toBeEmpty();
+    expect($vendor->category_id)->toBe($category->id);
+});
+
+test('vendor cannot be created with a service category', function () {
+    $user = readyUserForVendors();
+    $serviceCategory = Category::factory()->service()->create();
+
+    $this->actingAs($user)->post(route('vendors.store'), [
+        'name' => 'Acme Ltd',
+        'category_id' => $serviceCategory->id,
+        'status' => 'active',
+    ])->assertSessionHasErrors('category_id');
 });
 
 test('vendor show page displays vendor code', function () {
@@ -52,7 +66,7 @@ test('vendor can be updated', function () {
 
     $this->actingAs($user)->put(route('vendors.update', $vendor), [
         'name' => 'New Name',
-        'category' => $vendor->category,
+        'category_id' => $vendor->category_id,
         'status' => $vendor->status,
     ]);
 
@@ -64,7 +78,7 @@ test('vendor cannot be deleted with active services', function () {
     $vendor = Vendor::factory()->create();
     $vendor->services()->create([
         'name' => 'Active Service',
-        'category' => 'storage',
+        'category_id' => Category::factory()->service()->create()->id,
         'status' => 'active',
     ]);
 
@@ -79,7 +93,7 @@ test('vendor can be soft deleted when no active services', function () {
     $vendor = Vendor::factory()->create();
     $vendor->services()->create([
         'name' => 'Cancelled Service',
-        'category' => 'storage',
+        'category_id' => Category::factory()->service()->create()->id,
         'status' => 'cancelled',
     ]);
 

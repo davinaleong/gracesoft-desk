@@ -20,7 +20,7 @@ class Service extends Model
         'vendor_id',
         'name',
         'plan',
-        'category',
+        'category_id',
         'status',
         'notes',
     ];
@@ -58,6 +58,11 @@ class Service extends Model
         return $this->belongsTo(Vendor::class);
     }
 
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
     public function scopeActive(Builder $query): void
     {
         $query->where('status', 'active');
@@ -68,8 +73,8 @@ class Service extends Model
         $query->where('vendor_id', $vendorId);
     }
 
-    public function scopeByCategory(Builder $query, string $category): void
+    public function scopeByCategory(Builder $query, int $categoryId): void
     {
-        $query->where('category', $category);
+        $query->where('category_id', $categoryId);
     }
 }

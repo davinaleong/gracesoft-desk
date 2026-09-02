@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GitHubConnectionController;
@@ -73,6 +74,13 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::delete('/settings/project-stages/{projectStage}', [ProjectStageController::class, 'destroy'])->name('settings.project-stages.destroy');
     Route::patch('/settings/project-stages/{projectStage}/move-up', [ProjectStageController::class, 'moveUp'])->name('settings.project-stages.move-up');
     Route::patch('/settings/project-stages/{projectStage}/move-down', [ProjectStageController::class, 'moveDown'])->name('settings.project-stages.move-down');
+
+    Route::get('/settings/categories', [CategoryController::class, 'index'])->name('settings.categories.index');
+    Route::get('/settings/categories/create', [CategoryController::class, 'create'])->name('settings.categories.create');
+    Route::post('/settings/categories', [CategoryController::class, 'store'])->name('settings.categories.store');
+    Route::get('/settings/categories/{category}/edit', [CategoryController::class, 'edit'])->name('settings.categories.edit');
+    Route::put('/settings/categories/{category}', [CategoryController::class, 'update'])->name('settings.categories.update');
+    Route::delete('/settings/categories/{category}', [CategoryController::class, 'destroy'])->name('settings.categories.destroy');
 
     Route::get('/documents', [DocumentController::class, 'index'])->name('documents.index');
     Route::post('/documents', [DocumentController::class, 'store'])->name('documents.store');

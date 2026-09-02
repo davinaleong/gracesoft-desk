@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\Vendor;
@@ -26,12 +27,13 @@ test('services index is accessible', function () {
 test('service can be created with generated service code', function () {
     $user = readyUserForServices();
     $vendor = Vendor::factory()->create();
+    $category = Category::factory()->service()->create();
 
     $response = $this->actingAs($user)->post(route('services.store'), [
         'vendor_uuid' => $vendor->uuid,
         'name' => 'Cloud Storage',
         'plan' => 'Pro',
-        'category' => 'storage',
+        'category_id' => $category->id,
         'status' => 'active',
     ]);
 
@@ -40,6 +42,20 @@ test('service can be created with generated service code', function () {
     expect($service->service_code)->toStartWith('SVC-');
     expect($service->uuid)->not->toBeEmpty();
     expect($service->vendor_id)->toBe($vendor->id);
+    expect($service->category_id)->toBe($category->id);
+});
+
+test('service cannot be created with a vendor category', function () {
+    $user = readyUserForServices();
+    $vendor = Vendor::factory()->create();
+    $vendorCategory = Category::factory()->vendor()->create();
+
+    $this->actingAs($user)->post(route('services.store'), [
+        'vendor_uuid' => $vendor->uuid,
+        'name' => 'Cloud Storage',
+        'category_id' => $vendorCategory->id,
+        'status' => 'active',
+    ])->assertSessionHasErrors('category_id');
 });
 
 test('service show page displays service code and vendor link', function () {
@@ -62,7 +78,7 @@ test('service can be updated', function () {
     $this->actingAs($user)->put(route('services.update', $service), [
         'vendor_uuid' => $vendor->uuid,
         'name' => 'New Service',
-        'category' => $service->category,
+        'category_id' => $service->category_id,
         'status' => $service->status,
     ]);
 
@@ -97,6 +113,19 @@ test('services index filters by vendor', function () {
     Service::factory()->for($vendorB)->create(['name' => 'Service B']);
 
     $response = $this->actingAs($user)->get(route('services.index', ['vendor_uuid' => $vendorA->uuid]));
+
+    $response->assertOk()->assertSee('Service A')->assertDontSee('Service B');
+});
+
+test('services index filters by category', function () {
+    $user = readyUserForServices();
+    $vendor = Vendor::factory()->create();
+    $categoryA = Category::factory()->service()->create(['name' => 'Storage Category']);
+    $categoryB = Category::factory()->service()->create(['name' => 'Security Category']);
+    Service::factory()->for($vendor)->create(['name' => 'Service A', 'category_id' => $categoryA->id]);
+    Service::factory()->for($vendor)->create(['name' => 'Service B', 'category_id' => $categoryB->id]);
+
+    $response = $this->actingAs($user)->get(route('services.index', ['category_id' => $categoryA->id]));
 
     $response->assertOk()->assertSee('Service A')->assertDontSee('Service B');
 });

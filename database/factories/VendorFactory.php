@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use App\Models\Vendor;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,7 +20,7 @@ class VendorFactory extends Factory
     {
         return [
             'name' => $this->faker->company(),
-            'category' => $this->faker->randomElement(['telco', 'cloud', 'saas', 'professional_services', 'utilities', 'other']),
+            'category_id' => Category::factory()->vendor(),
             'website' => $this->faker->optional()->url(),
             'support_url' => $this->faker->optional()->url(),
             'account_number' => $this->faker->optional()->bothify('ACC-####'),
