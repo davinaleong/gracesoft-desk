@@ -31,12 +31,26 @@ class DashboardMetricsService
                 ->selectRaw("COALESCE(SUM(CASE WHEN direction = 'in' THEN net_amount ELSE -net_amount END), 0) as net_total")
                 ->value('net_total') ?? 0);
 
+            $moneyInThisMonth = (float) Transaction::query()
+                ->completed()
+                ->direction('in')
+                ->withinDateRange($currentMonthStart, $currentMonthEnd)
+                ->sum('net_amount');
+
+            $moneyOutThisMonth = (float) Transaction::query()
+                ->completed()
+                ->direction('out')
+                ->withinDateRange($currentMonthStart, $currentMonthEnd)
+                ->sum('net_amount');
+
             return [
                 'kpis' => [
                     'active_projects' => $activeProjects,
                     'total_logged_hours' => round($totalDurationMinutes / 60, 2),
                     'total_billable_value' => round($totalBillableValue, 2),
                     'net_cashflow_this_month' => round($netCashflowThisMonth, 2),
+                    'money_in_this_month' => round($moneyInThisMonth, 2),
+                    'money_out_this_month' => round($moneyOutThisMonth, 2),
                 ],
                 'monthly_cashflow' => $this->monthlyCashflowSeries(),
                 'expense_breakdown' => $this->breakdownByCategory('out'),
@@ -56,7 +70,7 @@ class DashboardMetricsService
     }
 
     /**
-     * @return array{labels: array<int, string>, values: array<int, float>}
+     * @return array{labels: array<int, string>, values: array<int, float>, money_in: array<int, float>, money_out: array<int, float>}
      */
     private function monthlyCashflowSeries(): array
     {
@@ -69,29 +83,42 @@ class DashboardMetricsService
             ->withinDateRange($monthStart->toDateString(), $monthEnd->toDateString())
             ->selectRaw($monthKeyExpression.' as month_key')
             ->selectRaw("COALESCE(SUM(CASE WHEN direction = 'in' THEN net_amount ELSE -net_amount END), 0) as net_total")
+            ->selectRaw("COALESCE(SUM(CASE WHEN direction = 'in' THEN net_amount ELSE 0 END), 0) as money_in")
+            ->selectRaw("COALESCE(SUM(CASE WHEN direction = 'out' THEN net_amount ELSE 0 END), 0) as money_out")
             ->groupByRaw($monthKeyExpression)
             ->get();
 
         $groupedValues = $groupedRows
             ->mapWithKeys(fn ($row): array => [
-                (string) $row->month_key => (float) $row->net_total,
+                (string) $row->month_key => [
+                    'net' => (float) $row->net_total,
+                    'in' => (float) $row->money_in,
+                    'out' => (float) $row->money_out,
+                ],
             ])
             ->all();
 
         $labels = [];
         $values = [];
+        $moneyIn = [];
+        $moneyOut = [];
 
         for ($offset = 0; $offset < 6; $offset++) {
             $month = $monthStart->copy()->addMonths($offset);
             $monthKey = $month->format('Y-m');
+            $monthTotals = Arr::get($groupedValues, $monthKey, ['net' => 0, 'in' => 0, 'out' => 0]);
 
             $labels[] = $month->format('M Y');
-            $values[] = round((float) Arr::get($groupedValues, $monthKey, 0), 2);
+            $values[] = round((float) $monthTotals['net'], 2);
+            $moneyIn[] = round((float) $monthTotals['in'], 2);
+            $moneyOut[] = round((float) $monthTotals['out'], 2);
         }
 
         return [
             'labels' => $labels,
             'values' => $values,
+            'money_in' => $moneyIn,
+            'money_out' => $moneyOut,
         ];
     }
 

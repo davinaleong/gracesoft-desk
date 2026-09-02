@@ -8,6 +8,7 @@ use App\Models\TimeEntry;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\User;
+use App\Services\DashboardMetricsService;
 
 function readyUserForDashboard(): User
 {
@@ -101,9 +102,12 @@ test('dashboard displays aggregated metrics', function () {
         ->assertSee('Active Projects')
         ->assertSee('Total Logged Hours')
         ->assertSee('Total Billable Value')
-        ->assertSee('Monthly Net Cashflow')
+        ->assertSee('Monthly Cash Flow')
+        ->assertSee('Money In (This Month)')
+        ->assertSee('Money Out (This Month)')
         ->assertSee('SGD 200.00')
         ->assertSee('SGD 500.00')
+        ->assertSee('SGD 0.00')
         ->assertSee('2h')
         ->assertSee('Expense Breakdown')
         ->assertSee('Income Breakdown')
@@ -117,4 +121,72 @@ test('dashboard route requires authentication', function () {
     $response = $this->get(route('dashboard'));
 
     $response->assertRedirect(route('login'));
+});
+
+test('monthly cashflow series separates money in and money out per month', function () {
+    $account = Account::query()->create([
+        'name' => 'Series Account',
+        'code' => 'DB-ACC-002',
+        'type' => 'bank',
+        'currency' => 'SGD',
+        'opening_balance' => 0,
+        'current_balance' => 0,
+        'is_active' => true,
+    ]);
+
+    $incomeCategory = TransactionCategory::query()->create([
+        'name' => 'Series Income',
+        'slug' => 'series-income',
+        'type' => 'income',
+        'is_active' => true,
+    ]);
+
+    $expenseCategory = TransactionCategory::query()->create([
+        'name' => 'Series Expense',
+        'slug' => 'series-expense',
+        'type' => 'expense',
+        'is_active' => true,
+    ]);
+
+    $paymentMethod = PaymentMethod::query()->create([
+        'name' => 'Series Transfer',
+        'slug' => 'series-transfer',
+        'is_active' => true,
+    ]);
+
+    Transaction::query()->create([
+        'account_id' => $account->id,
+        'transaction_category_id' => $incomeCategory->id,
+        'payment_method_id' => $paymentMethod->id,
+        'type' => 'income',
+        'direction' => 'in',
+        'status' => 'completed',
+        'transaction_date' => now()->toDateString(),
+        'amount' => 800,
+        'gst_amount' => 0,
+        'net_amount' => 800,
+    ]);
+
+    Transaction::query()->create([
+        'account_id' => $account->id,
+        'transaction_category_id' => $expenseCategory->id,
+        'payment_method_id' => $paymentMethod->id,
+        'type' => 'expense',
+        'direction' => 'out',
+        'status' => 'completed',
+        'transaction_date' => now()->toDateString(),
+        'amount' => 300,
+        'gst_amount' => 0,
+        'net_amount' => 300,
+    ]);
+
+    $dashboard = app(DashboardMetricsService::class)->getDashboardData();
+    $series = $dashboard['monthly_cashflow'];
+
+    expect($series)->toHaveKeys(['labels', 'values', 'money_in', 'money_out'])
+        ->and(end($series['money_in']))->toBe(800.0)
+        ->and(end($series['money_out']))->toBe(300.0)
+        ->and(end($series['values']))->toBe(500.0)
+        ->and($dashboard['kpis']['money_in_this_month'])->toBe(800.0)
+        ->and($dashboard['kpis']['money_out_this_month'])->toBe(300.0);
 });
