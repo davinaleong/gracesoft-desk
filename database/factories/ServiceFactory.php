@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Category;
 use App\Models\Service;
 use App\Models\Vendor;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +23,7 @@ class ServiceFactory extends Factory
             'vendor_id' => Vendor::factory(),
             'name' => $this->faker->words(3, true),
             'plan' => $this->faker->optional()->randomElement(['Free', 'Starter', 'Business', 'Enterprise']),
-            'category' => $this->faker->randomElement(['storage', 'communication', 'design', 'dev_tools', 'security', 'productivity', 'other']),
+            'category_id' => Category::factory()->service(),
             'status' => 'active',
             'notes' => $this->faker->optional()->sentence(),
         ];

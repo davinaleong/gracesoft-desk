@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreServiceRequest extends FormRequest
 {
@@ -26,7 +27,7 @@ class StoreServiceRequest extends FormRequest
             'vendor_uuid' => ['required', 'uuid', 'exists:vendors,uuid'],
             'name' => ['required', 'string', 'max:255'],
             'plan' => ['nullable', 'string', 'max:255'],
-            'category' => ['required', 'in:storage,communication,design,dev_tools,security,productivity,other'],
+            'category_id' => ['required', Rule::exists('categories', 'id')->where('type', 'service')],
             'status' => ['required', 'in:active,paused,cancelled'],
             'notes' => ['nullable', 'string'],
         ];

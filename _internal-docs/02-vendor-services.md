@@ -573,3 +573,60 @@
 * [ ] Soft deletes working on both
 * [ ] Audit logs recording on both
 * [ ] Filters working on both index pages
+
+---
+
+# Phase 11 — Category Management Panel (Follow-up, TODO item)
+
+**Completed:** 2026-09-02
+
+Implements the outstanding TODO item "Panel: Manage vendor and service categories" —
+categories were previously hardcoded DB enums with no admin UI to add, rename, or
+retire them.
+
+## Schema change
+
+* [x] New `categories` table: `id, uuid, type (vendor|service), name, code (nullable, legacy-migration key), status (active|inactive), timestamps`, unique on `(type, name)`
+* [x] `2026_09_02_000001_create_categories_table` — creates the table and seeds it with the original enum values (6 vendor categories, 7 service categories), preserving each original value in `code` for the backfill step
+* [x] `2026_09_02_000002_migrate_vendor_and_service_categories_to_lookup_table` — adds nullable `category_id` (FK → `categories`, `nullOnDelete`) to `vendors` and `services`, backfills every existing row by matching its old `category` string to the seeded row via `code`, then drops the old enum column. Reversible (`down()` recreates the enum columns and backfills from `categories.code`).
+* [x] `category_id` is nullable specifically so `nullOnDelete` can apply — deleting a category in use should not be reachable via the UI (see destroy guard below), but the FK is a safety net rather than a hard block
+
+## Model & relations
+
+* [x] `App\Models\Category` — `HasPublicUuid`, `scopeOfType`, `scopeActive`, `hasMany` to both `Vendor` and `Service`
+* [x] `Vendor::category()` / `Service::category()` — `belongsTo(Category::class)`, replacing the old plain string attribute
+* [x] `Service::scopeByCategory()` now filters by `category_id` (int) instead of the old enum string
+
+## Settings panel (`/settings/categories`)
+
+* [x] `CategoryController` — index (grouped into Vendor Categories / Service Categories, both listed alphabetically), create (type fixed via `?type=vendor|service` query param), store, edit, update, destroy
+* [x] Type is immutable after creation — the edit form only allows renaming and active/inactive toggling, never moving a category between vendor and service
+* [x] `destroy()` blocks deletion (flashes `category-in-use`) when any vendor or service still references the category
+* [x] No manual reordering (no `sort_order`/move-up/move-down) — unlike `ProjectStage`, category order has no functional dependency (no keyword-priority matching), so categories just list alphabetically; adding reorder UI here would be unused surface area
+* [x] Routes, views (`settings/categories/{index,create,edit}.blade.php`), and "Categories" nav link (under Registry, desktop + mobile) follow the same conventions as the Milestone 1 `ProjectStage` settings page
+
+## Vendor/Service forms & listings
+
+* [x] `vendors._form` / `services._form` — category `<select>` now populated from `Category::ofType(...)->active()`, submitting `category_id` instead of a hardcoded string list
+* [x] Edit forms additionally include the record's *current* category even if it has since been deactivated, so an existing assignment is never silently dropped from the dropdown
+* [x] All category badges (index/show pages, vendor's linked-services table) read `$model->category?->name` with a `—` fallback for a null relation
+* [x] Services index category filter (`?category_id=`) now built from the live `categories` table instead of a hardcoded array
+
+## Data fixed up
+
+* [x] `VendorServiceSeeder` and `MarketingDemoSeeder::seedVendorsAndServices()` updated to resolve `category_id` from the seeded `categories` rows (by `code`) instead of passing enum strings
+* [x] Verified against the real local dev database (not just the sqlite test DB): ran the two new migrations, confirmed all 8 existing demo vendors/services backfilled to the correct category by name, and confirmed `migrate:rollback --step=2` cleanly reverses both migrations on a throwaway sqlite file
+
+## Tests
+
+* [x] `tests/Feature/CategoriesCrudTest.php` — 10 tests: grouped index listing, vendor category create, service category create, same name allowed across types but not within a type, update, delete when unused, delete blocked when referenced by a vendor, delete blocked when referenced by a service, UUID-only routing, auth guard
+* [x] `tests/Feature/VendorsCrudTest.php` / `ServicesCrudTest.php` updated to create real `Category` rows via the new `CategoryFactory` instead of passing enum strings, plus new tests asserting a vendor can't be saved with a service-type category (and vice versa) — enforced by `Rule::exists('categories', 'id')->where('type', ...)` in the form requests
+* [x] Full suite: 226 passing (up from 213 before this change)
+
+## Known pre-existing issue (not touched)
+
+This file (`02-vendor-services.md`) contains a duplicated checklist — Phases 1–10
+appear twice, the first pass fully checked off, the second an unchecked copy
+starting again at line 304. That duplication predates this change and wasn't
+part of the TODO item being implemented, so it was left as-is rather than
+edited under an unrelated task.

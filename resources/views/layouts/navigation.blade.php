@@ -35,6 +35,7 @@
                 <div class="space-y-1 text-sm">
                     <x-nav-link :href="route('vendors.index')" :active="request()->routeIs('vendors.*')">{{ __('Vendors') }}</x-nav-link>
                     <x-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">{{ __('Services') }}</x-nav-link>
+                    <x-nav-link :href="route('settings.categories.index')" :active="request()->routeIs('settings.categories.*')">{{ __('Categories') }}</x-nav-link>
                 </div>
             </div>
         </div>
@@ -67,6 +68,7 @@
                 :active="request()->routeIs('settings.project-stages.*')">{{ __('Project Stages') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('vendors.index')" :active="request()->routeIs('vendors.*')">{{ __('Vendors') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">{{ __('Services') }}</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('settings.categories.index')" :active="request()->routeIs('settings.categories.*')">{{ __('Categories') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('profile.edit')">{{ __('Profile') }}</x-responsive-nav-link>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

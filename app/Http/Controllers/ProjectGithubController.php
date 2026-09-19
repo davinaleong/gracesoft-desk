@@ -14,44 +14,35 @@ use Illuminate\Validation\Rule;
 
 class ProjectGithubController extends Controller
 {
-    /** JSON endpoint used by the repo picker to list accessible repositories. */
-    public function repos(): JsonResponse
+    /** JSON endpoint used by the repo picker to list a GitHub account's accessible repositories. */
+    public function repos(int $connection): JsonResponse
     {
-        $connection = Auth::user()->githubConnection;
+        $connection = Auth::user()->githubConnections()->findOrFail($connection);
 
-        if (! $connection) {
-            return response()->json(['error' => 'No GitHub connection found.'], 403);
-        }
-
-        $service = new GitHubService($connection->access_token);
-        $repos = $service->listRepositories();
-
-        return response()->json($repos);
+        return response()->json((new GitHubService($connection->access_token))->listRepositories());
     }
 
     /** JSON endpoint used by the branch picker to list a repository's branches. */
-    public function branches(Request $request): JsonResponse
+    public function branches(Request $request, int $connection): JsonResponse
     {
-        $connection = Auth::user()->githubConnection;
-
-        if (! $connection) {
-            return response()->json(['error' => 'No GitHub connection found.'], 403);
-        }
+        $connection = Auth::user()->githubConnections()->findOrFail($connection);
 
         $validated = $request->validate([
             'repo' => ['required', 'string', 'regex:/^[^\/]+\/[^\/]+$/'],
         ]);
 
-        $service = new GitHubService($connection->access_token);
-        $branches = $service->listBranches($validated['repo']);
-
-        return response()->json($branches);
+        return response()->json((new GitHubService($connection->access_token))->listBranches($validated['repo']));
     }
 
     /** Link a GitHub repository + branch to a project and register a push webhook. */
     public function store(Request $request, Project $project): RedirectResponse
     {
         $validated = $request->validate([
+            'github_connection_id' => [
+                'required',
+                'integer',
+                Rule::exists('github_connections', 'id')->where('user_id', Auth::id()),
+            ],
             'github_repo' => [
                 'required',
                 'string',
@@ -63,12 +54,10 @@ class ProjectGithubController extends Controller
             'github_repo.unique' => __('This repository is already linked to another project.'),
         ]);
 
-        $connection = Auth::user()->githubConnection;
+        $connection = Auth::user()->githubConnections()->findOrFail($validated['github_connection_id']);
 
-        abort_unless($connection instanceof GithubConnection, 403, 'Connect GitHub first.');
-
-        // Unlink any previous repo/webhook before linking a new one.
-        $this->unlinkWebhook($connection, $project);
+        // Unlink any previous repo/webhook (using the account that created it) before linking a new one.
+        $this->unlinkWebhook($project);
 
         $secret = Str::random(40);
         $webhookUrl = route('webhooks.github', $project);
@@ -77,6 +66,7 @@ class ProjectGithubController extends Controller
         $webhookId = $service->registerWebhook($validated['github_repo'], $webhookUrl, $secret);
 
         $project->update([
+            'github_connection_id' => $connection->id,
             'github_repo' => $validated['github_repo'],
             'github_branch' => $validated['github_branch'],
             'github_webhook_id' => $webhookId,
@@ -91,13 +81,10 @@ class ProjectGithubController extends Controller
     /** Unlink the GitHub repository from a project and remove the webhook. */
     public function destroy(Project $project): RedirectResponse
     {
-        $connection = Auth::user()->githubConnection;
-
-        if ($connection instanceof GithubConnection) {
-            $this->unlinkWebhook($connection, $project);
-        }
+        $this->unlinkWebhook($project);
 
         $project->update([
+            'github_connection_id' => null,
             'github_repo' => null,
             'github_branch' => null,
             'github_webhook_id' => null,
@@ -109,11 +96,14 @@ class ProjectGithubController extends Controller
             ->with('status', 'github-repo-unlinked');
     }
 
-    private function unlinkWebhook(GithubConnection $connection, Project $project): void
+    /** Remove the project's webhook using the GitHub account that registered it, if that account is still connected. */
+    private function unlinkWebhook(Project $project): void
     {
-        if ($project->github_repo && $project->github_webhook_id) {
-            $service = new GitHubService($connection->access_token);
-            $service->removeWebhook($project->github_repo, $project->github_webhook_id);
+        $connection = $project->githubConnection;
+
+        if ($connection instanceof GithubConnection && $project->github_repo && $project->github_webhook_id) {
+            (new GitHubService($connection->access_token))
+                ->removeWebhook($project->github_repo, $project->github_webhook_id);
         }
     }
 }

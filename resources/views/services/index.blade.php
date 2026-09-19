@@ -31,12 +31,12 @@
                     @endforeach
                 </select>
 
-                <select name="category"
+                <select name="category_id"
                     class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
                     <option value="">{{ __('All Categories') }}</option>
-                    @foreach (['storage', 'communication', 'design', 'dev_tools', 'security', 'productivity', 'other'] as $catOption)
-                        <option value="{{ $catOption }}" @selected(request('category') === $catOption)>
-                            {{ str_replace('_', ' ', ucfirst($catOption)) }}
+                    @foreach ($categories as $catOption)
+                        <option value="{{ $catOption->id }}" @selected((int) request('category_id') === $catOption->id)>
+                            {{ $catOption->name }}
                         </option>
                     @endforeach
                 </select>
@@ -54,7 +54,7 @@
                     class="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
                     {{ __('Filter') }}
                 </button>
-                @if (request('vendor_uuid') || request('category') || request('status'))
+                @if (request('vendor_uuid') || request('category_id') || request('status'))
                     <a href="{{ route('services.index') }}"
                         class="text-sm text-gray-500 hover:text-gray-700">{{ __('Clear') }}</a>
                 @endif
@@ -97,7 +97,7 @@
                                         <td class="px-4 py-3 text-sm">
                                             <span
                                                 class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
-                                                {{ str_replace('_', ' ', ucfirst($service->category)) }}
+                                                {{ $service->category?->name ?? '—' }}
                                             </span>
                                         </td>
                                         <td class="px-4 py-3 text-sm">

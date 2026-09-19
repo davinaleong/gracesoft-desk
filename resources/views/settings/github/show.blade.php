@@ -18,10 +18,9 @@
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 space-y-4">
-
-                    @if ($connection)
+            @forelse ($connections as $connection)
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 space-y-4">
                         <div class="flex items-center gap-4">
                             <span class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
                                 <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
@@ -43,22 +42,29 @@
                                 <dd class="text-gray-900">{{ $connection->token_scope ?? '—' }}</dd>
                             </div>
                             <div class="flex justify-between py-2">
+                                <dt class="font-medium text-gray-500">{{ __('Linked projects') }}</dt>
+                                <dd class="text-gray-900">{{ $connection->projects_count }}</dd>
+                            </div>
+                            <div class="flex justify-between py-2">
                                 <dt class="font-medium text-gray-500">{{ __('Connected') }}</dt>
                                 <dd class="text-gray-900">{{ $connection->connected_at->toFormattedDateString() }}</dd>
                             </div>
                         </dl>
 
-                        <form method="POST" action="{{ route('settings.github.destroy') }}">
+                        <form method="POST" action="{{ route('settings.github.destroy', $connection->id) }}">
                             @csrf
                             @method('DELETE')
                             <button type="submit"
                                 class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500"
-                                onclick="return confirm('{{ __('Disconnect your GitHub account?') }}')">
+                                onclick="return confirm('{{ __('Disconnect this GitHub account?') }}')">
                                 {{ __('Disconnect GitHub') }}
                             </button>
                         </form>
-
-                    @else
+                    </div>
+                </div>
+            @empty
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 space-y-4">
                         <div class="flex items-center gap-4">
                             <span class="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
                                 <span class="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
@@ -69,13 +75,21 @@
                         <p class="text-sm text-gray-500">
                             {{ __('Connect your GitHub account to enable project repository linking and automatic commit ingestion.') }}
                         </p>
+                    </div>
+                </div>
+            @endforelse
 
-                        <a href="{{ route('settings.github.redirect') }}"
-                            class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
-                            {{ __('Connect GitHub') }}
-                        </a>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 space-y-3">
+                    <a href="{{ route('settings.github.redirect') }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                        {{ $connections->isEmpty() ? __('Connect GitHub') : __('Connect another GitHub account') }}
+                    </a>
+                    @if ($connections->isNotEmpty())
+                        <p class="text-xs text-gray-500">
+                            {{ __('GitHub authorizes the account you are currently signed in to on github.com. Switch accounts there first, then connect.') }}
+                        </p>
                     @endif
-
                 </div>
             </div>
 

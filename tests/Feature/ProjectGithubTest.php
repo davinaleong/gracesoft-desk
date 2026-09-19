@@ -14,12 +14,12 @@ function githubReadyUser(): User
     ]);
 }
 
-function withGitHubConnection(User $user, string $token = 'fake-token'): GithubConnection
+function withGitHubConnection(User $user, string $token = 'fake-token', string $login = 'octocat', string $githubId = '12345'): GithubConnection
 {
     return GithubConnection::create([
         'user_id' => $user->id,
-        'github_id' => '12345',
-        'github_login' => 'octocat',
+        'github_id' => $githubId,
+        'github_login' => $login,
         'access_token' => $token,
         'token_scope' => 'repo,read:user',
         'connected_at' => now(),
@@ -30,7 +30,7 @@ function withGitHubConnection(User $user, string $token = 'fake-token'): GithubC
 
 test('repos endpoint returns json list when connected', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
 
     Http::fake([
         'https://api.github.com/user/repos*' => Http::response([
@@ -40,29 +40,41 @@ test('repos endpoint returns json list when connected', function () {
     ]);
 
     $this->actingAs($user)
-        ->getJson(route('settings.github.repos'))
+        ->getJson(route('settings.github.repos', $connection))
         ->assertOk()
         ->assertJsonCount(2)
         ->assertJsonFragment(['full_name' => 'octocat/hello-world', 'default_branch' => 'main']);
 });
 
-test('repos endpoint returns 403 when no github connection', function () {
+test('repos endpoint returns 404 for an unknown connection', function () {
     $user = githubReadyUser();
 
     $this->actingAs($user)
-        ->getJson(route('settings.github.repos'))
-        ->assertForbidden();
+        ->getJson(route('settings.github.repos', 999))
+        ->assertNotFound();
+});
+
+test('repos endpoint uses the token of the selected account', function () {
+    $user = githubReadyUser();
+    withGitHubConnection($user, 'token-a', 'account-a', '1');
+    $second = withGitHubConnection($user, 'token-b', 'account-b', '2');
+
+    Http::fake(['https://api.github.com/user/repos*' => Http::response([], 200)]);
+
+    $this->actingAs($user)->getJson(route('settings.github.repos', $second))->assertOk();
+
+    Http::assertSent(fn ($req) => $req->hasHeader('Authorization', 'Bearer token-b'));
 });
 
 test('repos endpoint requires authentication', function () {
-    $this->getJson(route('settings.github.repos'))->assertUnauthorized();
+    $this->getJson(route('settings.github.repos', 1))->assertUnauthorized();
 });
 
 // ── Branch picker (JSON) ──────────────────────────────────────────────────────
 
 test('branches endpoint returns json list when connected', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
 
     Http::fake([
         'https://api.github.com/repos/octocat/hello-world/branches*' => Http::response([
@@ -72,37 +84,29 @@ test('branches endpoint returns json list when connected', function () {
     ]);
 
     $this->actingAs($user)
-        ->getJson(route('settings.github.branches', ['repo' => 'octocat/hello-world']))
+        ->getJson(route('settings.github.branches', ['connection' => $connection, 'repo' => 'octocat/hello-world']))
         ->assertOk()
         ->assertJson(['main', 'develop']);
 });
 
-test('branches endpoint returns 403 when no github connection', function () {
-    $user = githubReadyUser();
-
-    $this->actingAs($user)
-        ->getJson(route('settings.github.branches', ['repo' => 'octocat/hello-world']))
-        ->assertForbidden();
-});
-
 test('branches endpoint rejects an invalid repo format', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
 
     $this->actingAs($user)
-        ->getJson(route('settings.github.branches', ['repo' => 'not-a-valid-repo']))
+        ->getJson(route('settings.github.branches', ['connection' => $connection, 'repo' => 'not-a-valid-repo']))
         ->assertUnprocessable();
 });
 
 test('branches endpoint requires authentication', function () {
-    $this->getJson(route('settings.github.branches', ['repo' => 'octocat/hello-world']))->assertUnauthorized();
+    $this->getJson(route('settings.github.branches', ['connection' => 1, 'repo' => 'octocat/hello-world']))->assertUnauthorized();
 });
 
 // ── Link repo ────────────────────────────────────────────────────────────────
 
 test('linking a repo and branch registers a webhook and persists fields', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
     $project = Project::factory()->create();
 
     Http::fake([
@@ -110,7 +114,7 @@ test('linking a repo and branch registers a webhook and persists fields', functi
     ]);
 
     $this->actingAs($user)
-        ->post(route('projects.github.store', $project), ['github_repo' => 'octocat/hello-world', 'github_branch' => 'main'])
+        ->post(route('projects.github.store', $project), ['github_connection_id' => $connection->id, 'github_repo' => 'octocat/hello-world', 'github_branch' => 'main'])
         ->assertRedirect(route('projects.show', $project))
         ->assertSessionHas('status', 'github-repo-linked');
 
@@ -123,44 +127,86 @@ test('linking a repo and branch registers a webhook and persists fields', functi
 
 test('linking a repo rejects an invalid repo format', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
     $project = Project::factory()->create();
 
     $this->actingAs($user)
-        ->post(route('projects.github.store', $project), ['github_repo' => 'not-a-valid-repo', 'github_branch' => 'main'])
+        ->post(route('projects.github.store', $project), ['github_connection_id' => $connection->id, 'github_repo' => 'not-a-valid-repo', 'github_branch' => 'main'])
         ->assertSessionHasErrors('github_repo');
 });
 
 test('linking a repo without a branch is rejected', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
     $project = Project::factory()->create();
 
     $this->actingAs($user)
-        ->post(route('projects.github.store', $project), ['github_repo' => 'octocat/hello-world'])
+        ->post(route('projects.github.store', $project), ['github_connection_id' => $connection->id, 'github_repo' => 'octocat/hello-world'])
         ->assertSessionHasErrors('github_branch');
 
     $project->refresh();
     expect($project->github_repo)->toBeNull();
 });
 
-test('linking a repo requires github connection', function () {
+test('linking a repo requires a github connection', function () {
     $user = githubReadyUser();
     $project = Project::factory()->create();
 
     $this->actingAs($user)
         ->post(route('projects.github.store', $project), ['github_repo' => 'octocat/hello-world', 'github_branch' => 'main'])
-        ->assertForbidden();
+        ->assertSessionHasErrors('github_connection_id');
+});
+
+test('linking stores which github account was used and registers the hook with its token', function () {
+    $user = githubReadyUser();
+    withGitHubConnection($user, 'token-a', 'account-a', '1');
+    $second = withGitHubConnection($user, 'token-b', 'account-b', '2');
+    $project = Project::factory()->create();
+
+    Http::fake(['https://api.github.com/repos/account-b/site/hooks' => Http::response(['id' => 5], 201)]);
+
+    $this->actingAs($user)
+        ->post(route('projects.github.store', $project), ['github_connection_id' => $second->id, 'github_repo' => 'account-b/site', 'github_branch' => 'main'])
+        ->assertRedirect(route('projects.show', $project));
+
+    Http::assertSent(fn ($req) => $req->hasHeader('Authorization', 'Bearer token-b'));
+    expect($project->refresh()->github_connection_id)->toBe($second->id);
+});
+
+test('relinking to a different account removes the old webhook with the old account\'s token', function () {
+    $user = githubReadyUser();
+    $first = withGitHubConnection($user, 'token-a', 'account-a', '1');
+    $second = withGitHubConnection($user, 'token-b', 'account-b', '2');
+    $project = Project::factory()->create([
+        'github_connection_id' => $first->id,
+        'github_repo' => 'account-a/site',
+        'github_branch' => 'main',
+        'github_webhook_id' => 111,
+        'github_webhook_secret' => 's',
+    ]);
+
+    Http::fake([
+        'https://api.github.com/repos/account-a/site/hooks/111' => Http::response(null, 204),
+        'https://api.github.com/repos/account-b/site/hooks' => Http::response(['id' => 222], 201),
+    ]);
+
+    $this->actingAs($user)
+        ->post(route('projects.github.store', $project), ['github_connection_id' => $second->id, 'github_repo' => 'account-b/site', 'github_branch' => 'main'])
+        ->assertRedirect(route('projects.show', $project));
+
+    Http::assertSent(fn ($req) => str_contains($req->url(), 'account-a/site/hooks/111') && $req->hasHeader('Authorization', 'Bearer token-a'));
+    Http::assertSent(fn ($req) => str_contains($req->url(), 'account-b/site/hooks') && $req->hasHeader('Authorization', 'Bearer token-b'));
+    expect($project->refresh()->github_connection_id)->toBe($second->id);
 });
 
 test('linking a repo already linked to another project is rejected', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
-    Project::factory()->create(['github_repo' => 'octocat/hello-world']);
+    $connection = withGitHubConnection($user);
+    Project::factory()->create(['github_connection_id' => $connection->id, 'github_repo' => 'octocat/hello-world']);
     $project = Project::factory()->create();
 
     $this->actingAs($user)
-        ->post(route('projects.github.store', $project), ['github_repo' => 'octocat/hello-world', 'github_branch' => 'main'])
+        ->post(route('projects.github.store', $project), ['github_connection_id' => $connection->id, 'github_repo' => 'octocat/hello-world', 'github_branch' => 'main'])
         ->assertSessionHasErrors('github_repo');
 
     $project->refresh();
@@ -169,8 +215,9 @@ test('linking a repo already linked to another project is rejected', function ()
 
 test('relinking a project to the same repo it already holds is allowed', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
     $project = Project::factory()->create([
+        'github_connection_id' => $connection->id,
         'github_repo' => 'octocat/hello-world',
         'github_branch' => 'main',
         'github_webhook_id' => 111,
@@ -183,7 +230,7 @@ test('relinking a project to the same repo it already holds is allowed', functio
     ]);
 
     $this->actingAs($user)
-        ->post(route('projects.github.store', $project), ['github_repo' => 'octocat/hello-world', 'github_branch' => 'develop'])
+        ->post(route('projects.github.store', $project), ['github_connection_id' => $connection->id, 'github_repo' => 'octocat/hello-world', 'github_branch' => 'develop'])
         ->assertSessionDoesntHaveErrors('github_repo')
         ->assertRedirect(route('projects.show', $project));
 
@@ -195,8 +242,9 @@ test('relinking a project to the same repo it already holds is allowed', functio
 
 test('relinking a repo removes the old webhook first', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
     $project = Project::factory()->create([
+        'github_connection_id' => $connection->id,
         'github_repo' => 'octocat/old-repo',
         'github_branch' => 'main',
         'github_webhook_id' => 111,
@@ -209,7 +257,7 @@ test('relinking a repo removes the old webhook first', function () {
     ]);
 
     $this->actingAs($user)
-        ->post(route('projects.github.store', $project), ['github_repo' => 'octocat/new-repo', 'github_branch' => 'main'])
+        ->post(route('projects.github.store', $project), ['github_connection_id' => $connection->id, 'github_repo' => 'octocat/new-repo', 'github_branch' => 'main'])
         ->assertRedirect(route('projects.show', $project));
 
     Http::assertSent(fn ($req) => str_contains($req->url(), '/repos/octocat/old-repo/hooks/111'));
@@ -223,8 +271,9 @@ test('relinking a repo removes the old webhook first', function () {
 
 test('unlinking a repo removes webhook and clears fields', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
     $project = Project::factory()->create([
+        'github_connection_id' => $connection->id,
         'github_repo' => 'octocat/hello-world',
         'github_branch' => 'main',
         'github_webhook_id' => 9876,
@@ -244,13 +293,15 @@ test('unlinking a repo removes webhook and clears fields', function () {
     expect($project->github_repo)->toBeNull()
         ->and($project->github_branch)->toBeNull()
         ->and($project->github_webhook_id)->toBeNull()
-        ->and($project->github_webhook_secret)->toBeNull();
+        ->and($project->github_webhook_secret)->toBeNull()
+        ->and($project->github_connection_id)->toBeNull();
 });
 
 test('unlinking still clears fields when webhook is already gone on github', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
     $project = Project::factory()->create([
+        'github_connection_id' => $connection->id,
         'github_repo' => 'octocat/hello-world',
         'github_branch' => 'main',
         'github_webhook_id' => 9876,
@@ -271,8 +322,9 @@ test('unlinking still clears fields when webhook is already gone on github', fun
 
 test('project show page displays linked repository and branch', function () {
     $user = githubReadyUser();
-    withGitHubConnection($user);
+    $connection = withGitHubConnection($user);
     $project = Project::factory()->create([
+        'github_connection_id' => $connection->id,
         'github_repo' => 'octocat/hello-world',
         'github_branch' => 'main',
         'github_webhook_id' => 9876,
@@ -295,7 +347,8 @@ test('project show page prompts to link when connected but no repo', function ()
     $this->actingAs($user)
         ->get(route('projects.show', $project))
         ->assertOk()
-        ->assertSee('Link Repository');
+        ->assertSee('octocat')
+        ->assertSee('GitHub Account');
 });
 
 test('project show page prompts to connect github when not connected', function () {

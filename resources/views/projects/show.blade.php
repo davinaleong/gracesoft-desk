@@ -58,7 +58,7 @@
             </div>
 
             {{-- GitHub Repository --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" x-data="repoPicker()">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" x-data="repoPicker(@js(auth()->user()->githubConnections->map(fn ($c) => ['id' => $c->id, 'login' => $c->github_login])->values()))">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-sm font-semibold text-gray-700 mb-4">{{ __('GitHub Repository') }}</h3>
 
@@ -70,6 +70,9 @@
                                     class="text-indigo-600 hover:underline font-mono text-sm">{{ $project->github_repo }}</a>
                                 @if ($project->github_branch)
                                     <span class="ml-2 inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-mono text-gray-600">{{ $project->github_branch }}</span>
+                                @endif
+                                @if ($project->githubConnection)
+                                    <p class="mt-1 text-xs text-gray-500">{{ __('via') }} {{ $project->githubConnection->github_login }}</p>
                                 @endif
                             </div>
                             <div class="flex items-center gap-4">
@@ -84,18 +87,25 @@
                                 </form>
                             </div>
                         </div>
-                    @elseif (auth()->user()->githubConnection)
+                    @elseif (auth()->user()->githubConnections->isNotEmpty())
                         <div>
-                            <button type="button" @click="loadRepos"
-                                class="inline-flex items-center px-3 py-1.5 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50 mb-3">
-                                {{ __('Link Repository') }}
-                            </button>
+                            <div class="mb-3 w-64">
+                                <label class="block text-xs text-gray-500 uppercase mb-1">{{ __('GitHub Account') }}</label>
+                                <select x-model="connectionId" @change="onAccountChange"
+                                    class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm text-sm">
+                                    <option value="">{{ __('Select an account…') }}</option>
+                                    <template x-for="c in connections" :key="c.id">
+                                        <option :value="c.id" x-text="c.login"></option>
+                                    </template>
+                                </select>
+                            </div>
 
                             <div x-show="loading" class="text-sm text-gray-500">{{ __('Loading repositories…') }}</div>
 
                             <div x-show="repos.length > 0 && !loading">
                                 <form method="POST" action="{{ route('projects.github.store', $project) }}" class="flex items-start gap-3">
                                     @csrf
+                                    <input type="hidden" name="github_connection_id" :value="connectionId">
                                     <div class="flex-1">
                                         <input type="text" list="repo-list" name="github_repo" x-model="selected"
                                             @input="onRepoInput"
@@ -125,6 +135,10 @@
 
                             <div x-show="error" class="text-sm text-red-600" x-text="error"></div>
                             <div x-show="branchError" class="text-sm text-red-600" x-text="branchError"></div>
+
+                            @error('github_connection_id')
+                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
 
                             @error('github_repo')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -232,8 +246,10 @@
 
     @push('scripts')
     <script>
-        function repoPicker() {
+        function repoPicker(connections = []) {
             return {
+                connections,
+                connectionId: connections.length === 1 ? String(connections[0].id) : '',
                 repos: [],
                 selected: '',
                 loading: false,
@@ -242,11 +258,28 @@
                 selectedBranch: '',
                 branchLoading: false,
                 branchError: '',
+                init() {
+                    if (this.connectionId) {
+                        this.loadRepos();
+                    }
+                },
+                onAccountChange() {
+                    this.repos = [];
+                    this.selected = '';
+                    this.branches = [];
+                    this.selectedBranch = '';
+                    this.error = '';
+                    this.branchError = '';
+
+                    if (this.connectionId) {
+                        this.loadRepos();
+                    }
+                },
                 async loadRepos() {
                     this.loading = true;
                     this.error = '';
                     try {
-                        const res = await fetch('{{ route('settings.github.repos') }}', {
+                        const res = await fetch('{{ url('/settings/github') }}/' + this.connectionId + '/repos', {
                             headers: { 'X-Requested-With': 'XMLHttpRequest' }
                         });
                         if (!res.ok) throw new Error('Failed to load repositories.');
@@ -271,7 +304,7 @@
                     this.branchLoading = true;
                     this.branchError = '';
                     try {
-                        const res = await fetch('{{ route('settings.github.branches') }}?repo=' + encodeURIComponent(fullName), {
+                        const res = await fetch('{{ url('/settings/github') }}/' + this.connectionId + '/branches?repo=' + encodeURIComponent(fullName), {
                             headers: { 'X-Requested-With': 'XMLHttpRequest' }
                         });
                         if (!res.ok) throw new Error('Failed to load branches.');

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Account;
+use App\Models\Category;
 use App\Models\PaymentMethod;
 use App\Models\Project;
 use App\Models\ProjectStage;
@@ -710,13 +711,22 @@ class MarketingDemoSeeder extends Seeder
             ],
         ];
 
+        $vendorCategoryIds = Category::query()->ofType('vendor')->pluck('id', 'code');
+        $serviceCategoryIds = Category::query()->ofType('service')->pluck('id', 'code');
+
         foreach ($vendors as $vendorData) {
             $services = $vendorData['services'];
             unset($vendorData['services']);
 
+            $vendorData['category_id'] = $vendorCategoryIds[$vendorData['category']];
+            unset($vendorData['category']);
+
             $vendor = Vendor::query()->create($vendorData);
 
             foreach ($services as $serviceData) {
+                $serviceData['category_id'] = $serviceCategoryIds[$serviceData['category']];
+                unset($serviceData['category']);
+
                 $vendor->services()->create($serviceData);
             }
         }

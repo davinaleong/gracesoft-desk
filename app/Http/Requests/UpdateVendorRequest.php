@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateVendorRequest extends FormRequest
 {
@@ -24,7 +25,7 @@ class UpdateVendorRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'in:telco,cloud,saas,professional_services,utilities,other'],
+            'category_id' => ['required', Rule::exists('categories', 'id')->where('type', 'vendor')],
             'website' => ['nullable', 'url', 'max:255'],
             'support_url' => ['nullable', 'url', 'max:255'],
             'account_number' => ['nullable', 'string', 'max:255'],

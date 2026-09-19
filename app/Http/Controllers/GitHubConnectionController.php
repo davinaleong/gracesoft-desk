@@ -12,9 +12,9 @@ class GitHubConnectionController extends Controller
 {
     public function show(): View
     {
-        $connection = Auth::user()->githubConnection;
+        $connections = Auth::user()->githubConnections()->withCount('projects')->get();
 
-        return view('settings.github.show', ['connection' => $connection]);
+        return view('settings.github.show', ['connections' => $connections]);
     }
 
     public function redirect(): RedirectResponse
@@ -28,10 +28,10 @@ class GitHubConnectionController extends Controller
     {
         $githubUser = Socialite::driver('github')->user();
 
+        // One row per GitHub account; re-authorizing an account refreshes its token.
         GithubConnection::updateOrCreate(
-            ['user_id' => Auth::id()],
+            ['user_id' => Auth::id(), 'github_id' => $githubUser->getId()],
             [
-                'github_id' => $githubUser->getId(),
                 'github_login' => $githubUser->getNickname(),
                 'access_token' => $githubUser->token,
                 'token_scope' => $githubUser->approvedScopes
@@ -46,9 +46,9 @@ class GitHubConnectionController extends Controller
             ->with('status', 'github-connected');
     }
 
-    public function destroy(): RedirectResponse
+    public function destroy(int $connection): RedirectResponse
     {
-        Auth::user()->githubConnection?->delete();
+        Auth::user()->githubConnections()->findOrFail($connection)->delete();
 
         return redirect()
             ->route('settings.github.show')

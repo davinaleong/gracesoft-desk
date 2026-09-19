@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreServiceRequest;
 use App\Http\Requests\UpdateServiceRequest;
+use App\Models\Category;
 use App\Models\Service;
 use App\Models\Vendor;
 use Illuminate\Http\RedirectResponse;
@@ -14,28 +15,32 @@ class ServiceController extends Controller
     public function index(): View
     {
         $services = Service::query()
-            ->with('vendor')
+            ->with('vendor', 'category')
             ->when(request('status'), fn ($q, $status) => $q->where('status', $status))
             ->when(request('vendor_uuid'), fn ($q, $uuid) => $q->whereHas('vendor', fn ($vq) => $vq->where('uuid', $uuid)))
-            ->when(request('category'), fn ($q, $cat) => $q->where('category', $cat))
+            ->when(request('category_id'), fn ($q, $categoryId) => $q->where('category_id', $categoryId))
             ->orderBy('name')
             ->paginate(20)
             ->withQueryString();
 
         $vendors = Vendor::query()->orderBy('name')->get();
+        $categories = Category::query()->ofType('service')->orderBy('name')->get();
 
         return view('services.index', [
             'services' => $services,
             'vendors' => $vendors,
+            'categories' => $categories,
         ]);
     }
 
     public function create(): View
     {
         $vendors = Vendor::query()->active()->orderBy('name')->get();
+        $categories = Category::query()->ofType('service')->active()->orderBy('name')->get();
 
         return view('services.create', [
             'vendors' => $vendors,
+            'categories' => $categories,
         ]);
     }
 
@@ -55,7 +60,7 @@ class ServiceController extends Controller
 
     public function show(Service $service): View
     {
-        $service->load('vendor');
+        $service->load('vendor', 'category');
 
         return view('services.show', [
             'service' => $service,
@@ -66,10 +71,16 @@ class ServiceController extends Controller
     {
         $service->load('vendor');
         $vendors = Vendor::query()->active()->orderBy('name')->get();
+        $categories = Category::query()
+            ->ofType('service')
+            ->where(fn ($q) => $q->active()->orWhere('id', $service->category_id))
+            ->orderBy('name')
+            ->get();
 
         return view('services.edit', [
             'service' => $service,
             'vendors' => $vendors,
+            'categories' => $categories,
         ]);
     }
 
