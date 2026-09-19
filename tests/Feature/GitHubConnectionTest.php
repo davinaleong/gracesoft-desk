@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\GithubConnection;
+use App\Models\Project;
 use App\Models\User;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\GithubProvider;
@@ -122,7 +123,7 @@ test('oauth callback updates existing connection', function () {
 test('disconnect deletes github connection', function () {
     $user = readyUserForGitHub();
 
-    GithubConnection::create([
+    $connection = GithubConnection::create([
         'user_id' => $user->id,
         'github_id' => '12345',
         'github_login' => 'octocat',
@@ -132,10 +133,74 @@ test('disconnect deletes github connection', function () {
     ]);
 
     $this->actingAs($user)
-        ->delete(route('settings.github.destroy'))
+        ->delete(route('settings.github.destroy', $connection))
         ->assertRedirect(route('settings.github.show'));
 
     $this->assertDatabaseEmpty('github_connections');
+});
+
+test('oauth callback adds a second account instead of replacing the first', function () {
+    $user = readyUserForGitHub();
+
+    GithubConnection::create([
+        'user_id' => $user->id,
+        'github_id' => '111',
+        'github_login' => 'first',
+        'access_token' => 'token-1',
+        'connected_at' => now(),
+    ]);
+
+    $socialiteUser = (new SocialiteUser)->map(['id' => '222', 'nickname' => 'second']);
+    $socialiteUser->token = 'token-2';
+    $socialiteUser->approvedScopes = ['repo'];
+
+    $provider = Mockery::mock(GithubProvider::class);
+    $provider->shouldReceive('user')->andReturn($socialiteUser);
+    Socialite::shouldReceive('driver')->with('github')->andReturn($provider);
+
+    $this->actingAs($user)->get(route('settings.github.callback'))->assertRedirect(route('settings.github.show'));
+
+    $this->assertDatabaseCount('github_connections', 2);
+    $this->assertDatabaseHas('github_connections', ['github_login' => 'first']);
+    $this->assertDatabaseHas('github_connections', ['github_login' => 'second']);
+});
+
+test('github settings page lists every connected account', function () {
+    $user = readyUserForGitHub();
+
+    foreach (['111' => 'first-acct', '222' => 'second-acct'] as $id => $login) {
+        GithubConnection::create([
+            'user_id' => $user->id,
+            'github_id' => $id,
+            'github_login' => $login,
+            'access_token' => 't',
+            'connected_at' => now(),
+        ]);
+    }
+
+    $this->actingAs($user)
+        ->get(route('settings.github.show'))
+        ->assertOk()
+        ->assertSee('first-acct')
+        ->assertSee('second-acct')
+        ->assertSee('Connect another GitHub account');
+});
+
+test('disconnecting an account keeps projects linked but detaches them from it', function () {
+    $user = readyUserForGitHub();
+    $connection = GithubConnection::create([
+        'user_id' => $user->id,
+        'github_id' => '111',
+        'github_login' => 'first',
+        'access_token' => 't',
+        'connected_at' => now(),
+    ]);
+    $project = Project::factory()->create(['github_connection_id' => $connection->id, 'github_repo' => 'first/site']);
+
+    $this->actingAs($user)->delete(route('settings.github.destroy', $connection));
+
+    expect($project->refresh()->github_connection_id)->toBeNull()
+        ->and($project->github_repo)->toBe('first/site');
 });
 
 test('github settings requires authentication', function () {

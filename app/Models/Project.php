@@ -6,6 +6,7 @@ use App\Models\Concerns\HasPublicUuid;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -34,6 +35,7 @@ class Project extends Model
         'hourly_rate',
         'github_repo',
         'github_branch',
+        'github_connection_id',
         'github_webhook_id',
         'github_webhook_secret',
     ];
@@ -50,6 +52,11 @@ class Project extends Model
             'github_webhook_id' => 'integer',
             'github_webhook_secret' => 'encrypted',
         ];
+    }
+
+    public function githubConnection(): BelongsTo
+    {
+        return $this->belongsTo(GithubConnection::class);
     }
 
     public function stages(): HasMany
