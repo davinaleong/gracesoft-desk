@@ -75,6 +75,70 @@ test('bot time entries summary accepts a month override', function () {
         ]);
 });
 
+test('bot time entries summary accepts a from/to month range', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user, ['*']);
+
+    $project = Project::factory()->create(['hourly_rate' => 100]);
+    $stage = ProjectStage::query()->create(['name' => 'Development', 'sort_order' => 4, 'status' => 'active']);
+
+    makeBotTimeEntry($project, $stage, $user, [
+        'entry_date' => '2026-01-15',
+        'duration_minutes' => 60,
+        'is_billable' => true,
+    ]);
+    makeBotTimeEntry($project, $stage, $user, [
+        'entry_date' => '2026-03-15',
+        'duration_minutes' => 120,
+        'is_billable' => true,
+    ]);
+    // Outside the range — must not be counted.
+    makeBotTimeEntry($project, $stage, $user, [
+        'entry_date' => '2026-04-01',
+        'duration_minutes' => 999,
+        'is_billable' => true,
+    ]);
+
+    $this->getJson('/api/bot/time-entries/summary?from=2026-01&to=2026-03')
+        ->assertOk()
+        ->assertJson([
+            'range' => ['from' => '2026-01-01', 'to' => '2026-03-31'],
+            'billable_hours' => 3.0,
+        ]);
+});
+
+test('bot time entries summary accepts a from/to range within the same month', function () {
+    $user = User::factory()->create();
+    Sanctum::actingAs($user, ['*']);
+
+    $project = Project::factory()->create(['hourly_rate' => 100]);
+    $stage = ProjectStage::query()->create(['name' => 'Development', 'sort_order' => 4, 'status' => 'active']);
+
+    makeBotTimeEntry($project, $stage, $user, [
+        'entry_date' => '2026-03-15',
+        'duration_minutes' => 60,
+        'is_billable' => true,
+    ]);
+
+    $this->getJson('/api/bot/time-entries/summary?from=2026-03&to=2026-03')
+        ->assertOk()
+        ->assertJson(['range' => ['from' => '2026-03-01', 'to' => '2026-03-31']]);
+});
+
+test('bot time entries summary rejects a reversed from/to range', function () {
+    Sanctum::actingAs(User::factory()->create(), ['*']);
+
+    $this->getJson('/api/bot/time-entries/summary?from=2026-03&to=2026-01')
+        ->assertUnprocessable();
+});
+
+test('bot time entries summary rejects a malformed from/to range', function () {
+    Sanctum::actingAs(User::factory()->create(), ['*']);
+
+    $this->getJson('/api/bot/time-entries/summary?from=2026-01&to=not-a-month')
+        ->assertUnprocessable();
+});
+
 test('bot time entries summary rejects a malformed month', function () {
     Sanctum::actingAs(User::factory()->create(), ['*']);
 

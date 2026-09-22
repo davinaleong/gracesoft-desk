@@ -80,6 +80,53 @@ test('bot finance summary accepts a month override', function () {
         ]);
 });
 
+test('bot finance summary accepts a from/to month range', function () {
+    Sanctum::actingAs(User::factory()->create(), ['*']);
+
+    Transaction::factory()->create([
+        'type' => 'income',
+        'direction' => 'in',
+        'status' => 'completed',
+        'transaction_date' => '2026-01-10',
+        'amount' => 500,
+        'gst_amount' => 0,
+        'net_amount' => 500,
+    ]);
+    Transaction::factory()->create([
+        'type' => 'income',
+        'direction' => 'in',
+        'status' => 'completed',
+        'transaction_date' => '2026-03-10',
+        'amount' => 250,
+        'gst_amount' => 0,
+        'net_amount' => 250,
+    ]);
+    // Outside the range — must not be counted.
+    Transaction::factory()->create([
+        'type' => 'income',
+        'direction' => 'in',
+        'status' => 'completed',
+        'transaction_date' => '2026-04-10',
+        'amount' => 9999,
+        'gst_amount' => 0,
+        'net_amount' => 9999,
+    ]);
+
+    $this->getJson('/api/bot/finance/summary?from=2026-01&to=2026-03')
+        ->assertOk()
+        ->assertJson([
+            'range' => ['from' => '2026-01-01', 'to' => '2026-03-31'],
+            'income' => 750.0,
+        ]);
+});
+
+test('bot finance summary rejects a reversed from/to range', function () {
+    Sanctum::actingAs(User::factory()->create(), ['*']);
+
+    $this->getJson('/api/bot/finance/summary?from=2026-03&to=2026-01')
+        ->assertUnprocessable();
+});
+
 test('bot finance summary rejects a malformed month', function () {
     Sanctum::actingAs(User::factory()->create(), ['*']);
 
