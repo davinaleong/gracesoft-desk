@@ -332,3 +332,44 @@ Adopted the proposal: **fixed-fee time entries carry no billable amount.** Their
 - [x] Rollover carries unused hours forward one month only
 - [x] Month boundaries use the system timezone
 - [x] The projects report shows revenue by billing model
+
+---
+
+## M8 · Renewals and recurring charges ✅
+
+**Completed:** 2026-09-29
+
+### Decisions
+
+- **New fields on services:** `billing_cycle` (monthly / yearly), `expected_amount`, `currency`, `next_renewal_date`, `renewal_anchor_day`, the paying `account_id`, `payment_method_id`, an expense `transaction_category_id`, `auto_create_expense`, `reminder_days_before` (default 7) and `last_reminded_for`.
+- **Anchor day** (`App\Support\RenewalSchedule`): the service form stores the renewal date's day. The next date is always the anchor clamped to the target month's length, so 31 Jan → 28/29 Feb → 31 Mar, and 29 Feb 2028 → 28 Feb 2029 → … → 29 Feb 2032.
+- **"Its category":** a service's own category belongs to the vendor/service registry, which isn't a transaction category. Each service therefore gets an *expense category* (a transaction category) for the expenses it generates.
+- **`desk:process-renewals`** runs daily at 07:00 system time and is safe to re-run. For each active service with a cycle whose date has arrived, it creates the pending expense (only when the toggle is on and an account is set), catches up on any missed cycles, and advances the date. The date is checked before creating, and a unique index on `transactions (service_id, service_renewal_date)` backs that up, so a second run the same day creates nothing. Paused and cancelled services are never touched.
+- **Reminders:** one per renewal. `last_reminded_for` records which renewal date was reminded, and the reminder goes out once the date is within `reminder_days_before`.
+- **Spend report:** completed transactions linked to a service, grouped by vendor and by service category, with a CSV export.
+
+### What was built
+
+| File | Notes |
+| --- | --- |
+| `2026_09_29_100001_add_renewals_to_services` | Service renewal columns; `transactions.service_id` + `service_renewal_date` (unique pair). `down()` drops the FK before the index so MySQL can roll back |
+| `app/Support/RenewalSchedule.php` | Date arithmetic |
+| `app/Services/RenewalProcessor.php`, `desk:process-renewals`, `RenewalReminderMail` | Expenses, date advancement, reminders |
+| Service form / page | Renewal fieldset; renewal summary on the service page |
+| Dashboard | "Renewals in the Next 30 Days" |
+| `SpendReportService`, `reports/spend` + CSV | Linked from the Services page |
+| `MarketingDemoSeeder` | Three demo services with monthly renewals (two within 30 days) |
+
+Found on the way: joining `services` made the `Transaction::completed()` scope's unqualified `status` column ambiguous. The spend report qualifies it.
+
+### Tests
+
+`tests/Feature/RenewalsTest.php` (11):
+
+- [x] A monthly service renewing on the 31st moves to 28/29 February, then back to the 31st
+- [x] A yearly renewal on 29 February lands on 28 February in non-leap years
+- [x] Running the command twice on the same day creates one transaction
+- [x] Paused and cancelled services never generate anything
+- [x] Generated transactions are expense, out, pending, linked to the service, with its expense category
+- [x] Each renewal sends one reminder
+- [x] Spend report totals equal the sum of completed transactions linked to services

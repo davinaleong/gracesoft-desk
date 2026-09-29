@@ -27,6 +27,8 @@ class Transaction extends Model
         'project_id',
         'client_id',
         'invoice_id',
+        'service_id',
+        'service_renewal_date',
         'type',
         'direction',
         'status',
@@ -128,6 +130,11 @@ class Transaction extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class);
     }
 
     public function invoice(): BelongsTo

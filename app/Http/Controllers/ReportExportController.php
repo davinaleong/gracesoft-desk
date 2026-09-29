@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\FinanceReportService;
 use App\Services\LedgerSummaryService;
 use App\Services\ProjectReportService;
+use App\Services\SpendReportService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -50,6 +51,22 @@ class ReportExportController extends Controller
             ['Invoiced (issued in range)', number_format($report['receivables']['invoiced'], 2, '.', '')],
             ['Invoices paid (in range)', number_format($report['receivables']['paid'], 2, '.', '')],
             ['Outstanding receivables (now)', number_format($report['receivables']['outstanding'], 2, '.', '')],
+        ]);
+    }
+
+    public function spend(Request $request, SpendReportService $spendReportService): StreamedResponse
+    {
+        [$fromDate, $toDate] = $this->resolveDateRange($request);
+        $report = $spendReportService->build($fromDate, $toDate);
+
+        return $this->csvResponse('service-spend-report.csv', [
+            ['Vendor', 'Payments', 'Total'],
+            ...array_map(fn (array $row): array => [$row['vendor'], $row['count'], number_format($row['total'], 2, '.', '')], $report['by_vendor']),
+            [],
+            ['Category', 'Payments', 'Total'],
+            ...array_map(fn (array $row): array => [$row['category'], $row['count'], number_format($row['total'], 2, '.', '')], $report['by_category']),
+            [],
+            ['Total', '', number_format($report['total'], 2, '.', '')],
         ]);
     }
 

@@ -49,6 +49,33 @@
                     <div id="billable-by-stage-chart" class="h-80"></div>
                 </x-desk.chart-card>
 
+                <x-desk.table-card class="xl:col-span-2" :title="__('Renewals in the Next 30 Days')">
+                    <div class="overflow-x-auto">
+                        <table class="desk-table-dense min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="desk-table-head">{{ __('Date') }}</th>
+                                    <th class="desk-table-head">{{ __('Service') }}</th>
+                                    <th class="desk-table-head">{{ __('Amount') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse ($upcomingRenewals as $renewal)
+                                    <tr class="desk-interactive-row">
+                                        <td class="px-3 py-2 text-sm">{{ \App\Support\DeskFormat::date($renewal->next_renewal_date) }}</td>
+                                        <td class="px-3 py-2 text-sm">
+                                            <a href="{{ route('services.show', $renewal) }}" class="text-blue-600 hover:text-blue-800">{{ $renewal->vendor?->name }} · {{ $renewal->name }}</a>
+                                        </td>
+                                        <td class="px-3 py-2 text-sm">{{ $renewal->currency }} {{ number_format((float) $renewal->expected_amount, 2) }}</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="3" class="px-3 py-4 text-sm text-gray-500">{{ __('Nothing renews in the next 30 days.') }}</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </x-desk.table-card>
+
                 <x-desk.table-card class="xl:col-span-2" :title="__('Budgets at Risk')">
                     <div class="overflow-x-auto">
                         <table class="desk-table-dense min-w-full divide-y divide-gray-200">

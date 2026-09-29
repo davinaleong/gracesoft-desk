@@ -896,6 +896,31 @@ class MarketingDemoSeeder extends Seeder
                 $vendor->services()->create($serviceData);
             }
         }
+
+        // A few tracked renewals so the dashboard's "next 30 days" list and reminders have data.
+        $operatingAccountId = Account::query()->where('code', 'BANK-OPERATING')->value('id');
+        $today = CarbonImmutable::today();
+
+        Service::query()
+            ->where('status', 'active')
+            ->whereHas('vendor', fn ($q) => $q->whereIn('name', ['Amazon Web Services', 'Figma', 'Notion']))
+            ->orderBy('id')
+            ->get()
+            ->values()
+            ->each(function (Service $service, int $index) use ($operatingAccountId, $today): void {
+                $next = $today->addDays([6, 13, 41][$index % 3]);
+
+                $service->update([
+                    'billing_cycle' => 'monthly',
+                    'expected_amount' => [180.00, 22.50, 12.00][$index % 3],
+                    'currency' => 'SGD',
+                    'next_renewal_date' => $next->toDateString(),
+                    'renewal_anchor_day' => $next->day,
+                    'account_id' => $operatingAccountId,
+                    'auto_create_expense' => false,
+                    'reminder_days_before' => 7,
+                ]);
+            });
     }
 
     private function syncAccountBalances(): void

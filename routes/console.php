@@ -25,3 +25,8 @@ Schedule::command('desk:draft-retainer-invoices')
     ->monthlyOn(1, '06:00')
     ->timezone(config('app.timezone'))
     ->withoutOverlapping();
+
+Schedule::command('desk:process-renewals')
+    ->dailyAt('07:00')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping();

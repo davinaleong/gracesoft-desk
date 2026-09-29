@@ -79,6 +79,8 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::get('/reports/finance', [ReportController::class, 'finance'])->name('reports.finance');
     Route::get('/reports/projects', [ReportController::class, 'projects'])->name('reports.projects');
     Route::get('/reports/monthly-summary', [ReportController::class, 'monthlySummary'])->name('reports.monthly-summary');
+    Route::get('/reports/spend', [ReportController::class, 'spend'])->name('reports.spend');
+    Route::get('/reports/spend/export', [ReportExportController::class, 'spend'])->name('reports.spend.export');
 
     Route::get('/reports/finance/print', [ReportController::class, 'printFinance'])->name('reports.finance.print');
     Route::get('/reports/projects/print', [ReportController::class, 'printProjects'])->name('reports.projects.print');

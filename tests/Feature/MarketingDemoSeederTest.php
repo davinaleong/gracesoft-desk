@@ -6,6 +6,7 @@ use App\Models\CommitTimeEntry;
 use App\Models\Invoice;
 use App\Models\Milestone;
 use App\Models\Project;
+use App\Models\Service;
 use App\Models\TimeEntry;
 use App\Models\Transaction;
 use App\Models\User;
@@ -47,6 +48,7 @@ test('marketing demo seeder seeds realistic linked and repeatable data', functio
     expect(Transaction::where('transaction_code', 'like', 'DEMO-TRX-%')->count())->toBe($demoTransactionCount);
     expect(Client::count())->toBe(2);
     expect(Invoice::query()->count())->toBe(3);
+    expect(Service::query()->renewingWithin(30)->count())->toBeGreaterThan(0);
     expect(Milestone::query()->count())->toBe(2);
     expect(app(BudgetMonitor::class)->atRisk()->map(fn ($row) => $row['project']->code)->all())->toContain('DEMO-HQX');
     expect(CommitTimeEntry::query()->where('status', 'pending')->count())->toBe(5);

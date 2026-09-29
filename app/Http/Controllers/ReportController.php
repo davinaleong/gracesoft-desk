@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\FinanceReportService;
 use App\Services\LedgerSummaryService;
 use App\Services\ProjectReportService;
+use App\Services\SpendReportService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -31,6 +32,15 @@ class ReportController extends Controller
 
         return view('reports.projects', [
             'report' => $this->projectReportService->build($fromDate, $toDate),
+        ]);
+    }
+
+    public function spend(Request $request, SpendReportService $spendReportService): View
+    {
+        [$fromDate, $toDate] = $this->resolveDateRange($request);
+
+        return view('reports.spend', [
+            'report' => $spendReportService->build($fromDate, $toDate),
         ]);
     }
 

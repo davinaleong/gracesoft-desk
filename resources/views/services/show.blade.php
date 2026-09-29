@@ -58,6 +58,20 @@
                         </div>
                     @endif
 
+                    @if ($service->billing_cycle)
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase">{{ __('Renewal') }}</p>
+                            <p class="text-base">
+                                {{ ucfirst($service->billing_cycle) }} · {{ $service->currency }} {{ number_format((float) $service->expected_amount, 2) }}
+                                · {{ __('next') }} {{ $service->next_renewal_date ? \App\Support\DeskFormat::date($service->next_renewal_date) : '—' }}
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                {{ $service->auto_create_expense ? __('Creates a pending expense from :account on each renewal.', ['account' => $service->account?->name ?? '—']) : __('No automatic expense.') }}
+                                {{ __('Reminder :days day(s) before.', ['days' => $service->reminder_days_before]) }}
+                            </p>
+                        </div>
+                    @endif
+
                     <div>
                         <p class="text-xs text-gray-500 uppercase">{{ __('Category') }}</p>
                         <p class="text-base">
