@@ -16,6 +16,8 @@ function routeGuardExemptions(): array
         'profile.edit',              // must stay reachable while a password change / 2FA setup is pending
         'settings.github.callback',  // OAuth redirect arrives mid-flow
         'webhooks.github',           // HMAC-verified, no session
+        'settings.git.callback',     // GitLab / Bitbucket OAuth redirect arrives mid-flow
+        'webhooks.receive',          // GitLab / Bitbucket push webhooks, verified per provider
     ];
 }
 

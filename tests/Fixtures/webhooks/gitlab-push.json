@@ -1,0 +1,43 @@
+{
+  "object_kind": "push",
+  "event_name": "push",
+  "before": "95790bf891e76fee5e1747ab589903a6a1f80f22",
+  "after": "a10867b14bb761a232cd80139fbd4c0d33264240",
+  "ref": "refs/heads/main",
+  "checkout_sha": "a10867b14bb761a232cd80139fbd4c0d33264240",
+  "user_id": 4,
+  "user_name": "Dana Dev",
+  "user_username": "dana",
+  "project_id": 15,
+  "project": {
+    "id": 15,
+    "name": "desk-demo",
+    "path_with_namespace": "gracesoft/apps/desk-demo",
+    "default_branch": "main"
+  },
+  "commits": [
+    {
+      "id": "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+      "message": "feat: add invoice PDF export",
+      "title": "feat: add invoice PDF export",
+      "timestamp": "2026-09-27T23:30:00+08:00",
+      "url": "https://gitlab.com/gracesoft/apps/desk-demo/-/commit/0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+      "author": { "name": "Dana Dev", "email": "dana@gracesoft.example" },
+      "added": ["app/Services/InvoicePdfService.php"],
+      "modified": ["routes/web.php", "app/Http/Controllers/InvoiceController.php"],
+      "removed": []
+    },
+    {
+      "id": "a10867b14bb761a232cd80139fbd4c0d33264240",
+      "message": "fix: round GST per line",
+      "title": "fix: round GST per line",
+      "timestamp": "2026-09-28T09:05:12+08:00",
+      "url": "https://gitlab.com/gracesoft/apps/desk-demo/-/commit/a10867b14bb761a232cd80139fbd4c0d33264240",
+      "author": { "name": "Dana Dev", "email": "dana@gracesoft.example" },
+      "added": [],
+      "modified": ["app/Support/Money.php"],
+      "removed": []
+    }
+  ],
+  "total_commits_count": 2
+}

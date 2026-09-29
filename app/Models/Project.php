@@ -58,6 +58,8 @@ class Project extends Model
         'github_connection_id',
         'github_webhook_id',
         'github_webhook_secret',
+        'source_provider',
+        'source_webhook_ref',
     ];
 
     protected $hidden = ['id'];
@@ -111,6 +113,14 @@ class Project extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
+    }
+
+    /**
+     * The Git host the linked repository lives on. Rows linked before multi-provider support are GitHub.
+     */
+    public function sourceProviderKey(): string
+    {
+        return $this->source_provider ?: 'github';
     }
 
     public function budgetAlerts(): HasMany

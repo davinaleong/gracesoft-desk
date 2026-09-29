@@ -41,6 +41,19 @@ return [
         'redirect' => env('GITHUB_REDIRECT_URI', '/settings/github/callback'),
     ],
 
+    'gitlab' => [
+        'client_id' => env('GITLAB_CLIENT_ID'),
+        'client_secret' => env('GITLAB_CLIENT_SECRET'),
+        'redirect' => env('GITLAB_REDIRECT_URI', '/settings/git/gitlab/callback'),
+        'host' => env('GITLAB_HOST', 'https://gitlab.com'),
+    ],
+
+    'bitbucket' => [
+        'client_id' => env('BITBUCKET_CLIENT_ID'),
+        'client_secret' => env('BITBUCKET_CLIENT_SECRET'),
+        'redirect' => env('BITBUCKET_REDIRECT_URI', '/settings/git/bitbucket/callback'),
+    ],
+
     'openai' => [
         'api_key' => env('OPENAI_API_KEY'),
         'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),

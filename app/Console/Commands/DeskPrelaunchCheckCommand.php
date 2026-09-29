@@ -2,9 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Models\GithubConnection;
+use App\Models\Project;
 use App\Models\User;
 use App\Services\Ai\AiSettings;
 use App\Services\InvoiceSettings;
+use App\Services\SourceProviders\SourceProviderRegistry;
 use Database\Seeders\AdminUserSeeder;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -66,6 +69,11 @@ class DeskPrelaunchCheckCommand extends Command
             $this->check(
                 'AI provider is fully configured (or AI is off)',
                 ! app(AiSettings::class)->enabled() || app(AiSettings::class)->isReady(),
+            ),
+            $this->check(
+                'Git providers in use have OAuth credentials',
+                $this->gitProvidersConfigured(),
+                warning: true
             ),
             $this->check('Admin account exists', $this->adminUserExists()),
             $this->check('Backup directory is writable', $this->backupDirectoryWritable()),
@@ -130,6 +138,17 @@ class DeskPrelaunchCheckCommand extends Command
     {
         $this->callSilent('db:seed', ['--class' => AdminUserSeeder::class, '--no-interaction' => true]);
         $this->info('Admin account has been seeded/updated.');
+    }
+
+    private function gitProvidersConfigured(): bool
+    {
+        $inUse = Project::query()->whereNotNull('github_repo')->pluck('source_provider')->map(fn ($key) => $key ?: 'github')
+            ->merge(GithubConnection::query()->pluck('provider'))
+            ->unique();
+
+        $registry = app(SourceProviderRegistry::class);
+
+        return $inUse->every(fn (string $key): bool => $registry->get($key)->isConfigured());
     }
 
     private function schedulerRanRecently(): bool

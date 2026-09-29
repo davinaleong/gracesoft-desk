@@ -1,0 +1,51 @@
+{
+  "actor": { "display_name": "Dana Dev", "type": "user", "nickname": "dana" },
+  "repository": {
+    "type": "repository",
+    "full_name": "gracesoft/desk-demo",
+    "name": "desk-demo",
+    "is_private": true
+  },
+  "push": {
+    "changes": [
+      {
+        "old": {
+          "type": "branch",
+          "name": "main",
+          "target": { "type": "commit", "hash": "95790bf891e76fee5e1747ab589903a6a1f80f22" }
+        },
+        "new": {
+          "type": "branch",
+          "name": "main",
+          "target": {
+            "type": "commit",
+            "hash": "a10867b14bb761a232cd80139fbd4c0d33264240",
+            "date": "2026-09-28T01:05:12+00:00",
+            "message": "fix: round GST per line\n",
+            "author": { "type": "author", "raw": "Dana Dev <dana@gracesoft.example>" }
+          }
+        },
+        "created": false,
+        "closed": false,
+        "forced": false,
+        "truncated": false,
+        "commits": [
+          {
+            "type": "commit",
+            "hash": "a10867b14bb761a232cd80139fbd4c0d33264240",
+            "date": "2026-09-28T01:05:12+00:00",
+            "message": "fix: round GST per line",
+            "author": { "type": "author", "raw": "Dana Dev <dana@gracesoft.example>", "user": { "display_name": "Dana Dev" } }
+          },
+          {
+            "type": "commit",
+            "hash": "0d1a26e67d8f5eaf1f6ba5c57fc3c7d91ac0fd1c",
+            "date": "2026-09-27T15:30:00+00:00",
+            "message": "feat: add invoice PDF export",
+            "author": { "type": "author", "raw": "Dana Dev <dana@gracesoft.example>", "user": { "display_name": "Dana Dev" } }
+          }
+        ]
+      }
+    ]
+  }
+}

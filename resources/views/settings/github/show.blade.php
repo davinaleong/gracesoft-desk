@@ -1,7 +1,8 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('GitHub Connection') }}
+            {{ __('Git Providers') }}
+            <span class="block text-sm font-normal text-gray-500">{{ __('GitHub Connection, GitLab and Bitbucket accounts') }}</span>
         </h2>
     </x-slot>
 
@@ -29,6 +30,10 @@
                         </div>
 
                         <dl class="divide-y divide-gray-100 text-sm">
+                            <div class="flex justify-between py-2">
+                                <dt class="font-medium text-gray-500">{{ __('Provider') }}</dt>
+                                <dd class="text-gray-900">{{ $providers[$connection->provider]?->label() ?? $connection->provider }}</dd>
+                            </div>
                             <div class="flex justify-between py-2">
                                 <dt class="font-medium text-gray-500">{{ __('GitHub Login') }}</dt>
                                 <dd class="text-gray-900">{{ $connection->github_login }}</dd>
@@ -90,6 +95,19 @@
                             {{ __('GitHub authorizes the account you are currently signed in to on github.com. Switch accounts there first, then connect.') }}
                         </p>
                     @endif
+
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        @foreach ([$providers['gitlab'], $providers['bitbucket']] as $otherProvider)
+                            @if ($otherProvider->isConfigured())
+                                <a href="{{ route('settings.git.redirect', $otherProvider->key()) }}"
+                                    class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-50">
+                                    {{ __('Connect :provider', ['provider' => $otherProvider->label()]) }}
+                                </a>
+                            @else
+                                <span class="text-xs text-gray-500">{{ __(':provider: add its OAuth client ID and secret to .env to enable.', ['provider' => $otherProvider->label()]) }}</span>
+                            @endif
+                        @endforeach
+                    </div>
                 </div>
             </div>
 

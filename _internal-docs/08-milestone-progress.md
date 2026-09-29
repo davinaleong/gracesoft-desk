@@ -236,3 +236,50 @@ The MySQL migration check caught a bug SQLite missed (`DISTINCT` combined with t
 - [x] Alerts are evaluated after a CSV import commit
 - [x] Bot endpoint needs a Sanctum token (401) and lists projects over threshold
 - [x] Budget changes are audit-logged
+
+---
+
+## M6 · More Git providers ✅
+
+**Completed:** 2026-09-29
+
+### Decisions
+
+- **The GitHub contract tests stayed frozen.** Before refactoring, the hashes of `CommitIngestionTest`, `SmartBatchingTest`, `ProjectGithubTest`, `GitHubConnectionTest`, `AiSummaryTest` and `SquashCommitsTest` were recorded. After the refactor they match byte for byte and all pass. That ruled out renaming anything they touch, so the generalisation is additive:
+  - `github_connections` keeps its name but gains `provider`, `refresh_token` (encrypted) and `token_expires_at`. It is now unique on (user, provider, account id).
+  - `projects.github_repo`, `github_branch` and `github_webhook_secret` hold the repository for whichever provider `source_provider` names; `null` means GitHub for rows linked earlier. Webhook ids are stored as strings in `source_webhook_ref`, because Bitbucket uses UUIDs; GitHub still also fills `github_webhook_id`.
+  - GitHub's routes (`settings.github.*`, `projects.github.*`, `webhooks.github`) are unchanged. GitLab and Bitbucket use `settings.git.{redirect,callback}` and `webhooks.receive` at `/webhooks/{provider}/{project}`.
+- **Provider interface:** `App\Contracts\SourceProvider` covers OAuth connect, token refresh, listing repos and branches, registering and removing webhooks, verifying requests, and parsing a push into normalised commits (`App\Support\PushEvent`). GitHub was moved onto it first, then GitLab and Bitbucket Cloud were added.
+- **How each provider's webhook is checked:** GitHub uses the HMAC in `X-Hub-Signature-256`; GitLab compares `X-Gitlab-Token` to the secret in constant time; Bitbucket uses the HMAC in `X-Hub-Signature`. A project only accepts pushes on its own provider's route (404 otherwise).
+- **Dedup key is provider + repo + SHA** (new unique index; existing rows were backfilled with their repo). Rows without a repo still match on project + SHA and get backfilled on the next push.
+- **Token refresh:** GitLab and Bitbucket tokens expire, so they are refreshed just before use (`RefreshesOAuthTokens`). GitLab can be self-hosted via `GITLAB_HOST`.
+- **Differences between payloads:** Bitbucket sends no file lists, so `files_changed` is `null`. Bitbucket lists commits newest-first, so they are reversed. GitLab repos can be nested (`group/subgroup/project`), so each provider has its own repo-name pattern.
+
+### What was built
+
+| File | Notes |
+| --- | --- |
+| `2026_09_29_080001_add_source_providers` | Provider columns and the dedup index (reversible) |
+| `app/Contracts/SourceProvider.php`, `app/Support/PushEvent.php`, `ProviderAccount.php` | Contract and normalised types |
+| `app/Services/SourceProviders/*` | `GitHubSourceProvider` (wraps `GitHubService`), `GitLabSourceProvider`, `BitbucketSourceProvider`, `SourceProviderRegistry`, `RefreshesOAuthTokens` |
+| `WebhookController` | One `receive()` for every provider; `github()` delegates to it. Same branch filter, large-push threshold and queued ingest for all |
+| `CommitIngestionService` | Takes normalised commits and dedups on provider / repo / SHA |
+| `ProjectGithubController`, `GitHubConnectionController` | Dispatch on the connection's provider |
+| Settings → Git Providers | Provider shown per connection; Connect GitLab / Bitbucket buttons (or a hint when not configured) |
+| `config/services.php`, `.env.example` | `GITLAB_*`, `BITBUCKET_*` |
+| `desk:prelaunch-check` | Warns when a provider in use has no OAuth credentials |
+
+### Tests
+
+`tests/Feature/SourceProvidersTest.php` (21), with recorded-style push fixtures in `tests/Fixtures/webhooks/`:
+
+- [x] GitHub webhook tests frozen as contract tests; they pass unchanged afterwards (hashes checked)
+- [x] For each provider, a valid request is accepted, and an invalid or missing signature is rejected with no commits stored
+- [x] Push payloads from each provider normalise to the same commit shape
+- [x] Pushes to untracked branches are ignored for every provider
+- [x] Dedup keys on provider, repo and SHA
+- [x] The large-push threshold and queued ingest work for every provider
+- [x] Unlinking removes the remote webhook (`Http::fake` asserts the DELETE) for GitLab and Bitbucket
+- [x] Tokens are encrypted at rest, refreshed when expired, and deleted on disconnect
+
+Not tested against the live GitLab and Bitbucket APIs: that needs real OAuth apps.

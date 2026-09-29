@@ -26,6 +26,8 @@ class CommitTimeEntry extends Model
 
     protected $fillable = [
         'project_id',
+        'provider',
+        'repo',
         'sha',
         'push_batch_uuid',
         'from_large_batch',

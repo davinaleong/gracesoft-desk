@@ -116,7 +116,7 @@
             @endif
 
             {{-- GitHub Repository --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" x-data="repoPicker(@js(auth()->user()->githubConnections->map(fn ($c) => ['id' => $c->id, 'login' => $c->github_login])->values()))">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" x-data="repoPicker(@js(auth()->user()->githubConnections->map(fn ($c) => ['id' => $c->id, 'login' => $c->github_login.' ('.ucfirst($c->provider).')'])->values()))">
                 <div class="p-6 text-gray-900">
                     <h3 class="text-sm font-semibold text-gray-700 mb-4">{{ __('GitHub Repository') }}</h3>
 

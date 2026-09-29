@@ -123,6 +123,9 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
 
     Route::get('/settings/github', [GitHubConnectionController::class, 'show'])->name('settings.github.show');
     Route::get('/settings/github/redirect', [GitHubConnectionController::class, 'redirect'])->name('settings.github.redirect');
+    Route::get('/settings/git/{provider}/redirect', [GitHubConnectionController::class, 'redirectToProvider'])
+        ->whereIn('provider', ['gitlab', 'bitbucket'])
+        ->name('settings.git.redirect');
     Route::get('/settings/github/{connection}/repos', [ProjectGithubController::class, 'repos'])->name('settings.github.repos');
     Route::get('/settings/github/{connection}/branches', [ProjectGithubController::class, 'branches'])->name('settings.github.branches');
     Route::delete('/settings/github/{connection}', [GitHubConnectionController::class, 'destroy'])->name('settings.github.destroy');
@@ -139,8 +142,16 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
 // GitHub OAuth callback — exempt from password.changed / twofactor middleware (arrives mid-flow)
 Route::middleware('auth')->get('/settings/github/callback', [GitHubConnectionController::class, 'callback'])->name('settings.github.callback');
 
-// GitHub push webhook — HMAC-verified, exempt from auth/CSRF (Milestone 4)
+// GitLab / Bitbucket OAuth callbacks — same exemption as GitHub's
+Route::middleware('auth')->get('/settings/git/{provider}/callback', [GitHubConnectionController::class, 'providerCallback'])
+    ->whereIn('provider', ['gitlab', 'bitbucket'])
+    ->name('settings.git.callback');
+
+// Push webhooks — verified per provider (HMAC or secret token), exempt from auth/CSRF
 Route::post('/webhooks/github/{project:uuid}', [WebhookController::class, 'github'])->name('webhooks.github');
+Route::post('/webhooks/{provider}/{project:uuid}', [WebhookController::class, 'receive'])
+    ->whereIn('provider', ['gitlab', 'bitbucket'])
+    ->name('webhooks.receive');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
