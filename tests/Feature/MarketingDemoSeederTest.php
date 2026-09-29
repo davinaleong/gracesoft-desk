@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\TimeEntry;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\BudgetMonitor;
 use Database\Seeders\MarketingDemoSeeder;
 
 use function Pest\Laravel\seed;
@@ -45,6 +46,7 @@ test('marketing demo seeder seeds realistic linked and repeatable data', functio
     expect(Transaction::where('transaction_code', 'like', 'DEMO-TRX-%')->count())->toBe($demoTransactionCount);
     expect(Client::count())->toBe(2);
     expect(Invoice::query()->count())->toBe(3);
+    expect(app(BudgetMonitor::class)->atRisk()->map(fn ($row) => $row['project']->code)->all())->toContain('DEMO-HQX');
     expect(CommitTimeEntry::query()->where('status', 'pending')->count())->toBe(5);
     expect(Transaction::query()->whereNotNull('invoice_id')->count())->toBe(1);
 });

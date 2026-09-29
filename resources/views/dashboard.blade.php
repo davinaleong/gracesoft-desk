@@ -49,6 +49,35 @@
                     <div id="billable-by-stage-chart" class="h-80"></div>
                 </x-desk.chart-card>
 
+                <x-desk.table-card class="xl:col-span-2" :title="__('Budgets at Risk')">
+                    <div class="overflow-x-auto">
+                        <table class="desk-table-dense min-w-full divide-y divide-gray-200">
+                            <thead>
+                                <tr>
+                                    <th class="desk-table-head">{{ __('Project') }}</th>
+                                    <th class="desk-table-head">{{ __('Budget') }}</th>
+                                    <th class="desk-table-head">{{ __('Used') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                @forelse ($budgetsAtRisk as $row)
+                                    <tr class="desk-interactive-row">
+                                        <td class="px-3 py-2 text-sm">
+                                            <a href="{{ route('projects.show', $row['project']) }}" class="text-blue-600 hover:text-blue-800">{{ $row['project']->code }}</a>
+                                        </td>
+                                        <td class="px-3 py-2 text-sm">
+                                            {{ $row['project']->budget_type === 'hours' ? number_format((float) $row['project']->budget_value, 2).' h' : \App\Support\DeskFormat::money((float) $row['project']->budget_value) }}
+                                        </td>
+                                        <td class="px-3 py-2 text-sm font-semibold {{ $row['percent'] >= 100 ? 'text-red-700' : 'text-yellow-700' }}">{{ number_format($row['percent'], 0) }}%</td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="3" class="px-3 py-4 text-sm text-gray-500">{{ __('No project is past its first budget threshold.') }}</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </x-desk.table-card>
+
                 <x-desk.table-card class="xl:col-span-2" :title="__('Pending / Outstanding Transactions')">
 
                     <div class="overflow-x-auto">

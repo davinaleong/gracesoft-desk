@@ -228,6 +228,8 @@ class MarketingDemoSeeder extends Seeder
                 'starts_on' => $today->subDays(120)->toDateString(),
                 'ends_on' => $today->addDays(30)->toDateString(),
                 'is_billable' => true,
+                'budget_type' => 'hours',
+                'budget_value' => 40,
             ],
             [
                 'code' => 'DEMO-LAUNCH',
@@ -246,6 +248,8 @@ class MarketingDemoSeeder extends Seeder
                 'starts_on' => $today->subDays(80)->toDateString(),
                 'ends_on' => $today->addDays(35)->toDateString(),
                 'is_billable' => true,
+                'budget_type' => 'amount',
+                'budget_value' => 25000,
             ],
             [
                 'code' => 'DEMO-SUPPORT',

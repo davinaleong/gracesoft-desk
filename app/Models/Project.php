@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasPublicUuid;
+use App\Services\BudgetMonitor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,19 @@ class Project extends Model
         static::creating(function (self $project): void {
             self::fillUuid($project);
         });
+
+        // A new budget (type or value) re-arms every threshold.
+        static::updating(function (self $project): void {
+            if ($project->isDirty(['budget_type', 'budget_value'])) {
+                $project->budget_revision = (int) $project->getOriginal('budget_revision') + 1;
+            }
+        });
+
+        static::saved(function (self $project): void {
+            if ($project->wasChanged(['budget_type', 'budget_value', 'budget_thresholds']) || $project->wasRecentlyCreated) {
+                app(BudgetMonitor::class)->touched($project->id);
+            }
+        });
     }
 
     protected $fillable = [
@@ -36,6 +50,9 @@ class Project extends Model
         'is_billable',
         'hourly_rate',
         'ai_opt_out',
+        'budget_type',
+        'budget_value',
+        'budget_thresholds',
         'github_repo',
         'github_branch',
         'github_connection_id',
@@ -52,6 +69,9 @@ class Project extends Model
             'ends_on' => 'date',
             'is_billable' => 'boolean',
             'ai_opt_out' => 'boolean',
+            'budget_value' => 'decimal:2',
+            'budget_thresholds' => 'array',
+            'budget_revision' => 'integer',
             'hourly_rate' => 'decimal:2',
             'github_webhook_id' => 'integer',
             'github_webhook_secret' => 'encrypted',
@@ -91,6 +111,11 @@ class Project extends Model
     public function documents(): MorphMany
     {
         return $this->morphMany(Document::class, 'documentable');
+    }
+
+    public function budgetAlerts(): HasMany
+    {
+        return $this->hasMany(BudgetAlert::class);
     }
 
     public function scopeActive(Builder $query): Builder

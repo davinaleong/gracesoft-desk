@@ -83,6 +83,36 @@
         <p class="mt-1 text-xs text-gray-500">{{ __('Leave blank to use the client\'s rate, then the system default.') }}</p>
         <x-input-error :messages="$errors->get('hourly_rate')" class="mt-2" />
     </div>
+
+    <fieldset class="border-t border-gray-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <legend class="text-sm font-semibold text-gray-700">{{ __('Budget') }}</legend>
+
+        <div>
+            <x-input-label for="budget_type" :value="__('Budget Type')" />
+            <select id="budget_type" name="budget_type"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                @foreach (['none' => __('No budget'), 'hours' => __('Hours'), 'amount' => __('Amount')] as $value => $label)
+                    <option value="{{ $value }}" @selected(old('budget_type', $project->budget_type ?? 'none') === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('budget_type')" class="mt-2" />
+        </div>
+
+        <div>
+            <x-input-label for="budget_value" :value="__('Budget (hours or amount)')" />
+            <x-text-input id="budget_value" name="budget_value" type="number" min="0" step="0.01" class="mt-1 block w-full"
+                :value="old('budget_value', $project->budget_value ?? '')" />
+            <x-input-error :messages="$errors->get('budget_value')" class="mt-2" />
+        </div>
+
+        <div>
+            <x-input-label for="budget_thresholds" :value="__('Alert at (%)')" />
+            <x-text-input id="budget_thresholds" name="budget_thresholds" type="text" class="mt-1 block w-full" placeholder="50, 80, 100"
+                :value="implode(', ', (array) old('budget_thresholds', isset($project) ? ($project->budget_thresholds ?? []) : []))" />
+            <p class="mt-1 text-xs text-gray-500">{{ __('Blank uses 50, 80, 100. Changing the budget re-arms alerts.') }}</p>
+            <x-input-error :messages="collect($errors->getMessages())->filter(fn ($m, $k) => str_starts_with($k, 'budget_thresholds'))->flatten()->all()" class="mt-2" />
+        </div>
+    </fieldset>
 </div>
 
 <div class="mt-6 flex items-center gap-3">

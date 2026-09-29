@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\ProjectStage;
 use App\Models\TimeEntry;
 use App\Services\BillableRateResolver;
+use App\Services\BudgetMonitor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -121,14 +122,17 @@ class TimeEntryImportController extends Controller
 
         $createdCount = 0;
 
-        foreach (array_chunk($validRows, 50) as $chunk) {
-            DB::transaction(function () use ($chunk, &$createdCount): void {
-                foreach ($chunk as $row) {
-                    TimeEntry::query()->create($row);
-                    $createdCount++;
-                }
-            });
-        }
+        // Budget alerts are evaluated once per project after the whole import, not per row.
+        app(BudgetMonitor::class)->deferDuring(function () use ($validRows, &$createdCount): void {
+            foreach (array_chunk($validRows, 50) as $chunk) {
+                DB::transaction(function () use ($chunk, &$createdCount): void {
+                    foreach ($chunk as $row) {
+                        TimeEntry::query()->create($row);
+                        $createdCount++;
+                    }
+                });
+            }
+        });
 
         if (is_string($batch->csv_s3_path) && $batch->csv_s3_path !== '') {
             Storage::disk('s3')->delete($batch->csv_s3_path);

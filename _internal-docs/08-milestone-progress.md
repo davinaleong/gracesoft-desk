@@ -197,3 +197,42 @@ The MySQL migration check caught a bug SQLite missed (`DISTINCT` combined with t
 - [x] API keys are stored encrypted and never rendered back into the form
 
 `MarketingDemoSeeder` has nothing new for M4: AI stays off in the demo, as it should on a fresh install.
+
+---
+
+## M5 · Budgets and burn alerts ✅
+
+**Completed:** 2026-09-29 (this closes release 1.1)
+
+### Decisions
+
+- **Budget fields on projects:** `budget_type` (none / hours / amount), `budget_value`, and `budget_thresholds` (JSON; blank means 50 / 80 / 100).
+- **Fire once, re-arm on a new budget:** `budget_alerts` is unique on (project, `budget_revision`, threshold). `budget_revision` goes up only when the budget type or value changes. Changing only the thresholds keeps the alerts already fired, and newly added thresholds can still fire.
+- **What counts as used:** hours budgets count every non-deleted entry, billable or not. Amount budgets count billable value only. Soft-deleted entries never count.
+- **When it's checked:** `BudgetMonitor` (a singleton) re-evaluates on time-entry save, delete and restore (both projects when an entry moves), and on budget changes. The CSV import wraps its commit in `deferDuring()` so each project is evaluated once, after the whole import.
+- **A failed email never re-fires the alert:** the alert row is written first, `notified_at` is set only after a successful send, and the bot endpoint still shows the alert.
+
+### What was built
+
+| File | Notes |
+| --- | --- |
+| `2026_09_29_070001_add_budgets_to_projects_table` | Project budget columns and `budget_alerts` |
+| `app/Services/BudgetMonitor.php` | used / percent / thresholds / evaluate / `atRisk()` / `deferDuring()` |
+| `app/Models/BudgetAlert.php`, `BudgetAlertMail` | Alert row and email |
+| Project form / page | Budget fieldset; progress bar (indigo, yellow from 80%, red from 100%) |
+| Dashboard | "Budgets at Risk": projects past their first threshold, most-burned first |
+| `GET /api/bot/budgets/alerts` | At-risk projects plus alerts since `?since=` (default 7 days) for the Telegram assistant to push |
+| `MarketingDemoSeeder` | DEMO-HQX has a 40-hour budget (75% used, 50% alert fired); DEMO-CRM has an amount budget |
+
+### Tests
+
+`tests/Feature/BudgetAlertsTest.php` (11):
+
+- [x] 40 of 80 budgeted hours fires the 50% alert exactly once
+- [x] One entry that crosses 50% and 80% fires both, in order
+- [x] Dropping below and crossing again doesn't re-alert; raising the budget re-arms (changing only thresholds doesn't)
+- [x] Non-billable hours count toward an hours budget but not a money budget
+- [x] Soft-deleted entries are excluded
+- [x] Alerts are evaluated after a CSV import commit
+- [x] Bot endpoint needs a Sanctum token (401) and lists projects over threshold
+- [x] Budget changes are audit-logged

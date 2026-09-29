@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Bot\BudgetsController;
 use App\Http\Controllers\Api\Bot\FinanceController;
 use App\Http\Controllers\Api\Bot\InvoicesController;
 use App\Http\Controllers\Api\Bot\ProjectsController;
@@ -18,4 +19,5 @@ Route::prefix('bot')->middleware('auth:sanctum')->group(function (): void {
     Route::get('/finance/summary', [FinanceController::class, 'summary']);
     Route::get('/invoices/summary', [InvoicesController::class, 'summary']);
     Route::get('/timesheet/pending', [TimesheetController::class, 'pending']);
+    Route::get('/budgets/alerts', [BudgetsController::class, 'alerts']);
 });

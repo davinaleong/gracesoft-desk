@@ -75,6 +75,46 @@
                 </div>
             </div>
 
+            {{-- Budget --}}
+            @php
+                $budgetMonitor = app(\App\Services\BudgetMonitor::class);
+            @endphp
+            @if ($budgetMonitor->hasBudget($project))
+                @php
+                    $budgetUsed = $budgetMonitor->used($project);
+                    $budgetPercent = $budgetMonitor->percentUsed($project, $budgetUsed);
+                    $budgetBarClass = $budgetPercent >= 100 ? 'bg-red-600' : ($budgetPercent >= 80 ? 'bg-yellow-500' : 'bg-indigo-600');
+                    $isHours = $project->budget_type === 'hours';
+                @endphp
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900 space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <h3 class="font-semibold text-gray-700">{{ __('Budget') }}</h3>
+                            <span>
+                                @if ($isHours)
+                                    {{ number_format($budgetUsed, 2) }} / {{ number_format((float) $project->budget_value, 2) }} h
+                                @else
+                                    @deskMoney($budgetUsed) / @deskMoney((float) $project->budget_value)
+                                @endif
+                                · <strong>{{ number_format($budgetPercent, 0) }}%</strong>
+                            </span>
+                        </div>
+                        <div class="h-3 rounded bg-gray-200" role="progressbar" aria-label="{{ __('Budget used') }}"
+                            aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ (int) min(100, $budgetPercent) }}">
+                            <div class="h-3 rounded {{ $budgetBarClass }}" style="width: {{ min(100, $budgetPercent) }}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500">
+                            {{ __('Alerts at :thresholds%.', ['thresholds' => implode('%, ', $budgetMonitor->thresholds($project))]) }}
+                            @if ($isHours)
+                                {{ __('Hours budgets count billable and non-billable time.') }}
+                            @else
+                                {{ __('Amount budgets count billable value only.') }}
+                            @endif
+                        </p>
+                    </div>
+                </div>
+            @endif
+
             {{-- GitHub Repository --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg" x-data="repoPicker(@js(auth()->user()->githubConnections->map(fn ($c) => ['id' => $c->id, 'login' => $c->github_login])->values()))">
                 <div class="p-6 text-gray-900">

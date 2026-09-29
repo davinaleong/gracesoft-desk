@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\Concerns\HasPublicUuid;
 use App\Services\BillableRateResolver;
+use App\Services\BudgetMonitor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -45,6 +46,23 @@ class TimeEntry extends Model
                     'time_entry' => __('This time entry is on an invoice and can\'t be changed. Void the invoice to unlock it.'),
                 ]);
             }
+        });
+
+        static::saved(function (self $entry): void {
+            $monitor = app(BudgetMonitor::class);
+            $monitor->touched($entry->project_id);
+
+            if ($entry->wasChanged('project_id') && $entry->getOriginal('project_id') !== null) {
+                $monitor->touched((int) $entry->getOriginal('project_id'));
+            }
+        });
+
+        static::deleted(function (self $entry): void {
+            app(BudgetMonitor::class)->touched($entry->project_id);
+        });
+
+        static::restored(function (self $entry): void {
+            app(BudgetMonitor::class)->touched($entry->project_id);
         });
 
         static::deleting(function (self $entry): void {

@@ -13,6 +13,7 @@ use App\Models\Transaction;
 use App\Observers\AuditableObserver;
 use App\Services\Ai\AiSettings;
 use App\Services\AnthropicCommitSummarizer;
+use App\Services\BudgetMonitor;
 use App\Services\NullCommitSummarizer;
 use App\Services\OpenAiCommitSummarizer;
 use Illuminate\Support\Facades\App;
@@ -27,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(BudgetMonitor::class);
+
         // AI stays off (null driver) until switched on in AI settings with a complete provider config.
         $this->app->bind(CommitSummarizer::class, function (): CommitSummarizer {
             $settings = app(AiSettings::class);
