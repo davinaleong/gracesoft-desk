@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Client;
 use App\Models\CommitTimeEntry;
 use App\Models\Invoice;
+use App\Models\Milestone;
 use App\Models\PaymentMethod;
 use App\Models\Project;
 use App\Models\ProjectStage;
@@ -58,6 +59,7 @@ class MarketingDemoSeeder extends Seeder
         $accountsByCode = $this->seedAccounts();
         $projectsByCode = $this->seedProjects();
         $this->seedClients($projectsByCode);
+        $this->seedMilestones($projectsByCode);
 
         $this->seedTimeEntries($projectsByCode, $stagesByName);
         $this->seedPendingCommits($projectsByCode);
@@ -268,6 +270,8 @@ class MarketingDemoSeeder extends Seeder
                 'starts_on' => $today->subDays(140)->toDateString(),
                 'ends_on' => $today->subDays(25)->toDateString(),
                 'is_billable' => false,
+                'billing_model' => 'fixed_fee',
+                'fixed_fee_total' => 12000,
             ],
         ];
 
@@ -361,6 +365,32 @@ class MarketingDemoSeeder extends Seeder
     }
 
     /**
+     * Fixed-fee milestones for the AI discovery project.
+     *
+     * @param  array<string, Project>  $projectsByCode
+     */
+    private function seedMilestones(array $projectsByCode): void
+    {
+        $project = $projectsByCode['DEMO-AI'] ?? null;
+
+        if ($project === null) {
+            return;
+        }
+
+        $today = CarbonImmutable::today();
+
+        foreach ([
+            ['name' => 'Discovery workshop & findings', 'amount' => 5000, 'due_date' => $today->subDays(60)->toDateString(), 'sort_order' => 1],
+            ['name' => 'MVP flows and ROI baseline', 'amount' => 7000, 'due_date' => $today->subDays(25)->toDateString(), 'sort_order' => 2],
+        ] as $milestone) {
+            Milestone::query()->firstOrCreate(
+                ['project_id' => $project->id, 'name' => $milestone['name']],
+                $milestone + ['status' => Milestone::STATUS_PENDING],
+            );
+        }
+    }
+
+    /**
      * Seed demo clients and link each billable demo project to one.
      *
      * @param  array<string, Project>  $projectsByCode
@@ -392,7 +422,7 @@ class MarketingDemoSeeder extends Seeder
                     'status' => 'active',
                     'notes' => 'Demo client. Campaign analytics retainer prospect.',
                 ],
-                'projects' => ['DEMO-LAUNCH'],
+                'projects' => ['DEMO-LAUNCH', 'DEMO-AI'],
             ],
         ];
 

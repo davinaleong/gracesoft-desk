@@ -84,6 +84,57 @@
         <x-input-error :messages="$errors->get('hourly_rate')" class="mt-2" />
     </div>
 
+    <fieldset class="border-t border-gray-200 pt-4 space-y-4" x-data="{ model: @js(old('billing_model', $project->billing_model ?? 'hourly')) }">
+        <legend class="text-sm font-semibold text-gray-700">{{ __('Billing Model') }}</legend>
+
+        <div class="max-w-xs">
+            <label class="sr-only" for="billing_model">{{ __('Billing Model') }}</label>
+            <select id="billing_model" name="billing_model" x-model="model"
+                class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                <option value="hourly">{{ __('Hourly') }}</option>
+                <option value="fixed_fee">{{ __('Fixed fee (with milestones)') }}</option>
+                <option value="retainer">{{ __('Monthly retainer') }}</option>
+            </select>
+            <x-input-error :messages="$errors->get('billing_model')" class="mt-2" />
+        </div>
+
+        <div x-show="model === 'fixed_fee'" class="max-w-xs">
+            <x-input-label for="fixed_fee_total" :value="__('Fixed Fee Total')" />
+            <x-text-input id="fixed_fee_total" name="fixed_fee_total" type="number" min="0" step="0.01" class="mt-1 block w-full"
+                :value="old('fixed_fee_total', $project->fixed_fee_total ?? '')" />
+            <p class="mt-1 text-xs text-gray-500">{{ __('Time on fixed-fee projects is tracked as effort only (no billable amount).') }}</p>
+            <x-input-error :messages="$errors->get('fixed_fee_total')" class="mt-2" />
+        </div>
+
+        <div x-show="model === 'retainer'" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+            <div>
+                <x-input-label for="retainer_monthly_amount" :value="__('Monthly Amount')" />
+                <x-text-input id="retainer_monthly_amount" name="retainer_monthly_amount" type="number" min="0" step="0.01" class="mt-1 block w-full"
+                    :value="old('retainer_monthly_amount', $project->retainer_monthly_amount ?? '')" />
+                <x-input-error :messages="$errors->get('retainer_monthly_amount')" class="mt-2" />
+            </div>
+            <div>
+                <x-input-label for="retainer_included_hours" :value="__('Included Hours')" />
+                <x-text-input id="retainer_included_hours" name="retainer_included_hours" type="number" min="0" step="0.25" class="mt-1 block w-full"
+                    :value="old('retainer_included_hours', $project->retainer_included_hours ?? '')" />
+                <x-input-error :messages="$errors->get('retainer_included_hours')" class="mt-2" />
+            </div>
+            <div>
+                <x-input-label for="retainer_overage_rate" :value="__('Overage Rate / h')" />
+                <x-text-input id="retainer_overage_rate" name="retainer_overage_rate" type="number" min="0" step="0.01" class="mt-1 block w-full"
+                    :value="old('retainer_overage_rate', $project->retainer_overage_rate ?? '')" />
+                <x-input-error :messages="$errors->get('retainer_overage_rate')" class="mt-2" />
+            </div>
+            <div class="flex items-center gap-2 pb-2">
+                <input type="hidden" name="retainer_rollover" value="0">
+                <input id="retainer_rollover" name="retainer_rollover" type="checkbox" value="1"
+                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                    @checked(old('retainer_rollover', $project->retainer_rollover ?? false))>
+                <x-input-label for="retainer_rollover" :value="__('Roll unused hours over (one month)')" />
+            </div>
+        </div>
+    </fieldset>
+
     <fieldset class="border-t border-gray-200 pt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <legend class="text-sm font-semibold text-gray-700">{{ __('Budget') }}</legend>
 

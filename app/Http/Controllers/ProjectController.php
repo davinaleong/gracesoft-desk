@@ -55,7 +55,7 @@ class ProjectController extends Controller
      */
     public function show(Project $project): View
     {
-        $project->load(['documents', 'client']);
+        $project->load(['documents', 'client', 'milestones']);
 
         $unlinkedDocuments = Document::query()->whereNull('documentable_id')->orderBy('name')->get();
 

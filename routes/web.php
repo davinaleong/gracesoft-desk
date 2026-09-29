@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GitHubConnectionController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\PendingCommitController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -129,6 +130,10 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::get('/settings/github/{connection}/repos', [ProjectGithubController::class, 'repos'])->name('settings.github.repos');
     Route::get('/settings/github/{connection}/branches', [ProjectGithubController::class, 'branches'])->name('settings.github.branches');
     Route::delete('/settings/github/{connection}', [GitHubConnectionController::class, 'destroy'])->name('settings.github.destroy');
+
+    Route::post('/projects/{project}/milestones', [MilestoneController::class, 'store'])->name('projects.milestones.store');
+    Route::put('/projects/{project}/milestones/{milestone}', [MilestoneController::class, 'update'])->name('projects.milestones.update');
+    Route::delete('/projects/{project}/milestones/{milestone}', [MilestoneController::class, 'destroy'])->name('projects.milestones.destroy');
 
     Route::post('/projects/{project}/github', [ProjectGithubController::class, 'store'])->name('projects.github.store');
     Route::delete('/projects/{project}/github', [ProjectGithubController::class, 'destroy'])->name('projects.github.destroy');

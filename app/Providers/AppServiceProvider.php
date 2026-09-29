@@ -6,6 +6,7 @@ use App\Contracts\CommitSummarizer;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
+use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\SystemSetting;
 use App\Models\TimeEntry;
@@ -86,6 +87,7 @@ class AppServiceProvider extends ServiceProvider
         Client::observe(AuditableObserver::class);
         Invoice::observe(AuditableObserver::class);
         InvoiceLine::observe(AuditableObserver::class);
+        Milestone::observe(AuditableObserver::class);
         Project::observe(AuditableObserver::class);
         TimeEntry::observe(AuditableObserver::class);
         Transaction::observe(AuditableObserver::class);

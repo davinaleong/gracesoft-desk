@@ -36,6 +36,8 @@ class StoreInvoiceRequest extends FormRequest
             'grouping' => ['required', Rule::in([InvoiceService::GROUP_PER_ENTRY, InvoiceService::GROUP_BY_STAGE])],
             'time_entry_uuids' => ['array'],
             'time_entry_uuids.*' => ['uuid'],
+            'milestone_uuids' => ['array'],
+            'milestone_uuids.*' => ['uuid'],
             'notes' => ['nullable', 'string', 'max:2000'],
             ...ManualInvoiceLines::rules(),
         ];

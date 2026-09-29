@@ -15,6 +15,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
 {
+    public const BILLING_HOURLY = 'hourly';
+
+    public const BILLING_FIXED_FEE = 'fixed_fee';
+
+    public const BILLING_RETAINER = 'retainer';
+
+    public const BILLING_MODELS = [self::BILLING_HOURLY, self::BILLING_FIXED_FEE, self::BILLING_RETAINER];
+
     use HasFactory;
     use HasPublicUuid;
     use SoftDeletes;
@@ -53,6 +61,12 @@ class Project extends Model
         'budget_type',
         'budget_value',
         'budget_thresholds',
+        'billing_model',
+        'fixed_fee_total',
+        'retainer_monthly_amount',
+        'retainer_included_hours',
+        'retainer_overage_rate',
+        'retainer_rollover',
         'github_repo',
         'github_branch',
         'github_connection_id',
@@ -74,6 +88,11 @@ class Project extends Model
             'budget_value' => 'decimal:2',
             'budget_thresholds' => 'array',
             'budget_revision' => 'integer',
+            'fixed_fee_total' => 'decimal:2',
+            'retainer_monthly_amount' => 'decimal:2',
+            'retainer_included_hours' => 'decimal:2',
+            'retainer_overage_rate' => 'decimal:2',
+            'retainer_rollover' => 'boolean',
             'hourly_rate' => 'decimal:2',
             'github_webhook_id' => 'integer',
             'github_webhook_secret' => 'encrypted',
@@ -121,6 +140,21 @@ class Project extends Model
     public function sourceProviderKey(): string
     {
         return $this->source_provider ?: 'github';
+    }
+
+    public function milestones(): HasMany
+    {
+        return $this->hasMany(Milestone::class)->orderBy('sort_order')->orderBy('id');
+    }
+
+    public function retainerPeriods(): HasMany
+    {
+        return $this->hasMany(RetainerPeriod::class);
+    }
+
+    public function billingModel(): string
+    {
+        return $this->billing_model ?: self::BILLING_HOURLY;
     }
 
     public function budgetAlerts(): HasMany

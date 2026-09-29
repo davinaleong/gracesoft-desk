@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\ProjectStage;
 use App\Models\TimeEntry;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ProjectReportService
 {
@@ -49,6 +51,7 @@ class ProjectReportService
                 ],
                 'project_summary' => $projectSummary,
                 'stage_summary' => $stageSummary,
+                'revenue_by_billing_model' => $this->revenueByBillingModel($fromDate, $toDate),
                 'totals' => [
                     'active_projects' => Project::query()->active()->count(),
                     'total_hours' => round(((float) TimeEntry::query()->withinDateRange($fromDate, $toDate)->sum('duration_minutes')) / 60, 2),
@@ -65,6 +68,35 @@ class ProjectReportService
         return Cache::remember($cacheKey, now()->addMinutes(5), $callback);
     }
 
+    /**
+     * Invoiced revenue (issued and paid invoices, excl. GST) by the billing model of each line's project.
+     * Lines with no project (manual extras) are grouped as "unassigned".
+     *
+     * @return array<string, float>
+     */
+    private function revenueByBillingModel(string $fromDate, string $toDate): array
+    {
+        $rows = DB::table('invoice_lines')
+            ->join('invoices', 'invoices.id', '=', 'invoice_lines.invoice_id')
+            ->leftJoin('projects', 'projects.id', '=', 'invoice_lines.project_id')
+            ->whereIn('invoices.status', [Invoice::STATUS_ISSUED, Invoice::STATUS_PAID])
+            ->whereNull('invoices.deleted_at')
+            ->whereDate('invoices.issue_date', '>=', $fromDate)
+            ->whereDate('invoices.issue_date', '<=', $toDate)
+            ->selectRaw("CASE WHEN invoice_lines.project_id IS NULL THEN 'unassigned' ELSE COALESCE(projects.billing_model, 'hourly') END as model")
+            ->selectRaw('COALESCE(SUM(invoice_lines.amount), 0) as revenue')
+            ->groupBy('model')
+            ->pluck('revenue', 'model');
+
+        $result = [];
+
+        foreach ([...Project::BILLING_MODELS, 'unassigned'] as $model) {
+            $result[$model] = round((float) ($rows[$model] ?? 0), 2);
+        }
+
+        return $result;
+    }
+
     private function projectReportCacheSignature(): string
     {
         $timeEntryCount = TimeEntry::query()->count();
@@ -77,6 +109,8 @@ class ProjectReportService
             $latestTimeEntryUpdate,
             $projectCount,
             $latestProjectUpdate,
+            Invoice::withTrashed()->count(),
+            (string) (Invoice::withTrashed()->max('updated_at') ?? 'none'),
         ]));
     }
 }

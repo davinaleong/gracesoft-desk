@@ -75,6 +75,95 @@
                 </div>
             </div>
 
+            {{-- Billing --}}
+            @if ($project->billing_model === 'fixed_fee')
+                @php
+                    $milestoneTotal = (float) $project->milestones->sum('amount');
+                @endphp
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900 space-y-4">
+                        <div class="flex items-center justify-between text-sm">
+                            <h3 class="font-semibold text-gray-700">{{ __('Fixed Fee & Milestones') }}</h3>
+                            <span>{{ __('Planned') }} @deskMoney($milestoneTotal) / @deskMoney((float) $project->fixed_fee_total)</span>
+                        </div>
+
+                        @if (in_array(session('status'), ['milestone-created', 'milestone-updated', 'milestone-deleted'], true))
+                            <p class="text-sm text-green-700">{{ __('Milestones updated.') }}</p>
+                        @endif
+                        @if ($errors->has('amount') || $errors->has('milestone'))
+                            <p class="text-sm text-red-700">{{ $errors->first('amount') ?: $errors->first('milestone') }}</p>
+                        @endif
+
+                        <table class="min-w-full divide-y divide-gray-100 text-sm">
+                            <caption class="sr-only">{{ __('Milestones') }}</caption>
+                            <thead>
+                                <tr class="text-xs text-gray-500 uppercase">
+                                    <th scope="col" class="px-2 py-1 text-left">{{ __('Milestone') }}</th>
+                                    <th scope="col" class="px-2 py-1 text-left">{{ __('Due') }}</th>
+                                    <th scope="col" class="px-2 py-1 text-right">{{ __('Amount') }}</th>
+                                    <th scope="col" class="px-2 py-1 text-left">{{ __('Status') }}</th>
+                                    <th scope="col" class="px-2 py-1"><span class="sr-only">{{ __('Actions') }}</span></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                @forelse ($project->milestones as $milestone)
+                                    <tr>
+                                        <td class="px-2 py-2">{{ $milestone->name }}</td>
+                                        <td class="px-2 py-2">{{ $milestone->due_date ? \App\Support\DeskFormat::date($milestone->due_date) : '—' }}</td>
+                                        <td class="px-2 py-2 text-right">@deskMoney((float) $milestone->amount)</td>
+                                        <td class="px-2 py-2">{{ ucfirst($milestone->status) }}</td>
+                                        <td class="px-2 py-2 text-right">
+                                            @if ($milestone->isPending())
+                                                <form method="POST" action="{{ route('projects.milestones.destroy', [$project, $milestone]) }}"
+                                                    onsubmit="return confirm('{{ __('Delete this milestone?') }}')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-800">{{ __('Delete') }}</button>
+                                                </form>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="5" class="px-2 py-3 text-gray-500">{{ __('No milestones yet.') }}</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+
+                        <form method="POST" action="{{ route('projects.milestones.store', $project) }}" class="grid grid-cols-1 sm:grid-cols-4 gap-2 items-end">
+                            @csrf
+                            <div class="sm:col-span-2">
+                                <x-input-label for="milestone-name" :value="__('New milestone')" />
+                                <x-text-input id="milestone-name" name="name" type="text" class="mt-1 block w-full" required />
+                            </div>
+                            <div>
+                                <x-input-label for="milestone-amount" :value="__('Amount')" />
+                                <x-text-input id="milestone-amount" name="amount" type="number" min="0.01" step="0.01" class="mt-1 block w-full" required />
+                            </div>
+                            <div>
+                                <x-input-label for="milestone-due" :value="__('Due')" />
+                                <x-text-input id="milestone-due" name="due_date" type="date" class="mt-1 block w-full" />
+                            </div>
+                            <div class="sm:col-span-4">
+                                <x-secondary-button type="submit">{{ __('Add Milestone') }}</x-secondary-button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            @elseif ($project->billing_model === 'retainer')
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900 text-sm space-y-1">
+                        <h3 class="font-semibold text-gray-700">{{ __('Monthly Retainer') }}</h3>
+                        <p>
+                            @deskMoney((float) $project->retainer_monthly_amount) {{ __('per month') }} ·
+                            {{ number_format((float) $project->retainer_included_hours, 2) }} {{ __('h included') }} ·
+                            {{ __('overage') }} @deskMoney((float) $project->retainer_overage_rate)/h ·
+                            {{ $project->retainer_rollover ? __('unused hours roll over one month') : __('no rollover') }}
+                        </p>
+                        <p class="text-xs text-gray-500">{{ __('The month\'s draft invoice is created on the 1st for the previous month.') }}</p>
+                    </div>
+                </div>
+            @endif
+
             {{-- Budget --}}
             @php
                 $budgetMonitor = app(\App\Services\BudgetMonitor::class);

@@ -20,7 +20,8 @@ class InvoiceTotals
     {
         $invoiced = (float) Invoice::query()
             ->whereIn('status', [Invoice::STATUS_ISSUED, Invoice::STATUS_PAID])
-            ->whereBetween('issue_date', [$fromDate, $toDate])
+            ->whereDate('issue_date', '>=', $fromDate)
+            ->whereDate('issue_date', '<=', $toDate)
             ->sum('total');
 
         $paid = (float) Invoice::query()

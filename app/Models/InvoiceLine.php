@@ -20,6 +20,10 @@ class InvoiceLine extends Model
 
     public const TYPE_MANUAL = 'manual';
 
+    public const TYPE_MILESTONE = 'milestone';
+
+    public const TYPE_RETAINER = 'retainer';
+
     protected $fillable = [
         'invoice_id',
         'project_id',

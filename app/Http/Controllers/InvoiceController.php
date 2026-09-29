@@ -53,6 +53,7 @@ class InvoiceController extends Controller
             'clients' => Client::query()->active()->orderBy('name')->get(),
             'client' => $client,
             'entries' => $client ? $this->invoices->unbilledEntriesFor($client)->get() : collect(),
+            'milestones' => $client ? $this->invoices->unbilledMilestonesFor($client)->get() : collect(),
         ]);
     }
 
@@ -68,6 +69,7 @@ class InvoiceController extends Controller
             manualLines: $validated['manual_lines'] ?? [],
             notes: $validated['notes'] ?? null,
             user: $request->user(),
+            milestoneUuids: $validated['milestone_uuids'] ?? [],
         );
 
         return redirect()

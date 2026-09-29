@@ -106,6 +106,25 @@
                         </div>
                     </div>
 
+                    @if ($milestones->isNotEmpty())
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                            <fieldset class="p-6 text-gray-900 space-y-2">
+                                <legend class="text-sm font-semibold text-gray-700">{{ __('Fixed-Fee Milestones') }}</legend>
+                                <x-input-error :messages="$errors->get('milestone_uuids')" class="mt-2" />
+                                @foreach ($milestones as $milestone)
+                                    <label class="flex items-center gap-3 text-sm">
+                                        <input type="checkbox" name="milestone_uuids[]" value="{{ $milestone->uuid }}"
+                                            @checked(in_array($milestone->uuid, old('milestone_uuids', []), true))
+                                            class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                        <span class="font-mono text-xs text-gray-500">{{ $milestone->project?->code }}</span>
+                                        <span class="grow">{{ $milestone->name }}{{ $milestone->due_date ? ' · '.__('due').' '.\App\Support\DeskFormat::date($milestone->due_date) : '' }}</span>
+                                        <span>@deskMoney((float) $milestone->amount)</span>
+                                    </label>
+                                @endforeach
+                            </fieldset>
+                        </div>
+                    @endif
+
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         <div class="p-6 text-gray-900 space-y-4">
                             @include('invoices._manual-lines', ['initialLines' => old('manual_lines', [])])

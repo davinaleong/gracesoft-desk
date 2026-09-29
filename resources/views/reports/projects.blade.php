@@ -63,6 +63,18 @@
             </div>
 
             <div class="desk-card desk-card-body">
+                <h3 class="desk-card-title">{{ __('Invoiced Revenue by Billing Model') }}</h3>
+                <dl class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                    @foreach (['hourly' => __('Hourly'), 'fixed_fee' => __('Fixed fee'), 'retainer' => __('Retainer'), 'unassigned' => __('Not tied to a project')] as $model => $label)
+                        <div>
+                            <dt class="text-gray-500">{{ $label }}</dt>
+                            <dd class="font-semibold">@deskMoney((float) ($report['revenue_by_billing_model'][$model] ?? 0))</dd>
+                        </div>
+                    @endforeach
+                </dl>
+            </div>
+
+            <div class="desk-card desk-card-body">
                 <h3 class="desk-card-title">{{ __('Project Summary') }}</h3>
                 <div class="overflow-x-auto">
                     <table class="desk-table-dense min-w-full divide-y divide-gray-200">

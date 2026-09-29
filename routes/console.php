@@ -20,3 +20,8 @@ Schedule::command('desk:timesheet-reminder')
     ->withoutOverlapping();
 
 Schedule::command('desk:prune-ai-requests')->dailyAt('03:15')->timezone(config('app.timezone'));
+
+Schedule::command('desk:draft-retainer-invoices')
+    ->monthlyOn(1, '06:00')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping();

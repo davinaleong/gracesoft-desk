@@ -20,13 +20,18 @@ class BillableRateResolver
             return 0.0;
         }
 
-        $project = Project::withTrashed()->find($projectId, ['id', 'client_id', 'hourly_rate']);
+        $project = Project::withTrashed()->find($projectId, ['id', 'client_id', 'hourly_rate', 'billing_model']);
 
         return $project ? $this->forProject($project) : 0.0;
     }
 
     public function forProject(Project $project): float
     {
+        // Fixed-fee projects track hours as effort only: the fee is billed through milestones.
+        if ($project->billing_model === Project::BILLING_FIXED_FEE) {
+            return 0.0;
+        }
+
         $projectRate = (float) $project->hourly_rate;
 
         if ($projectRate > 0) {

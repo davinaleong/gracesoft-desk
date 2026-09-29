@@ -283,3 +283,52 @@ The MySQL migration check caught a bug SQLite missed (`DISTINCT` combined with t
 - [x] Tokens are encrypted at rest, refreshed when expired, and deleted on disconnect
 
 Not tested against the live GitLab and Bitbucket APIs: that needs real OAuth apps.
+
+---
+
+## M7 · Billing models ✅
+
+**Completed:** 2026-09-29
+
+### Decision: billable amount on fixed-fee projects
+
+Adopted the proposal: **fixed-fee time entries carry no billable amount.** Their hours are tracked as effort only, so margin reads as fee against time spent. `BillableRateResolver` returns 0 for fixed-fee projects, so entry saves, CSV import and `desk:recalculate-billable-amounts` all apply the same rule.
+
+### Other decisions
+
+- **`billing_model` defaults to `hourly`,** so existing projects and their amounts don't change.
+- **Milestones:** amounts can't add up to more than the fixed fee (checked on add and edit), and the fixed fee can't be lowered below the planned milestones. A milestone becomes one `milestone` invoice line and is then locked (it can't be edited or deleted). Voiding or deleting the draft releases it; paying the invoice marks it `paid`.
+- **Only hourly projects offer their time as invoice time lines.** Fixed-fee time has no amount, and retainer time is covered by the retainer invoice.
+- **Retainers:** `desk:draft-retainer-invoices` (scheduled on the 1st at 06:00 system time) drafts last month's invoice: the monthly amount, plus an overage line when positive. `retainer_periods` is unique per project and month, so re-running creates nothing. The month's time entries are linked to the retainer line, which locks them like any invoiced time.
+- **Overage** = max(0, hours used − rollover in − included hours) × overage rate.
+- **Rollover:** hours used draw down last month's carried hours first; only this month's unused included hours carry forward, and for one month only.
+- **Month boundaries:** the default month is last month in the system timezone. Entry dates are calendar dates compared inclusively.
+- **Found along the way:** SQLite stores `date` casts as `Y-m-d 00:00:00`, so `BETWEEN` on a date range dropped the last day of the month. The new range queries (retainer month, timesheet week, invoice totals, revenue report) use inclusive `whereDate` comparisons. The older `withinDateRange` scopes behave the same on SQLite, but MySQL's `date` columns aren't affected.
+
+### What was built
+
+| File | Notes |
+| --- | --- |
+| `2026_09_29_090001_add_billing_models` | Project billing fields, `milestones`, `retainer_periods` |
+| `app/Models/Milestone.php`, `RetainerPeriod.php` | Milestones are audited |
+| `app/Services/RetainerBillingService.php` + `desk:draft-retainer-invoices` | Calculation and drafting |
+| `InvoiceService` | Milestone lines, `unbilledMilestonesFor()`, release on void or delete, paid on payment |
+| `MilestoneController` | Add, update and delete (pending only) from the project page |
+| Project form / page | Billing-model fieldset; milestone table and add form; retainer summary |
+| Invoice create / edit | Milestone checklist; milestone lines can be removed from a draft |
+| Projects report | "Invoiced Revenue by Billing Model" (issued and paid invoices; manual lines count as unassigned) |
+| `MarketingDemoSeeder` | DEMO-AI becomes a 12,000 fixed-fee project for Brightline with two milestones |
+
+### Tests
+
+`tests/Feature/BillingModelsTest.php` (14):
+
+- [x] Existing projects default to hourly and their billable amounts don't change
+- [x] Milestone amounts can't exceed the fixed fee
+- [x] A milestone can be invoiced once only (and voiding releases it)
+- [x] Fixed-fee time entries follow the agreed rule (no billable amount; never offered as time lines)
+- [x] The retainer draft is generated once per month; re-running creates nothing new
+- [x] Overage = (hours used − included) × rate, only when positive
+- [x] Rollover carries unused hours forward one month only
+- [x] Month boundaries use the system timezone
+- [x] The projects report shows revenue by billing model

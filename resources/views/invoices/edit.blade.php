@@ -18,8 +18,8 @@
                     @endif
 
                     <div>
-                        <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ __('Time Lines') }}</h3>
-                        @forelse ($invoice->lines->where('type', 'time') as $line)
+                        <h3 class="text-sm font-semibold text-gray-700 mb-2">{{ __('Time & Milestone Lines') }}</h3>
+                        @forelse ($invoice->lines->whereIn('type', ['time', 'milestone']) as $line)
                             <label class="flex items-center justify-between gap-3 py-2 border-b border-gray-100 text-sm">
                                 <span>{{ $line->description }} <span class="text-gray-500">({{ $line->quantity }} h, {{ number_format((float) $line->amount, 2) }})</span></span>
                                 <span class="flex items-center gap-1 text-red-600">

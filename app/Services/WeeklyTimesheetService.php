@@ -109,7 +109,8 @@ class WeeklyTimesheetService
     public function loggedMinutes(CarbonImmutable $weekStart): int
     {
         return (int) TimeEntry::query()
-            ->whereBetween('entry_date', [$weekStart->toDateString(), $weekStart->addDays(6)->toDateString()])
+            ->whereDate('entry_date', '>=', $weekStart->toDateString())
+            ->whereDate('entry_date', '<=', $weekStart->addDays(6)->toDateString())
             ->sum('duration_minutes');
     }
 

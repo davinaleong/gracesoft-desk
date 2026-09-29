@@ -6,7 +6,9 @@ use App\Models\Account;
 use App\Models\Client;
 use App\Models\Invoice;
 use App\Models\InvoiceLine;
+use App\Models\Milestone;
 use App\Models\PaymentMethod;
+use App\Models\Project;
 use App\Models\TimeEntry;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
@@ -41,15 +43,33 @@ class InvoiceService
         return TimeEntry::query()
             ->billable()
             ->unbilled()
-            ->whereHas('project', fn (Builder $q) => $q->where('client_id', $client->id))
+            ->whereHas('project', fn (Builder $q) => $q->where('client_id', $client->id)
+                ->where(fn (Builder $q) => $q->where('billing_model', Project::BILLING_HOURLY)->orWhereNull('billing_model')))
             ->with(['project', 'stage'])
             ->orderBy('entry_date')
             ->orderBy('id');
     }
 
     /**
+     * Pending milestones on the client's fixed-fee projects.
+     *
+     * @return Builder<Milestone>
+     */
+    public function unbilledMilestonesFor(Client $client): Builder
+    {
+        return Milestone::query()
+            ->where('status', Milestone::STATUS_PENDING)
+            ->whereNull('invoice_line_id')
+            ->whereHas('project', fn (Builder $q) => $q->where('client_id', $client->id))
+            ->with('project')
+            ->orderBy('due_date')
+            ->orderBy('sort_order');
+    }
+
+    /**
      * @param  array<int, string>  $timeEntryUuids
      * @param  array<int, array{description: string, quantity: string|float, unit_price: string|float}>  $manualLines
+     * @param  array<int, string>  $milestoneUuids
      */
     public function createDraft(
         Client $client,
@@ -58,11 +78,13 @@ class InvoiceService
         array $manualLines,
         ?string $notes,
         ?User $user,
+        array $milestoneUuids = [],
     ): Invoice {
-        return DB::transaction(function () use ($client, $timeEntryUuids, $grouping, $manualLines, $notes, $user): Invoice {
+        return DB::transaction(function () use ($client, $timeEntryUuids, $grouping, $manualLines, $notes, $user, $milestoneUuids): Invoice {
             $entries = $this->lockSelectableEntries($client, $timeEntryUuids);
+            $milestones = $this->lockSelectableMilestones($client, $milestoneUuids);
 
-            if ($entries->isEmpty() && $manualLines === []) {
+            if ($entries->isEmpty() && $manualLines === [] && $milestones->isEmpty()) {
                 throw ValidationException::withMessages([
                     'time_entry_uuids' => __('Choose at least one time entry or add a manual line.'),
                 ]);
@@ -78,6 +100,7 @@ class InvoiceService
                 'created_by' => $user?->id,
             ]);
 
+            $this->addMilestoneLines($invoice, $milestones);
             $this->addTimeLines($invoice, $entries, $grouping);
             $this->addManualLines($invoice, $manualLines);
             $this->recalculate($invoice);
@@ -214,6 +237,10 @@ class InvoiceService
                 'paid_at' => now(),
             ]);
 
+            Milestone::query()
+                ->whereIn('invoice_line_id', $invoice->lines()->reorder()->select('id'))
+                ->update(['status' => Milestone::STATUS_PAID]);
+
             return $transaction;
         });
     }
@@ -298,6 +325,51 @@ class InvoiceService
         }
 
         return $entries;
+    }
+
+    /**
+     * @param  array<int, string>  $uuids
+     * @return Collection<int, Milestone>
+     */
+    private function lockSelectableMilestones(Client $client, array $uuids): Collection
+    {
+        $uuids = array_values(array_unique($uuids));
+
+        if ($uuids === []) {
+            return new Collection;
+        }
+
+        $milestones = $this->unbilledMilestonesFor($client)->whereIn('uuid', $uuids)->lockForUpdate()->get();
+
+        if ($milestones->count() !== count($uuids)) {
+            throw ValidationException::withMessages([
+                'milestone_uuids' => __('Some selected milestones were already invoiced. Refresh and try again.'),
+            ]);
+        }
+
+        return $milestones;
+    }
+
+    /**
+     * @param  Collection<int, Milestone>  $milestones
+     */
+    private function addMilestoneLines(Invoice $invoice, Collection $milestones): void
+    {
+        $sortOrder = (int) $invoice->lines()->reorder()->max('sort_order');
+
+        foreach ($milestones as $milestone) {
+            $line = $invoice->lines()->create([
+                'project_id' => $milestone->project_id,
+                'type' => InvoiceLine::TYPE_MILESTONE,
+                'description' => Str::limit(sprintf('%s — %s', $milestone->project?->name ?? __('Project'), $milestone->name), 500, ''),
+                'quantity' => '1.00',
+                'unit_price' => $milestone->amount,
+                'amount' => $milestone->amount,
+                'sort_order' => ++$sortOrder,
+            ]);
+
+            $milestone->update(['invoice_line_id' => $line->id, 'status' => Milestone::STATUS_INVOICED]);
+        }
     }
 
     /**
@@ -386,6 +458,11 @@ class InvoiceService
 
     private function releaseLine(InvoiceLine $line): void
     {
+        Milestone::query()->where('invoice_line_id', $line->id)->update([
+            'invoice_line_id' => null,
+            'status' => Milestone::STATUS_PENDING,
+        ]);
+
         foreach ($line->timeEntries()->withTrashed()->get() as $entry) {
             $entry->forceFill(['invoice_line_id' => null])->save();
         }
