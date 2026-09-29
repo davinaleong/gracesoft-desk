@@ -142,7 +142,8 @@ test('summarize squashed commits job runs on the full group not per-commit', fun
     $summarizer = Mockery::mock(CommitSummarizer::class);
     $summarizer->shouldReceive('summarize')
         ->once()
-        ->withArgs(function (array $commits, array $stageNames) use ($anchor, $child): bool {
+        ->withArgs(function (array $payload) use ($anchor, $child): bool {
+            $commits = $payload['commits'];
             $messages = array_column($commits, 'message');
 
             return count($commits) === 2
@@ -152,7 +153,7 @@ test('summarize squashed commits job runs on the full group not per-commit', fun
         ->andReturn(new SummaryResult(summary: 'Added a widget with tests.', suggestedStageName: 'Testing'));
 
     $job = new SummarizeSquashedCommits($anchor);
-    $job->handle($summarizer);
+    $job->handle(gatewayWith($summarizer));
 
     $anchor->refresh();
     $child->refresh();
@@ -173,7 +174,7 @@ test('summarize squashed commits job skips AI when a keyword already matches the
     $summarizer->shouldNotReceive('summarize');
 
     $job = new SummarizeSquashedCommits($anchor);
-    $job->handle($summarizer);
+    $job->handle(gatewayWith($summarizer));
 
     $anchor->refresh();
     expect($anchor->ai_summary)->toBeNull();

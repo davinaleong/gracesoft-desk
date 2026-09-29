@@ -152,3 +152,48 @@ The MySQL migration check caught a bug SQLite missed (`DISTINCT` combined with t
 - [x] The reminder sends only when the pending count is above zero; it is scheduled; the bot endpoint returns the count (401 without a token)
 - [x] In archive mode the page is viewable and every action is blocked
 - [x] The UTC data migration converts and reverts correctly
+
+---
+
+## M4 · AI privacy controls ✅
+
+**Completed:** 2026-09-29
+
+### Decisions
+
+- **AI is off until switched on** in Settings → AI & Privacy (`ai_enabled`, default off). The null driver stays bound unless AI is enabled *and* the chosen provider is fully configured. An `OPENAI_API_KEY` in `.env` no longer turns AI on by itself; it is only used as the key once the OpenAI provider is selected.
+- **All traffic goes through one door:** `CommitSummaryGateway` checks the switch and the per-project opt-out, builds the allow-listed payload, calls the driver and writes the log row. The jobs never call a driver directly.
+- **Allow-list** (`AiPayloadBuilder`): commit message, branch, changed-file count, stage names and keywords, plus file paths only when "Also send changed file paths" is on. Diffs, author names and emails are never sent. Paths are now stored on ingest (`commit_time_entries.file_paths`, capped at 100) so the toggle has something to send.
+- **Redaction** (`Redactor`) runs on messages, branches and paths before sending. It masks emails, JWTs, `Bearer …`, well-known key prefixes (OpenAI, Anthropic, GitHub, GitLab, Slack, Stripe, AWS), `password=`/`token:`-style pairs, and long mixed letter/digit strings.
+- **Drivers:** `OpenAiCommitSummarizer` (also drives OpenAI-compatible local endpoints through a base URL, key optional), `AnthropicCommitSummarizer` and `NullCommitSummarizer`. The Anthropic driver uses raw `Http` calls like the others, which avoids adding the Anthropic PHP SDK as a dependency. It defaults to `claude-opus-5` (configurable), treats `stop_reason: refusal` as "no summary", and for Opus 5 / Fable 5.1 opts into server-side `fallbacks: "default"` with low effort.
+- **Failures:** jobs retry 3 times with 30 s / 120 s backoff. Each failed attempt is logged as `error`, and `failed()` only writes an info log, so the commit stays pending with no summary.
+- **API key** is stored with `Crypt::encryptString` and is write-only in the form: a blank field keeps the stored key, and there is a "Remove the saved key" option.
+
+### What was built
+
+| File | Notes |
+| --- | --- |
+| `2026_09_29_060001_create_ai_requests_table` | `ai_requests` log; `projects.ai_opt_out`; `commit_time_entries.file_paths` |
+| `app/Services/Ai/*` | `AiSettings`, `AiPayloadBuilder`, `Redactor`, `SummaryPrompt`, `CommitSummaryGateway` |
+| `app/Contracts/CommitSummarizer.php` | Now takes the allow-listed payload and exposes `provider()` / `model()` for logging |
+| `app/Services/AnthropicCommitSummarizer.php` | New driver |
+| `AiSettingsController` + `settings/ai.blade.php` | Switch, provider, model, base URL, key, file-path toggle, retention; last 20 log rows (hash prefix, byte length, outcome) |
+| `desk:prune-ai-requests` | Deletes rows older than retention (default 90 days); scheduled daily at 03:15 |
+| Projects | "Never send this project's commits to AI" checkbox |
+| `desk:prelaunch-check` | Fails when AI is on but the provider isn't fully configured |
+
+### Tests
+
+`tests/Feature/AiPrivacyTest.php` (18); `AiSummaryTest` and `SquashCommitsTest` were updated to the payload contract through a shared `gatewayWith()` helper in `tests/Pest.php`:
+
+- [x] Fresh install: null summarizer bound, no HTTP request (`Http::fake` + `assertNothingSent`), even with `OPENAI_API_KEY` set
+- [x] Each driver (OpenAI, Anthropic, OpenAI-compatible) calls its own endpoint with the configured model
+- [x] The body holds only allow-listed fields; author email, name, diff and (by default) file paths are absent
+- [x] Token-like strings and emails are masked
+- [x] An opted-out project is never summarised
+- [x] A 500 leaves the commit pending without a summary, retries with backoff, and fails quietly
+- [x] Every call writes one log row with a hash, not the payload
+- [x] A stage keyword match still skips AI
+- [x] API keys are stored encrypted and never rendered back into the form
+
+`MarketingDemoSeeder` has nothing new for M4: AI stays off in the demo, as it should on a fresh install.

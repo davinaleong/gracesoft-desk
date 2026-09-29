@@ -11,6 +11,8 @@ use App\Models\SystemSetting;
 use App\Models\TimeEntry;
 use App\Models\Transaction;
 use App\Observers\AuditableObserver;
+use App\Services\Ai\AiSettings;
+use App\Services\AnthropicCommitSummarizer;
 use App\Services\NullCommitSummarizer;
 use App\Services\OpenAiCommitSummarizer;
 use Illuminate\Support\Facades\App;
@@ -25,17 +27,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // AI stays off (null driver) until switched on in AI settings with a complete provider config.
         $this->app->bind(CommitSummarizer::class, function (): CommitSummarizer {
-            $apiKey = (string) config('services.openai.api_key', '');
+            $settings = app(AiSettings::class);
 
-            if ($apiKey === '') {
+            try {
+                if (! $settings->isReady()) {
+                    return new NullCommitSummarizer;
+                }
+            } catch (Throwable) {
                 return new NullCommitSummarizer;
             }
 
-            return new OpenAiCommitSummarizer(
-                apiKey: $apiKey,
-                model: (string) config('services.openai.model', 'gpt-4o-mini'),
-            );
+            return match ($settings->provider()) {
+                'openai' => new OpenAiCommitSummarizer(apiKey: $settings->apiKey(), model: $settings->model()),
+                'anthropic' => new AnthropicCommitSummarizer(apiKey: (string) $settings->apiKey(), model: $settings->model()),
+                'openai_compatible' => new OpenAiCommitSummarizer(
+                    apiKey: $settings->apiKey(),
+                    model: $settings->model(),
+                    baseUrl: (string) $settings->baseUrl(),
+                    providerName: 'openai_compatible',
+                ),
+                default => new NullCommitSummarizer,
+            };
         });
     }
 

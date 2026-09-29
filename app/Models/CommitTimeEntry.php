@@ -39,6 +39,7 @@ class CommitTimeEntry extends Model
         'additions',
         'deletions',
         'changed_files',
+        'file_paths',
         'status',
         'squashed_into',
         'converted_time_entry_id',
@@ -51,6 +52,7 @@ class CommitTimeEntry extends Model
             'additions' => 'integer',
             'deletions' => 'integer',
             'changed_files' => 'integer',
+            'file_paths' => 'array',
             'from_large_batch' => 'boolean',
         ];
     }

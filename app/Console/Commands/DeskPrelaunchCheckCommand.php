@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Services\Ai\AiSettings;
 use App\Services\InvoiceSettings;
 use Database\Seeders\AdminUserSeeder;
 use Illuminate\Console\Attributes\Description;
@@ -61,6 +62,10 @@ class DeskPrelaunchCheckCommand extends Command
                 'Scheduler ran in the last hour (cron: schedule:run)',
                 $this->schedulerRanRecently(),
                 warning: true
+            ),
+            $this->check(
+                'AI provider is fully configured (or AI is off)',
+                ! app(AiSettings::class)->enabled() || app(AiSettings::class)->isReady(),
             ),
             $this->check('Admin account exists', $this->adminUserExists()),
             $this->check('Backup directory is writable', $this->backupDirectoryWritable()),

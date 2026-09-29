@@ -1,6 +1,10 @@
 <?php
 
+use App\Contracts\CommitSummarizer;
+use App\Models\SystemSetting;
+use App\Services\Ai\CommitSummaryGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery\MockInterface;
 use Tests\TestCase;
 
 /*
@@ -44,7 +48,19 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Switch AI on and route the gateway through the given (usually mocked) summarizer.
+ */
+function gatewayWith(CommitSummarizer $summarizer): CommitSummaryGateway
 {
-    // ..
+    SystemSetting::upsertValues(['ai_enabled' => true]);
+
+    if ($summarizer instanceof MockInterface) {
+        $summarizer->shouldReceive('provider')->andReturn('mock');
+        $summarizer->shouldReceive('model')->andReturn('mock-model');
+    }
+
+    app()->instance(CommitSummarizer::class, $summarizer);
+
+    return app(CommitSummaryGateway::class);
 }

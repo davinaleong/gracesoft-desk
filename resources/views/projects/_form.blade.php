@@ -68,6 +68,14 @@
         <x-input-label for="is_billable" :value="__('Billable Project')" />
     </div>
 
+    <div class="flex items-center gap-2">
+        <input type="hidden" name="ai_opt_out" value="0">
+        <input id="ai_opt_out" name="ai_opt_out" type="checkbox" value="1"
+            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+            @checked(old('ai_opt_out', $project->ai_opt_out ?? false))>
+        <x-input-label for="ai_opt_out" :value="__('Never send this project\'s commits to AI')" />
+    </div>
+
     <div>
         <x-input-label for="hourly_rate" :value="__('Hourly Rate')" />
         <x-text-input id="hourly_rate" name="hourly_rate" type="number" min="0" step="0.01"

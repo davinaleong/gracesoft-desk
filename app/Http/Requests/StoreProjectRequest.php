@@ -47,6 +47,7 @@ class StoreProjectRequest extends FormRequest
             'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on'],
             'is_billable' => ['required', 'boolean'],
             'hourly_rate' => ['nullable', 'numeric', 'min:0'],
+            'ai_opt_out' => ['sometimes', 'boolean'],
             'client_uuid' => ['nullable', 'uuid', Rule::exists('clients', 'uuid')->whereNull('deleted_at')],
         ];
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiSettingsController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientImportController;
@@ -85,6 +86,9 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::get('/reports/finance/export', [ReportExportController::class, 'finance'])->name('reports.finance.export');
     Route::get('/reports/projects/export', [ReportExportController::class, 'projects'])->name('reports.projects.export');
     Route::get('/reports/monthly-summary/export', [ReportExportController::class, 'monthlySummary'])->name('reports.monthly-summary.export');
+
+    Route::get('/settings/ai', [AiSettingsController::class, 'edit'])->name('settings.ai.edit');
+    Route::put('/settings/ai', [AiSettingsController::class, 'update'])->name('settings.ai.update');
 
     Route::get('/settings/system', [SystemSettingsController::class, 'edit'])->name('settings.system.edit');
     Route::put('/settings/system', [SystemSettingsController::class, 'update'])->name('settings.system.update');

@@ -18,3 +18,5 @@ Schedule::command('desk:timesheet-reminder')
     ->weeklyOn(5, '16:00')
     ->timezone(config('app.timezone'))
     ->withoutOverlapping();
+
+Schedule::command('desk:prune-ai-requests')->dailyAt('03:15')->timezone(config('app.timezone'));

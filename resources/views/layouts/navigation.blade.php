@@ -29,6 +29,7 @@
                     <x-nav-link :href="route('reports.finance')" :active="request()->routeIs('reports.*')">{{ __('Reports') }}</x-nav-link>
                     <x-nav-link :href="route('settings.system.edit')" :active="request()->routeIs('settings.system.*')">{{ __('System Settings') }}</x-nav-link>
                     <x-nav-link :href="route('settings.project-stages.index')" :active="request()->routeIs('settings.project-stages.*')">{{ __('Project Stages') }}</x-nav-link>
+                    <x-nav-link :href="route('settings.ai.edit')" :active="request()->routeIs('settings.ai.*')">{{ __('AI & Privacy') }}</x-nav-link>
                     <x-nav-link :href="route('settings.github.show')" :active="request()->routeIs('settings.github.*')">{{ __('GitHub') }}</x-nav-link>
                 </div>
             </div>
@@ -72,6 +73,7 @@
                 :active="request()->routeIs('settings.system.*')">{{ __('System Settings') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('settings.project-stages.index')"
                 :active="request()->routeIs('settings.project-stages.*')">{{ __('Project Stages') }}</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('settings.ai.edit')" :active="request()->routeIs('settings.ai.*')">{{ __('AI & Privacy') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('vendors.index')" :active="request()->routeIs('vendors.*')">{{ __('Vendors') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('services.index')" :active="request()->routeIs('services.*')">{{ __('Services') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('settings.categories.index')" :active="request()->routeIs('settings.categories.*')">{{ __('Categories') }}</x-responsive-nav-link>

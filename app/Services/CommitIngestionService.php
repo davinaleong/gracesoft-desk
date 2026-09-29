@@ -31,8 +31,15 @@ class CommitIngestionService
             }
 
             $changedFiles = null;
+            $filePaths = null;
 
             if ($statsInPayload) {
+                $filePaths = array_slice(array_values(array_unique(array_merge(
+                    $commit['added'] ?? [],
+                    $commit['removed'] ?? [],
+                    $commit['modified'] ?? [],
+                ))), 0, 100);
+
                 $changedFiles = count($commit['added'] ?? [])
                     + count($commit['removed'] ?? [])
                     + count($commit['modified'] ?? []);
@@ -53,6 +60,7 @@ class CommitIngestionService
                     'additions' => null,
                     'deletions' => null,
                     'changed_files' => $changedFiles,
+                    'file_paths' => $filePaths,
                     'status' => 'pending',
                 ]
             );

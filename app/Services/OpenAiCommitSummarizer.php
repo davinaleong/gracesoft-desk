@@ -3,58 +3,55 @@
 namespace App\Services;
 
 use App\Contracts\CommitSummarizer;
+use App\Services\Ai\SummaryPrompt;
 use App\Support\SummaryResult;
 use Illuminate\Support\Facades\Http;
 
+/**
+ * OpenAI chat completions. Also drives any OpenAI-compatible endpoint (Ollama, LM Studio, vLLM…)
+ * when constructed with its base URL; the API key is optional for local endpoints.
+ */
 class OpenAiCommitSummarizer implements CommitSummarizer
 {
+    public const DEFAULT_BASE_URL = 'https://api.openai.com/v1';
+
     public function __construct(
-        private readonly string $apiKey,
+        private readonly ?string $apiKey,
         private readonly string $model = 'gpt-4o-mini',
+        private readonly string $baseUrl = self::DEFAULT_BASE_URL,
+        private readonly string $providerName = 'openai',
     ) {}
 
-    public function summarize(array $commits, array $stageNames): SummaryResult
+    public function summarize(array $payload): SummaryResult
     {
-        $stageList = implode(', ', $stageNames);
-        $commitLines = array_map(function (array $c): string {
-            $stats = '';
-            if ($c['additions'] !== null || $c['deletions'] !== null) {
-                $stats = sprintf(' (+%d/-%d, %d files)', $c['additions'] ?? 0, $c['deletions'] ?? 0, $c['changed_files'] ?? 0);
-            }
+        $request = Http::timeout(30)->connectTimeout(5)->acceptJson();
 
-            return '- '.trim($c['message']).$stats;
-        }, $commits);
+        if ($this->apiKey !== null && $this->apiKey !== '') {
+            $request = $request->withToken($this->apiKey);
+        }
 
-        $commitText = implode("\n", $commitLines);
+        $body = [
+            'model' => $this->model,
+            'messages' => [['role' => 'user', 'content' => SummaryPrompt::build($payload)]],
+            'max_tokens' => 300,
+        ];
 
-        $prompt = <<<PROMPT
-You are a technical note writer for a software project time-tracking system.
+        if ($this->providerName === 'openai') {
+            $body['response_format'] = ['type' => 'json_object'];
+        }
 
-Given the following git commits, write a concise 1–2 sentence plain-English summary suitable as a time entry note.
-Also suggest which SDLC stage best fits these commits from this list: {$stageList}.
+        $response = $request->post(rtrim($this->baseUrl, '/').'/chat/completions', $body)->throw();
 
-Commits:
-{$commitText}
+        return SummaryPrompt::parse((string) $response->json('choices.0.message.content', ''));
+    }
 
-Respond with JSON only in this exact format:
-{"summary":"…","stage":"…"}
-PROMPT;
+    public function provider(): string
+    {
+        return $this->providerName;
+    }
 
-        $response = Http::withToken($this->apiKey)
-            ->post('https://api.openai.com/v1/chat/completions', [
-                'model' => $this->model,
-                'messages' => [['role' => 'user', 'content' => $prompt]],
-                'max_tokens' => 200,
-                'response_format' => ['type' => 'json_object'],
-            ]);
-
-        $response->throw();
-
-        $data = json_decode($response->json('choices.0.message.content', '{}'), true);
-
-        return new SummaryResult(
-            summary: $data['summary'] ?? '',
-            suggestedStageName: $data['stage'] ?? null,
-        );
+    public function model(): string
+    {
+        return $this->model;
     }
 }

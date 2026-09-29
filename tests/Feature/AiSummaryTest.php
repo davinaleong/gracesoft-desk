@@ -36,7 +36,7 @@ test('summarize job skips when keyword already matches', function () {
     $summarizer->shouldNotReceive('summarize');
 
     $job = new SummarizeCommit($commit);
-    $job->handle($summarizer);
+    $job->handle(gatewayWith($summarizer));
 
     $commit->refresh();
     expect($commit->ai_summary)->toBeNull()
@@ -60,9 +60,9 @@ test('summarize job calls provider when no keyword match', function () {
     $summarizer = Mockery::mock(CommitSummarizer::class);
     $summarizer->shouldReceive('summarize')
         ->once()
-        ->withArgs(function (array $commits, array $stageNames): bool {
-            return $commits[0]['message'] === 'Initial project setup'
-                && in_array('Testing', $stageNames, true);
+        ->withArgs(function (array $payload): bool {
+            return $payload['commits'][0]['message'] === 'Initial project setup'
+                && in_array('Testing', array_column($payload['stages'], 'name'), true);
         })
         ->andReturn(new SummaryResult(
             summary: 'Set up initial project scaffolding.',
@@ -70,7 +70,7 @@ test('summarize job calls provider when no keyword match', function () {
         ));
 
     $job = new SummarizeCommit($commit);
-    $job->handle($summarizer);
+    $job->handle(gatewayWith($summarizer));
 
     $commit->refresh();
     expect($commit->ai_summary)->toBe('Set up initial project scaffolding.')
@@ -93,7 +93,7 @@ test('summarize job stores null stage when provider suggests unknown stage name'
         ->andReturn(new SummaryResult(summary: 'Miscellaneous work.', suggestedStageName: 'Nonexistent Stage'));
 
     $job = new SummarizeCommit($commit);
-    $job->handle($summarizer);
+    $job->handle(gatewayWith($summarizer));
 
     $commit->refresh();
     expect($commit->ai_suggested_stage_id)->toBeNull()

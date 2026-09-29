@@ -7,10 +7,15 @@ use App\Support\SummaryResult;
 interface CommitSummarizer
 {
     /**
-     * Generate a human-readable summary and suggest an SDLC stage for one or more commits.
+     * Summarise commits and suggest an SDLC stage.
      *
-     * @param  array<int, array{message: string, additions: int|null, deletions: int|null, changed_files: int|null}>  $commits
-     * @param  array<int, string>  $stageNames  Available stage names the LLM should pick from.
+     * The payload is already allow-listed and redacted by AiPayloadBuilder; drivers must send nothing else.
+     *
+     * @param  array{commits: array<int, array<string, mixed>>, stages: array<int, array{name: string, keywords: array<int, string>}>}  $payload
      */
-    public function summarize(array $commits, array $stageNames): SummaryResult;
+    public function summarize(array $payload): SummaryResult;
+
+    public function provider(): string;
+
+    public function model(): string;
 }
