@@ -30,6 +30,11 @@ class UpdateSystemSettingsRequest extends FormRequest
             'locale' => ['required', 'string', 'max:10'],
             'default_hourly_rate' => ['required', 'numeric', 'min:0'],
             'archive_mode' => ['required', 'boolean'],
+            'company_address' => ['sometimes', 'nullable', 'string', 'max:1000'],
+            'gst_registration_number' => ['sometimes', 'nullable', 'string', 'max:50'],
+            'gst_rate' => ['sometimes', 'required', 'numeric', 'min:0', 'max:100', 'decimal:0,2'],
+            'payment_terms_days' => ['sometimes', 'required', 'integer', 'min:0', 'max:365'],
+            'invoice_footer' => ['sometimes', 'nullable', 'string', 'max:2000'],
         ];
     }
 }

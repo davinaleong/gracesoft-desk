@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Validation\ValidationException;
 
 class TimeEntry extends Model
 {
@@ -20,12 +21,54 @@ class TimeEntry extends Model
     protected static function booted(): void
     {
         static::saving(function (self $entry): void {
+            // Invoiced entries keep the amount they were billed at; linking and releasing them never re-prices.
+            if ($entry->invoice_line_id !== null || $entry->getOriginal('invoice_line_id') !== null) {
+                return;
+            }
+
             self::deriveBillingValues($entry);
         });
 
         static::creating(function (self $entry): void {
             self::fillUuid($entry);
         });
+
+        static::updating(function (self $entry): void {
+            if ($entry->getOriginal('invoice_line_id') === null) {
+                return;
+            }
+
+            $changed = array_diff(array_keys($entry->getDirty()), ['invoice_line_id', 'updated_at']);
+
+            if ($changed !== []) {
+                throw ValidationException::withMessages([
+                    'time_entry' => __('This time entry is on an invoice and can\'t be changed. Void the invoice to unlock it.'),
+                ]);
+            }
+        });
+
+        static::deleting(function (self $entry): void {
+            if ($entry->isInvoiced()) {
+                throw ValidationException::withMessages([
+                    'time_entry' => __('This time entry is on an invoice and can\'t be deleted. Void the invoice to unlock it.'),
+                ]);
+            }
+        });
+    }
+
+    public function isInvoiced(): bool
+    {
+        return $this->invoice_line_id !== null;
+    }
+
+    public function invoiceLine(): BelongsTo
+    {
+        return $this->belongsTo(InvoiceLine::class);
+    }
+
+    public function scopeUnbilled(Builder $query): Builder
+    {
+        return $query->whereNull('invoice_line_id');
     }
 
     protected $fillable = [

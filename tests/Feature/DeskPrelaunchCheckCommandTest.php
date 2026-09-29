@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\SystemSetting;
 use App\Models\User;
 
 beforeEach(function (): void {
@@ -11,6 +12,9 @@ beforeEach(function (): void {
     config()->set('app.url', 'https://gracesoft.test');
     config()->set('mail.from.address', 'ops@gracesoft.dev');
     config()->set('queue.default', 'database');
+    config()->set('mail.default', 'smtp');
+    config()->set('filesystems.disks.s3.bucket', 'desk-test');
+    SystemSetting::upsertValues(['company_address' => '1 Raffles Place, Singapore']);
 
     $backupPath = storage_path('app/backups-test');
 
@@ -86,4 +90,16 @@ test('prelaunch check command fails in strict mode when warnings exist', functio
     $this->artisan('desk:prelaunch-check --strict')
         ->expectsOutputToContain('Strict mode stopped the pre-launch check')
         ->assertExitCode(1);
+});
+
+test('prelaunch check warns when invoicing is not ready to send', function () {
+    config()->set('mail.default', 'log');
+    config()->set('filesystems.disks.s3.bucket', null);
+    SystemSetting::upsertValues(['company_address' => null]);
+
+    $this->artisan('desk:prelaunch-check')
+        ->expectsOutputToContain('Mail transport delivers real email')
+        ->expectsOutputToContain('S3 bucket is configured')
+        ->expectsOutputToContain('Company address is set for invoices')
+        ->expectsOutputToContain('warning(s)');
 });

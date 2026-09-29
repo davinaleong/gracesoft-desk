@@ -5,27 +5,40 @@
                 {{ __('Time Entry Details') }}
             </h2>
 
-            <div class="flex items-center gap-3">
-                <a href="{{ route('time-entries.edit', $timeEntry) }}"
-                    class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
-                    {{ __('Edit') }}
-                </a>
+            @unless ($timeEntry->isInvoiced())
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('time-entries.edit', $timeEntry) }}"
+                        class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                        {{ __('Edit') }}
+                    </a>
 
-                <form method="POST" action="{{ route('time-entries.destroy', $timeEntry) }}"
-                    onsubmit="return confirm('{{ __('Delete this time entry?') }}');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                        class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500">
-                        {{ __('Delete') }}
-                    </button>
-                </form>
-            </div>
+                    <form method="POST" action="{{ route('time-entries.destroy', $timeEntry) }}"
+                        onsubmit="return confirm('{{ __('Delete this time entry?') }}');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                            class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500">
+                            {{ __('Delete') }}
+                        </button>
+                    </form>
+                </div>
+            @endunless
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-6">
+            @if (session('error'))
+                <div class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ session('error') }}</div>
+            @endif
+
+            @if ($timeEntry->isInvoiced() && $timeEntry->invoiceLine?->invoice)
+                <div class="rounded-md border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+                    {{ __('Billed on invoice') }}
+                    <a href="{{ route('invoices.show', $timeEntry->invoiceLine->invoice) }}" class="font-semibold underline">{{ $timeEntry->invoiceLine->invoice->displayNumber() }}</a>.
+                    {{ __('Void the invoice to edit this entry.') }}
+                </div>
+            @endif
             @if (session('status') === 'time-entry-created')
                 <div
                     class="flex items-center justify-between rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">

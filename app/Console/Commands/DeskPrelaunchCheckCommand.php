@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use App\Services\InvoiceSettings;
 use Database\Seeders\AdminUserSeeder;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -37,6 +38,21 @@ class DeskPrelaunchCheckCommand extends Command
             $this->check(
                 'Queue connection is not sync',
                 (string) config('queue.default') !== 'sync',
+                warning: true
+            ),
+            $this->check(
+                'Mail transport delivers real email (invoices are emailed)',
+                ! in_array((string) config('mail.default'), ['log', 'array'], true),
+                warning: true
+            ),
+            $this->check(
+                'S3 bucket is configured (documents and invoice PDFs)',
+                filled(config('filesystems.disks.s3.bucket')),
+                warning: true
+            ),
+            $this->check(
+                'Company address is set for invoices',
+                filled(app(InvoiceSettings::class)->companyAddress()),
                 warning: true
             ),
             $this->check('Admin account exists', $this->adminUserExists()),

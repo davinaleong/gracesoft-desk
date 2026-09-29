@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Client;
+use App\Models\Invoice;
 use App\Models\PaymentMethod;
 use App\Models\Project;
 use App\Models\ProjectStage;
@@ -14,6 +15,7 @@ use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\User;
 use App\Models\Vendor;
+use App\Services\InvoiceService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -58,6 +60,7 @@ class MarketingDemoSeeder extends Seeder
 
         $this->seedTimeEntries($projectsByCode, $stagesByName);
         $this->seedTransactions($projectsByCode, $categoriesBySlug, $methodsBySlug, $accountsByCode);
+        $this->seedInvoices($accountsByCode);
         $this->syncAccountBalances();
         $this->seedVendorsAndServices();
     }
@@ -274,6 +277,45 @@ class MarketingDemoSeeder extends Seeder
         }
 
         return $byCode;
+    }
+
+    /**
+     * One paid, one outstanding and one draft invoice for the demo clients.
+     * Skipped once the demo clients have invoices, so reseeding never burns invoice numbers.
+     *
+     * @param  array<string, Account>  $accountsByCode
+     */
+    private function seedInvoices(array $accountsByCode): void
+    {
+        $northwind = Client::query()->where('name', 'Northwind Retail Pte Ltd')->first();
+        $brightline = Client::query()->where('name', 'Brightline Media Group')->first();
+
+        if ($northwind === null || $brightline === null || Invoice::query()->whereIn('client_id', [$northwind->id, $brightline->id])->exists()) {
+            return;
+        }
+
+        $invoices = app(InvoiceService::class);
+        $today = CarbonImmutable::today();
+        $entriesFor = fn (Client $client, string $projectCode, int $olderThanDays, int $limit) => $invoices->unbilledEntriesFor($client)
+            ->whereHas('project', fn ($q) => $q->where('code', $projectCode))
+            ->whereDate('entry_date', '<=', $today->subDays($olderThanDays)->toDateString())
+            ->limit($limit)
+            ->pluck('uuid')
+            ->all();
+
+        $paid = $invoices->createDraft($northwind, $entriesFor($northwind, 'DEMO-HQX', 45, 6), InvoiceService::GROUP_BY_STAGE, [], 'Demo Seed: discovery and design sprint.', null);
+        $invoices->issue($paid, $today->subDays(40));
+        $invoices->recordPayment($paid, [
+            'account_uuid' => $accountsByCode['BANK-OPERATING']->uuid,
+            'payment_date' => $today->subDays(12)->toDateString(),
+        ]);
+
+        $outstanding = $invoices->createDraft($northwind, $entriesFor($northwind, 'DEMO-CRM', 10, 5), InvoiceService::GROUP_PER_ENTRY, [
+            ['description' => 'CRM sandbox licence (pass-through)', 'quantity' => 1, 'unit_price' => 180],
+        ], 'Demo Seed: CRM automation phase 1.', null);
+        $invoices->issue($outstanding, $today->subDays(8));
+
+        $invoices->createDraft($brightline, $entriesFor($brightline, 'DEMO-LAUNCH', 0, 4), InvoiceService::GROUP_BY_STAGE, [], 'Demo Seed: analytics rollout.', null);
     }
 
     /**

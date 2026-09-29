@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Invoice;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -62,6 +63,7 @@ class FinanceReportService
                     'pending' => round($pending, 2),
                     'net' => round($income - $expense, 2),
                 ],
+                'receivables' => app(InvoiceTotals::class)->forRange($fromDate, $toDate),
                 'expense_by_category' => $expenseByCategory,
                 'income_by_category' => $incomeByCategory,
                 'transactions' => $transactions,
@@ -80,6 +82,6 @@ class FinanceReportService
         $count = Transaction::query()->count();
         $latestUpdate = (string) (Transaction::query()->max('updated_at') ?? 'none');
 
-        return sha1($count.'|'.$latestUpdate);
+        return sha1($count.'|'.$latestUpdate.'|'.Invoice::withTrashed()->count().'|'.(Invoice::withTrashed()->max('updated_at') ?? 'none'));
     }
 }

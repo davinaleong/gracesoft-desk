@@ -66,6 +66,21 @@
                 </div>
             </div>
 
+            <div class="desk-kpi-grid !mb-0 md:grid-cols-3 xl:grid-cols-3">
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Invoiced') }}</p>
+                    <p class="desk-kpi-value">@deskMoney((float) $report['receivables']['invoiced'])</p>
+                </div>
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Invoices Paid') }}</p>
+                    <p class="desk-kpi-value-positive">@deskMoney((float) $report['receivables']['paid'])</p>
+                </div>
+                <div class="desk-kpi-card">
+                    <p class="desk-kpi-label">{{ __('Outstanding (Now)') }}</p>
+                    <p class="desk-kpi-value-pending">@deskMoney((float) $report['receivables']['outstanding'])</p>
+                </div>
+            </div>
+
             <div class="desk-report-grid">
                 <div class="desk-card desk-card-body">
                     <h3 class="desk-card-title">{{ __('Expense Breakdown') }}</h3>

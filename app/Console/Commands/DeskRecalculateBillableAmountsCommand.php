@@ -32,12 +32,14 @@ class DeskRecalculateBillableAmountsCommand extends Command
             // Non-billable entries → always 0
             DB::table('time_entries')
                 ->where('project_id', $project->id)
+                ->whereNull('invoice_line_id')
                 ->where('is_billable', false)
                 ->update(['billable_amount' => 0]);
 
             if ($hourlyRate <= 0.0) {
                 DB::table('time_entries')
                     ->where('project_id', $project->id)
+                    ->whereNull('invoice_line_id')
                     ->where('is_billable', true)
                     ->update(['billable_amount' => 0]);
 
@@ -46,6 +48,7 @@ class DeskRecalculateBillableAmountsCommand extends Command
 
             DB::table('time_entries')
                 ->where('project_id', $project->id)
+                ->whereNull('invoice_line_id')
                 ->where('is_billable', true)
                 ->where('duration_minutes', '>', 0)
                 ->update([
@@ -54,6 +57,7 @@ class DeskRecalculateBillableAmountsCommand extends Command
 
             DB::table('time_entries')
                 ->where('project_id', $project->id)
+                ->whereNull('invoice_line_id')
                 ->where('is_billable', true)
                 ->where('duration_minutes', 0)
                 ->update(['billable_amount' => 0]);

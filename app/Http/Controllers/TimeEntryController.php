@@ -73,8 +73,12 @@ class TimeEntryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(TimeEntry $timeEntry): View
+    public function edit(TimeEntry $timeEntry): View|RedirectResponse
     {
+        if ($timeEntry->isInvoiced()) {
+            return $this->lockedResponse($timeEntry);
+        }
+
         $timeEntry->load(['project', 'stage']);
 
         return view('time-entries.edit', [
@@ -89,6 +93,10 @@ class TimeEntryController extends Controller
      */
     public function update(UpdateTimeEntryRequest $request, TimeEntry $timeEntry): RedirectResponse
     {
+        if ($timeEntry->isInvoiced()) {
+            return $this->lockedResponse($timeEntry);
+        }
+
         $payload = $request->validated();
         $payload = $this->resolveForeignKeys($payload);
 
@@ -104,11 +112,22 @@ class TimeEntryController extends Controller
      */
     public function destroy(TimeEntry $timeEntry): RedirectResponse
     {
+        if ($timeEntry->isInvoiced()) {
+            return $this->lockedResponse($timeEntry);
+        }
+
         $timeEntry->delete();
 
         return redirect()
             ->route('time-entries.index')
             ->with('status', 'time-entry-deleted');
+    }
+
+    private function lockedResponse(TimeEntry $timeEntry): RedirectResponse
+    {
+        return redirect()
+            ->route('time-entries.show', $timeEntry)
+            ->with('error', __('This time entry is on an invoice and can\'t be changed. Void the invoice to unlock it.'));
     }
 
     /**

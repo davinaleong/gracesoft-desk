@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateSystemSettingsRequest;
 use App\Models\SystemSetting;
+use App\Services\InvoiceSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -21,6 +22,11 @@ class SystemSettingsController extends Controller
                 'timezone' => $settings->get('timezone', config('app.timezone', 'UTC')),
                 'locale' => $settings->get('locale', config('app.locale', 'en')),
                 'default_hourly_rate' => $settings->get('default_hourly_rate', '0.00'),
+                'company_address' => $settings->get('company_address', ''),
+                'gst_registration_number' => $settings->get('gst_registration_number', ''),
+                'gst_rate' => $settings->get('gst_rate', InvoiceSettings::DEFAULT_GST_RATE),
+                'payment_terms_days' => $settings->get('payment_terms_days', InvoiceSettings::DEFAULT_PAYMENT_TERMS_DAYS),
+                'invoice_footer' => $settings->get('invoice_footer', ''),
                 'archive_mode' => in_array(strtolower((string) $settings->get('archive_mode', '0')), ['1', 'true', 'yes', 'on'], true),
             ],
         ]);

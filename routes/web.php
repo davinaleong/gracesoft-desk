@@ -6,6 +6,7 @@ use App\Http\Controllers\ClientImportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GitHubConnectionController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PendingCommitController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
@@ -48,6 +49,13 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::post('/clients/import/preview', [ClientImportController::class, 'preview'])->name('clients.import.preview');
     Route::post('/clients/import/commit', [ClientImportController::class, 'commit'])->name('clients.import.commit');
     Route::resource('clients', ClientController::class)->except('destroy');
+
+    Route::resource('invoices', InvoiceController::class);
+    Route::post('/invoices/{invoice}/issue', [InvoiceController::class, 'issue'])->name('invoices.issue');
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+    Route::post('/invoices/{invoice}/send', [InvoiceController::class, 'send'])->name('invoices.send');
+    Route::post('/invoices/{invoice}/payment', [InvoiceController::class, 'recordPayment'])->name('invoices.payment');
+    Route::post('/invoices/{invoice}/void', [InvoiceController::class, 'void'])->name('invoices.void');
 
     Route::resource('projects', ProjectController::class)->except('destroy');
     Route::resource('time-entries', TimeEntryController::class);

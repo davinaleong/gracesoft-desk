@@ -58,6 +58,7 @@ class ClientController extends Controller
         return view('clients.show', [
             'client' => $client,
             'transactions' => $transactions,
+            'invoices' => $client->invoices()->latest('id')->limit(25)->get(),
             'unlinkedDocuments' => Document::query()->whereNull('documentable_id')->orderBy('name')->get(),
         ]);
     }

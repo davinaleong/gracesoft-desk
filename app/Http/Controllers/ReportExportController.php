@@ -46,6 +46,10 @@ class ReportExportController extends Controller
                 $row->project?->uuid,
                 number_format((float) $row->net_amount, 2, '.', ''),
             ])->all(),
+            [],
+            ['Invoiced (issued in range)', number_format($report['receivables']['invoiced'], 2, '.', '')],
+            ['Invoices paid (in range)', number_format($report['receivables']['paid'], 2, '.', '')],
+            ['Outstanding receivables (now)', number_format($report['receivables']['outstanding'], 2, '.', '')],
         ]);
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Bot\FinanceController;
+use App\Http\Controllers\Api\Bot\InvoicesController;
 use App\Http\Controllers\Api\Bot\ProjectsController;
 use App\Http\Controllers\Api\Bot\TimeEntriesController;
 use Illuminate\Http\Request;
@@ -14,4 +15,5 @@ Route::prefix('bot')->middleware('auth:sanctum')->group(function (): void {
     Route::get('/projects', [ProjectsController::class, 'index']);
     Route::get('/time-entries/summary', [TimeEntriesController::class, 'summary']);
     Route::get('/finance/summary', [FinanceController::class, 'summary']);
+    Route::get('/invoices/summary', [InvoicesController::class, 'summary']);
 });

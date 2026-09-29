@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\TimeEntry;
 use App\Models\Transaction;
@@ -16,7 +17,7 @@ class DashboardMetricsService
      */
     public function getDashboardData(): array
     {
-        $cacheKey = sprintf('dashboard.metrics.%s', $this->dashboardCacheSignature());
+        $cacheKey = $this->cacheKey();
 
         $callback = function (): array {
             $activeProjects = Project::query()->active()->count();
@@ -51,6 +52,8 @@ class DashboardMetricsService
                     'net_cashflow_this_month' => round($netCashflowThisMonth, 2),
                     'money_in_this_month' => round($moneyInThisMonth, 2),
                     'money_out_this_month' => round($moneyOutThisMonth, 2),
+                    'outstanding_receivables' => round((float) Invoice::query()->outstanding()->sum('total'), 2),
+                    'overdue_receivables' => round((float) Invoice::query()->outstanding()->whereDate('due_date', '<', now()->toDateString())->sum('total'), 2),
                 ],
                 'monthly_cashflow' => $this->monthlyCashflowSeries(),
                 'expense_breakdown' => $this->breakdownByCategory('out'),
@@ -228,6 +231,14 @@ class DashboardMetricsService
         ];
     }
 
+    /**
+     * The cache key changes whenever any record feeding a dashboard metric changes.
+     */
+    public function cacheKey(): string
+    {
+        return sprintf('dashboard.metrics.%s', $this->dashboardCacheSignature());
+    }
+
     private function dashboardCacheSignature(): string
     {
         return sha1(implode('|', [
@@ -237,6 +248,9 @@ class DashboardMetricsService
             (string) (TimeEntry::query()->max('updated_at') ?? 'none'),
             Transaction::query()->count(),
             (string) (Transaction::query()->max('updated_at') ?? 'none'),
+            Invoice::withTrashed()->count(),
+            (string) (Invoice::withTrashed()->max('updated_at') ?? 'none'),
+            now()->toDateString(),
         ]));
     }
 

@@ -26,6 +26,7 @@ class Transaction extends Model
         'payment_method_id',
         'project_id',
         'client_id',
+        'invoice_id',
         'type',
         'direction',
         'status',
@@ -127,6 +128,11 @@ class Transaction extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     public function client(): BelongsTo

@@ -99,6 +99,25 @@
                 </div>
             </div>
 
+            {{-- Invoices --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-semibold text-gray-700">{{ __('Invoices') }}</h3>
+                        <a href="{{ route('invoices.create', ['client' => $client->uuid]) }}" class="text-sm text-indigo-600 hover:text-indigo-800">{{ __('New Invoice') }}</a>
+                    </div>
+                    @forelse ($invoices as $invoice)
+                        <div class="flex items-center justify-between py-2 border-b border-gray-100 last:border-0 text-sm">
+                            <a href="{{ route('invoices.show', $invoice) }}" class="text-blue-600 hover:text-blue-800 font-mono">{{ $invoice->displayNumber() }}</a>
+                            @include('invoices._status', ['status' => $invoice->status])
+                            <span>{{ $invoice->currency }} {{ number_format((float) $invoice->total, 2) }}</span>
+                        </div>
+                    @empty
+                        <p class="text-sm text-gray-500">{{ __('No invoices for this client yet.') }}</p>
+                    @endforelse
+                </div>
+            </div>
+
             {{-- Transactions --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">

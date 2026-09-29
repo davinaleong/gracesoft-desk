@@ -3,6 +3,7 @@
 use App\Models\Project;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Services\InvoiceSettings;
 
 function readyUserForSystemSettings(): User
 {
@@ -100,4 +101,35 @@ test('system settings routes require authentication', function () {
     $response = $this->get(route('settings.system.edit'));
 
     $response->assertRedirect(route('login'));
+});
+
+test('invoice settings can be saved and gst is only charged when registered', function () {
+    $user = readyUserForSystemSettings();
+
+    $this->actingAs($user)->put(route('settings.system.update'), [
+        'company_name' => 'GraceSoft Pte Ltd',
+        'default_currency' => 'SGD',
+        'timezone' => 'Asia/Singapore',
+        'locale' => 'en',
+        'default_hourly_rate' => 100,
+        'archive_mode' => false,
+        'company_address' => '1 Raffles Place',
+        'gst_registration_number' => 'M90312345A',
+        'gst_rate' => '9',
+        'payment_terms_days' => 14,
+        'invoice_footer' => 'Bank: DBS 123-456-789',
+    ])->assertRedirect(route('settings.system.edit'));
+
+    $settings = app(InvoiceSettings::class);
+
+    expect($settings->gstRegistrationNumber())->toBe('M90312345A')
+        ->and($settings->gstRate())->toBe('9.00')
+        ->and($settings->paymentTermsDays())->toBe(14)
+        ->and($settings->footer())->toBe('Bank: DBS 123-456-789');
+
+    $this->actingAs($user)->get(route('settings.system.edit'))->assertOk()->assertSee('M90312345A');
+
+    SystemSetting::upsertValues(['gst_registration_number' => null]);
+
+    expect(app(InvoiceSettings::class)->gstRate())->toBe('0.00');
 });

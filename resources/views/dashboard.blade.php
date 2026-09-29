@@ -23,6 +23,9 @@
                 <x-desk.kpi-card :label="__('Net Cashflow (This Month)')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['net_cashflow_this_month'])" :tone="(float) $dashboard['kpis']['net_cashflow_this_month'] >= 0 ? 'positive' : 'negative'" />
                 <x-desk.kpi-card :label="__('Money In (This Month)')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['money_in_this_month'])" tone="positive" />
                 <x-desk.kpi-card :label="__('Money Out (This Month)')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['money_out_this_month'])" tone="negative" />
+                <a href="{{ route('invoices.index', ['status' => 'issued']) }}" class="block">
+                    <x-desk.kpi-card :label="__('Outstanding Receivables')" :value="\App\Support\DeskFormat::money((float) $dashboard['kpis']['outstanding_receivables'])" :tone="(float) $dashboard['kpis']['overdue_receivables'] > 0 ? 'negative' : 'pending'" />
+                </a>
             </div>
 
             <div class="desk-content-grid">
