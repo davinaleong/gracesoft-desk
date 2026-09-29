@@ -7,6 +7,7 @@ use App\Models\ImportBatch;
 use App\Models\Project;
 use App\Models\ProjectStage;
 use App\Models\TimeEntry;
+use App\Services\BillableRateResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -268,7 +269,7 @@ class TimeEntryImportController extends Controller
                 'entry_date' => trim((string) ($mapped['entry_date'] ?? '')),
                 'duration_minutes' => $durationMinutes,
                 'is_billable' => $isBillable,
-                'billable_amount' => $this->calculateBillableAmount($durationMinutes, $isBillable, (float) $project->hourly_rate),
+                'billable_amount' => $this->calculateBillableAmount($durationMinutes, $isBillable, app(BillableRateResolver::class)->forProject($project)),
                 'notes' => $this->nullableString($mapped['notes'] ?? null),
             ];
 

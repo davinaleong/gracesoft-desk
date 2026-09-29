@@ -92,17 +92,34 @@
         </div>
     </div>
 
-    <div>
-        <x-input-label for="project_uuid" :value="__('Project (Optional)')" />
-        <select id="project_uuid" name="project_uuid"
-            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-            <option value="">{{ __('None') }}</option>
-            @foreach ($projects as $project)
-                <option value="{{ $project->uuid }}" @selected(old('project_uuid', $transaction->project?->uuid ?? '') === $project->uuid)>{{ $project->code }} -
-                    {{ $project->name }}</option>
-            @endforeach
-        </select>
-        <x-input-error :messages="$errors->get('project_uuid')" class="mt-2" />
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+            <x-input-label for="project_uuid" :value="__('Project (Optional)')" />
+            <select id="project_uuid" name="project_uuid"
+                x-on:change="const clientUuid = $event.target.selectedOptions[0]?.dataset.clientUuid; if (clientUuid) { document.getElementById('client_uuid').value = clientUuid; }"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                <option value="">{{ __('None') }}</option>
+                @foreach ($projects as $project)
+                    <option value="{{ $project->uuid }}" data-client-uuid="{{ $project->client?->uuid }}" @selected(old('project_uuid', $transaction->project?->uuid ?? '') === $project->uuid)>{{ $project->code }} -
+                        {{ $project->name }}</option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('project_uuid')" class="mt-2" />
+        </div>
+
+        <div>
+            <x-input-label for="client_uuid" :value="__('Client (Optional)')" />
+            <select id="client_uuid" name="client_uuid"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                <option value="">{{ __('None') }}</option>
+                @foreach ($clients as $clientOption)
+                    <option value="{{ $clientOption->uuid }}" @selected(old('client_uuid', $transaction->client?->uuid ?? '') === $clientOption->uuid)>{{ $clientOption->client_code }} -
+                        {{ $clientOption->name }}</option>
+                @endforeach
+            </select>
+            <p class="mt-1 text-xs text-gray-500">{{ __('Filled in from the project when left blank.') }}</p>
+            <x-input-error :messages="$errors->get('client_uuid')" class="mt-2" />
+        </div>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -49,6 +49,7 @@ class UpdateProjectRequest extends FormRequest
             'ends_on' => ['nullable', 'date', 'after_or_equal:starts_on'],
             'is_billable' => ['required', 'boolean'],
             'hourly_rate' => ['nullable', 'numeric', 'min:0'],
+            'client_uuid' => ['nullable', 'uuid', Rule::exists('clients', 'uuid')->whereNull('deleted_at')],
         ];
     }
 }

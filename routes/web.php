@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ClientImportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\GitHubConnectionController;
@@ -40,6 +42,12 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::get('/time-entries/import', [TimeEntryImportController::class, 'create'])->name('time-entries.import.create');
     Route::post('/time-entries/import/preview', [TimeEntryImportController::class, 'preview'])->name('time-entries.import.preview');
     Route::post('/time-entries/import/commit', [TimeEntryImportController::class, 'commit'])->name('time-entries.import.commit');
+
+    Route::get('/clients/import/template', [ClientImportController::class, 'template'])->name('clients.import.template');
+    Route::get('/clients/import', [ClientImportController::class, 'create'])->name('clients.import.create');
+    Route::post('/clients/import/preview', [ClientImportController::class, 'preview'])->name('clients.import.preview');
+    Route::post('/clients/import/commit', [ClientImportController::class, 'commit'])->name('clients.import.commit');
+    Route::resource('clients', ClientController::class)->except('destroy');
 
     Route::resource('projects', ProjectController::class)->except('destroy');
     Route::resource('time-entries', TimeEntryController::class);

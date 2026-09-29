@@ -14,6 +14,18 @@
     </div>
 
     <div>
+        <x-input-label for="client_uuid" :value="__('Client (Optional)')" />
+        <select id="client_uuid" name="client_uuid"
+            class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+            <option value="">{{ __('None') }}</option>
+            @foreach ($clients as $clientOption)
+                <option value="{{ $clientOption->uuid }}" @selected(old('client_uuid', isset($project) ? ($project->client?->uuid ?? '') : '') === $clientOption->uuid)>{{ $clientOption->client_code }} - {{ $clientOption->name }}</option>
+            @endforeach
+        </select>
+        <x-input-error :messages="$errors->get('client_uuid')" class="mt-2" />
+    </div>
+
+    <div>
         <x-input-label for="status" :value="__('Status')" />
         <select id="status" name="status"
             class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
@@ -59,7 +71,8 @@
     <div>
         <x-input-label for="hourly_rate" :value="__('Hourly Rate')" />
         <x-text-input id="hourly_rate" name="hourly_rate" type="number" min="0" step="0.01"
-            class="mt-1 block w-full" :value="old('hourly_rate', $project->hourly_rate ?? '0.00')" />
+            class="mt-1 block w-full" :value="old('hourly_rate', $project->hourly_rate ?? '')" />
+        <p class="mt-1 text-xs text-gray-500">{{ __('Leave blank to use the client\'s rate, then the system default.') }}</p>
         <x-input-error :messages="$errors->get('hourly_rate')" class="mt-2" />
     </div>
 </div>

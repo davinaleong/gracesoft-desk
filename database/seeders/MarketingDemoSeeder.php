@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Client;
 use App\Models\PaymentMethod;
 use App\Models\Project;
 use App\Models\ProjectStage;
@@ -53,6 +54,7 @@ class MarketingDemoSeeder extends Seeder
         $methodsBySlug = $this->seedPaymentMethods();
         $accountsByCode = $this->seedAccounts();
         $projectsByCode = $this->seedProjects();
+        $this->seedClients($projectsByCode);
 
         $this->seedTimeEntries($projectsByCode, $stagesByName);
         $this->seedTransactions($projectsByCode, $categoriesBySlug, $methodsBySlug, $accountsByCode);
@@ -272,6 +274,56 @@ class MarketingDemoSeeder extends Seeder
         }
 
         return $byCode;
+    }
+
+    /**
+     * Seed demo clients and link each billable demo project to one.
+     *
+     * @param  array<string, Project>  $projectsByCode
+     */
+    private function seedClients(array $projectsByCode): void
+    {
+        $clients = [
+            [
+                'attributes' => [
+                    'name' => 'Northwind Retail Pte Ltd',
+                    'billing_email' => 'accounts@northwind.example',
+                    'address' => "88 Market Street\n#12-01\nSingapore 048948",
+                    'tax_id' => '201812345K',
+                    'currency' => 'SGD',
+                    'default_hourly_rate' => 140.00,
+                    'status' => 'active',
+                    'notes' => 'Demo client. Net 30 payment terms.',
+                ],
+                'projects' => ['DEMO-HQX', 'DEMO-CRM'],
+            ],
+            [
+                'attributes' => [
+                    'name' => 'Brightline Media Group',
+                    'billing_email' => 'finance@brightline.example',
+                    'address' => "2 Science Park Drive\nSingapore 118222",
+                    'tax_id' => null,
+                    'currency' => 'SGD',
+                    'default_hourly_rate' => 120.00,
+                    'status' => 'active',
+                    'notes' => 'Demo client. Campaign analytics retainer prospect.',
+                ],
+                'projects' => ['DEMO-LAUNCH'],
+            ],
+        ];
+
+        foreach ($clients as $clientData) {
+            $client = Client::query()->updateOrCreate(
+                ['name' => $clientData['attributes']['name']],
+                $clientData['attributes'],
+            );
+
+            foreach ($clientData['projects'] as $projectCode) {
+                if (isset($projectsByCode[$projectCode])) {
+                    $projectsByCode[$projectCode]->update(['client_id' => $client->id]);
+                }
+            }
+        }
     }
 
     /**

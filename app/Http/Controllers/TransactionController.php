@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreTransactionRequest;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Models\Account;
+use App\Models\Client;
 use App\Models\Document;
 use App\Models\PaymentMethod;
 use App\Models\Project;
@@ -39,7 +40,8 @@ class TransactionController extends Controller
             'accounts' => Account::query()->orderBy('name')->get(),
             'categories' => TransactionCategory::query()->orderBy('name')->get(),
             'paymentMethods' => PaymentMethod::query()->orderBy('name')->get(),
-            'projects' => Project::query()->orderBy('name')->get(),
+            'projects' => Project::query()->with('client')->orderBy('name')->get(),
+            'clients' => Client::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -64,7 +66,7 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction): View
     {
-        $transaction->load(['account', 'category', 'paymentMethod', 'project', 'documents']);
+        $transaction->load(['account', 'category', 'paymentMethod', 'project', 'client', 'documents']);
 
         $unlinkedDocuments = Document::query()->whereNull('documentable_id')->orderBy('name')->get();
 
@@ -79,14 +81,15 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction): View
     {
-        $transaction->load(['account', 'category', 'paymentMethod', 'project']);
+        $transaction->load(['account', 'category', 'paymentMethod', 'project', 'client']);
 
         return view('transactions.edit', [
             'transaction' => $transaction,
             'accounts' => Account::query()->orderBy('name')->get(),
             'categories' => TransactionCategory::query()->orderBy('name')->get(),
             'paymentMethods' => PaymentMethod::query()->orderBy('name')->get(),
-            'projects' => Project::query()->orderBy('name')->get(),
+            'projects' => Project::query()->with('client')->orderBy('name')->get(),
+            'clients' => Client::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -130,12 +133,16 @@ class TransactionController extends Controller
         $payload['project_id'] = isset($payload['project_uuid'])
             ? Project::query()->where('uuid', (string) $payload['project_uuid'])->value('id')
             : null;
+        $payload['client_id'] = isset($payload['client_uuid'])
+            ? Client::query()->where('uuid', (string) $payload['client_uuid'])->value('id')
+            : ($payload['project_id'] ? Project::query()->whereKey($payload['project_id'])->value('client_id') : null);
 
         unset(
             $payload['account_uuid'],
             $payload['transaction_category_uuid'],
             $payload['payment_method_uuid'],
-            $payload['project_uuid']
+            $payload['project_uuid'],
+            $payload['client_uuid']
         );
 
         return $payload;

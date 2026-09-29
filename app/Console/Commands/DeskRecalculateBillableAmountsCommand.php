@@ -4,16 +4,17 @@ namespace App\Console\Commands;
 
 use App\Models\Project;
 use App\Models\TimeEntry;
+use App\Services\BillableRateResolver;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 #[Signature('desk:recalculate-billable-amounts')]
-#[Description('One-time pass: recalculate billable_amount on all time entries using each project\'s current hourly rate')]
+#[Description('Recalculate billable_amount on all time entries using each project\'s resolved rate (project, then client, then system default)')]
 class DeskRecalculateBillableAmountsCommand extends Command
 {
-    public function handle(): int
+    public function handle(BillableRateResolver $rateResolver): int
     {
         $count = TimeEntry::withTrashed()->count();
 
@@ -25,8 +26,8 @@ class DeskRecalculateBillableAmountsCommand extends Command
 
         $this->info("Recalculating billable amounts for {$count} time entry/entries...");
 
-        Project::query()->each(function (Project $project): void {
-            $hourlyRate = (float) $project->hourly_rate;
+        Project::withTrashed()->each(function (Project $project) use ($rateResolver): void {
+            $hourlyRate = $rateResolver->forProject($project);
 
             // Non-billable entries → always 0
             DB::table('time_entries')

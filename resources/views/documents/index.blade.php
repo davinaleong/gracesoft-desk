@@ -95,6 +95,12 @@
                                                     {{ __('Time Entry') }}
                                                     {{ $document->documentable->entry_date->format('d M Y') }}
                                                 </a>
+                                            @elseif ($document->documentable instanceof \App\Models\Client)
+                                                <a href="{{ route('clients.show', $document->documentable) }}"
+                                                    class="text-blue-600 hover:text-blue-800">
+                                                    {{ $document->documentable->client_code }} —
+                                                    {{ $document->documentable->name }}
+                                                </a>
                                             @else
                                                 &mdash;
                                             @endif

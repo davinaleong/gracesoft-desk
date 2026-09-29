@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasPublicUuid;
+use App\Services\BillableRateResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -92,7 +93,7 @@ class TimeEntry extends Model
             return;
         }
 
-        $hourlyRate = (float) Project::query()->where('id', $entry->project_id)->value('hourly_rate');
+        $hourlyRate = app(BillableRateResolver::class)->forProjectId($entry->project_id);
 
         if ($hourlyRate <= 0.0) {
             $entry->billable_amount = 0;

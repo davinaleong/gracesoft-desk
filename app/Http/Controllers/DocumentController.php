@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AttachDocumentRequest;
 use App\Http\Requests\StoreDocumentRequest;
 use App\Http\Requests\UpdateDocumentRequest;
+use App\Models\Client;
 use App\Models\Document;
 use App\Models\Project;
 use App\Models\TimeEntry;
@@ -94,6 +95,12 @@ class DocumentController extends Controller
                 ->with('status', 'document-uploaded');
         }
 
+        if ($redirectBack === 'client' && $documentable instanceof Client) {
+            return redirect()
+                ->route('clients.show', $documentable)
+                ->with('status', 'document-uploaded');
+        }
+
         return redirect()
             ->route('documents.index')
             ->with('status', 'document-uploaded');
@@ -162,6 +169,12 @@ class DocumentController extends Controller
                 ->with('status', 'document-deleted');
         }
 
+        if ($redirectBack === 'client' && $documentable instanceof Client) {
+            return redirect()
+                ->route('clients.show', $documentable)
+                ->with('status', 'document-deleted');
+        }
+
         return redirect()
             ->route('documents.index')
             ->with('status', 'document-deleted');
@@ -203,6 +216,12 @@ class DocumentController extends Controller
                 ->with('status', 'document-attached');
         }
 
+        if ($redirectBack === 'client' && $documentable instanceof Client) {
+            return redirect()
+                ->route('clients.show', $documentable)
+                ->with('status', 'document-attached');
+        }
+
         return redirect()
             ->route('documents.index')
             ->with('status', 'document-attached');
@@ -214,6 +233,7 @@ class DocumentController extends Controller
             'transaction' => Transaction::query()->where('uuid', $uuid)->first(),
             'project' => Project::query()->where('uuid', $uuid)->first(),
             'time-entry' => TimeEntry::query()->where('uuid', $uuid)->first(),
+            'client' => Client::query()->where('uuid', $uuid)->first(),
             default => null,
         };
     }

@@ -29,6 +29,7 @@ class UpdateTransactionRequest extends FormRequest
             'transaction_category_uuid' => ['nullable', 'uuid', 'exists:transaction_categories,uuid'],
             'payment_method_uuid' => ['nullable', 'uuid', 'exists:payment_methods,uuid'],
             'project_uuid' => ['nullable', 'uuid', 'exists:projects,uuid'],
+            'client_uuid' => ['nullable', 'uuid', 'exists:clients,uuid'],
             'type' => ['required', 'in:income,expense,transfer'],
             'direction' => ['required', 'in:in,out'],
             'status' => ['required', 'in:pending,completed,void'],

@@ -26,6 +26,7 @@ class Project extends Model
     }
 
     protected $fillable = [
+        'client_id',
         'code',
         'name',
         'status',
@@ -53,6 +54,11 @@ class Project extends Model
             'github_webhook_id' => 'integer',
             'github_webhook_secret' => 'encrypted',
         ];
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function githubConnection(): BelongsTo

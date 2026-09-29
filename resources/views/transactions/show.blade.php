@@ -47,6 +47,23 @@
                     </div>
 
                     <div>
+                        <p class="text-xs text-gray-500 uppercase">{{ __('Project / Client') }}</p>
+                        <p class="text-base">
+                            @if ($transaction->project)
+                                <a href="{{ route('projects.show', $transaction->project) }}" class="text-blue-600 hover:text-blue-800">{{ $transaction->project->code }}</a>
+                            @else
+                                —
+                            @endif
+                            /
+                            @if ($transaction->client)
+                                <a href="{{ route('clients.show', $transaction->client) }}" class="text-blue-600 hover:text-blue-800">{{ $transaction->client->name }}</a>
+                            @else
+                                —
+                            @endif
+                        </p>
+                    </div>
+
+                    <div>
                         <p class="text-xs text-gray-500 uppercase">{{ __('Amount / GST / Net') }}</p>
                         <p class="text-base">
                             @deskMoney((float) $transaction->amount) /

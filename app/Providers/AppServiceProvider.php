@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Contracts\CommitSummarizer;
+use App\Models\Client;
 use App\Models\Project;
 use App\Models\SystemSetting;
 use App\Models\TimeEntry;
@@ -63,6 +64,7 @@ class AppServiceProvider extends ServiceProvider
             // Ignore early boot/migration states where settings table is not available yet.
         }
 
+        Client::observe(AuditableObserver::class);
         Project::observe(AuditableObserver::class);
         TimeEntry::observe(AuditableObserver::class);
         Transaction::observe(AuditableObserver::class);

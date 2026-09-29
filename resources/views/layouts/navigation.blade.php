@@ -19,6 +19,7 @@
                 <h2 class="text-xs font-bold uppercase tracking-wide text-indigo-300">{{ __('Operations') }}</h2>
                 <div class="space-y-1 text-sm">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">{{ __('Dashboard') }}</x-nav-link>
+                    <x-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">{{ __('Clients') }}</x-nav-link>
                     <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">{{ __('Projects') }}</x-nav-link>
                     <x-nav-link :href="route('time-entries.index')" :active="request()->routeIs('time-entries.*')">{{ __('Time Entries') }}</x-nav-link>
                     <x-nav-link :href="route('transactions.index')" :active="request()->routeIs('transactions.*')">{{ __('Transactions') }}</x-nav-link>
@@ -55,6 +56,7 @@
         class="hidden border-b border-indigo-400 bg-indigo-700 px-4 pb-4 pt-2 text-white lg:hidden">
         <div class="space-y-1 text-sm">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">{{ __('Dashboard') }}</x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('clients.index')" :active="request()->routeIs('clients.*')">{{ __('Clients') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">{{ __('Projects') }}</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('time-entries.index')"
                 :active="request()->routeIs('time-entries.*')">{{ __('Time Entries') }}</x-responsive-nav-link>

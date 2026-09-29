@@ -5,22 +5,25 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class AttachDocumentRequest extends FormRequest
+class ImportClientsCsvRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
     public function authorize(): bool
     {
         return true;
     }
 
     /**
+     * Get the validation rules that apply to the request.
+     *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'documentable_type' => ['required', 'string', 'in:transaction,project,time-entry,client'],
-            'documentable_uuid' => ['required', 'string', 'uuid'],
-            'redirect_back' => ['nullable', 'string', 'in:transaction,project,time-entry,client'],
+            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:2048'],
         ];
     }
 }

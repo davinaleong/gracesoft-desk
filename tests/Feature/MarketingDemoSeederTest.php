@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Account;
+use App\Models\Client;
 use App\Models\Project;
 use App\Models\TimeEntry;
 use App\Models\Transaction;
@@ -14,6 +15,8 @@ test('marketing demo seeder seeds realistic linked and repeatable data', functio
 
     expect(User::count())->toBe(1);
     expect(Project::where('code', 'like', 'DEMO-%')->count())->toBe(5);
+    expect(Client::count())->toBe(2);
+    expect(Project::where('code', 'like', 'DEMO-%')->whereNotNull('client_id')->count())->toBe(3);
     expect(TimeEntry::where('notes', 'like', 'Demo Seed:%')->count())->toBeGreaterThan(40);
     expect(Transaction::where('transaction_code', 'like', 'DEMO-TRX-%')->count())->toBe(12);
 
@@ -36,4 +39,5 @@ test('marketing demo seeder seeds realistic linked and repeatable data', functio
 
     expect(TimeEntry::where('notes', 'like', 'Demo Seed:%')->count())->toBe($demoEntryCount);
     expect(Transaction::where('transaction_code', 'like', 'DEMO-TRX-%')->count())->toBe($demoTransactionCount);
+    expect(Client::count())->toBe(2);
 });

@@ -41,13 +41,31 @@
                     </div>
 
                     <div>
+                        <p class="text-xs text-gray-500 uppercase">{{ __('Client') }}</p>
+                        <p class="text-base">
+                            @if ($project->client)
+                                <a href="{{ route('clients.show', $project->client) }}" class="text-blue-600 hover:text-blue-800">
+                                    {{ $project->client->client_code }} — {{ $project->client->name }}
+                                </a>
+                            @else
+                                —
+                            @endif
+                        </p>
+                    </div>
+
+                    <div>
                         <p class="text-xs text-gray-500 uppercase">{{ __('Billable') }}</p>
                         <p class="text-base">{{ $project->is_billable ? __('Yes') : __('No') }}</p>
                     </div>
 
                     <div>
                         <p class="text-xs text-gray-500 uppercase">{{ __('Hourly Rate') }}</p>
-                        <p class="text-base">@deskMoney((float) ($project->hourly_rate ?? 0))</p>
+                        <p class="text-base">
+                            @deskMoney(app(\App\Services\BillableRateResolver::class)->forProject($project))
+                            @if ((float) $project->hourly_rate <= 0)
+                                <span class="text-xs text-gray-500">{{ $project->client && (float) $project->client->default_hourly_rate > 0 ? __('(from client)') : __('(system default)') }}</span>
+                            @endif
+                        </p>
                     </div>
 
                     <div>

@@ -25,6 +25,7 @@ class Transaction extends Model
         'transaction_category_id',
         'payment_method_id',
         'project_id',
+        'client_id',
         'type',
         'direction',
         'status',
@@ -126,6 +127,11 @@ class Transaction extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 
     public function scopeWithinDateRange(Builder $query, string $fromDate, string $toDate): Builder
