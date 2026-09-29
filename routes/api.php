@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Bot\FinanceController;
 use App\Http\Controllers\Api\Bot\InvoicesController;
 use App\Http\Controllers\Api\Bot\ProjectsController;
 use App\Http\Controllers\Api\Bot\TimeEntriesController;
+use App\Http\Controllers\Api\Bot\TimesheetController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +17,5 @@ Route::prefix('bot')->middleware('auth:sanctum')->group(function (): void {
     Route::get('/time-entries/summary', [TimeEntriesController::class, 'summary']);
     Route::get('/finance/summary', [FinanceController::class, 'summary']);
     Route::get('/invoices/summary', [InvoicesController::class, 'summary']);
+    Route::get('/timesheet/pending', [TimesheetController::class, 'pending']);
 });

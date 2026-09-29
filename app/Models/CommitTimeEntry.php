@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Casts\UtcDateTime;
 use App\Models\Concerns\HasPublicUuid;
 use Database\Factories\CommitTimeEntryFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,12 +47,21 @@ class CommitTimeEntry extends Model
     protected function casts(): array
     {
         return [
-            'committed_at' => 'datetime',
+            'committed_at' => UtcDateTime::class,
             'additions' => 'integer',
             'deletions' => 'integer',
             'changed_files' => 'integer',
             'from_large_batch' => 'boolean',
         ];
+    }
+
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_DISMISSED = 'ignored';
+
+    public function scopePending(Builder $query): void
+    {
+        $query->where('status', self::STATUS_PENDING);
     }
 
     public function project(): BelongsTo

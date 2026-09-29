@@ -2,6 +2,7 @@
 
 use App\Models\Account;
 use App\Models\Client;
+use App\Models\CommitTimeEntry;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\TimeEntry;
@@ -44,5 +45,6 @@ test('marketing demo seeder seeds realistic linked and repeatable data', functio
     expect(Transaction::where('transaction_code', 'like', 'DEMO-TRX-%')->count())->toBe($demoTransactionCount);
     expect(Client::count())->toBe(2);
     expect(Invoice::query()->count())->toBe(3);
+    expect(CommitTimeEntry::query()->where('status', 'pending')->count())->toBe(5);
     expect(Transaction::query()->whereNotNull('invoice_id')->count())->toBe(1);
 });

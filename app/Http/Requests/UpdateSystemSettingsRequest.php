@@ -35,6 +35,7 @@ class UpdateSystemSettingsRequest extends FormRequest
             'gst_rate' => ['sometimes', 'required', 'numeric', 'min:0', 'max:100', 'decimal:0,2'],
             'payment_terms_days' => ['sometimes', 'required', 'integer', 'min:0', 'max:365'],
             'invoice_footer' => ['sometimes', 'nullable', 'string', 'max:2000'],
+            'weekly_hours_target' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:168'],
         ];
     }
 }

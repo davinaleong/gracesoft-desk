@@ -2,6 +2,7 @@
 
 use App\Models\SystemSetting;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 beforeEach(function (): void {
     config()->set('app.key', 'base64:'.base64_encode(str_repeat('a', 32)));
@@ -15,6 +16,7 @@ beforeEach(function (): void {
     config()->set('mail.default', 'smtp');
     config()->set('filesystems.disks.s3.bucket', 'desk-test');
     SystemSetting::upsertValues(['company_address' => '1 Raffles Place, Singapore']);
+    Cache::forever('desk.scheduler.last_run', now()->toIso8601String());
 
     $backupPath = storage_path('app/backups-test');
 
@@ -101,5 +103,13 @@ test('prelaunch check warns when invoicing is not ready to send', function () {
         ->expectsOutputToContain('Mail transport delivers real email')
         ->expectsOutputToContain('S3 bucket is configured')
         ->expectsOutputToContain('Company address is set for invoices')
+        ->expectsOutputToContain('warning(s)');
+});
+
+test('prelaunch check warns when the scheduler has not run recently', function () {
+    Cache::forever('desk.scheduler.last_run', now()->subHours(3)->toIso8601String());
+
+    $this->artisan('desk:prelaunch-check')
+        ->expectsOutputToContain('Scheduler ran in the last hour')
         ->expectsOutputToContain('warning(s)');
 });

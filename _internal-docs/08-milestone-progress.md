@@ -110,3 +110,45 @@ Adopted the proposal: **project rate → client default rate → system `default
 - [x] Bot endpoint needs a Sanctum token and lists overdue invoices
 
 The MySQL migration check caught a bug SQLite missed (`DISTINCT` combined with the relation's `ORDER BY`). It is fixed with `reorder()`.
+
+---
+
+## M3 · Weekly draft timesheet ✅
+
+**Completed:** 2026-09-29
+
+### Decisions
+
+- **`committed_at` is now stored in true UTC** through the new `App\Casts\UtcDateTime` cast. The plain `datetime` cast used to keep the pusher's wall-clock time and drop the `+08:00` offset. `2026_09_29_050001_convert_commit_timestamps_to_utc` rewrites existing rows, assuming they were in the system timezone (reversible).
+- **The week is Monday 00:00 to Sunday 23:59:59 in the system timezone.** Its bounds are converted to UTC before querying.
+- **Dismiss reuses the existing `ignored` status** (`CommitTimeEntry::STATUS_DISMISSED`); restore sets the commit back to `pending`.
+- **Suggestions:** the stage comes from the keyword matcher first, then the AI-suggested stage. The summary comes from the AI summary, falling back to the first line of the message. Duration defaults to 15 minutes.
+- **Converting** runs in one transaction with the selected commits row-locked. Each commit's minutes are snapped to 15. A repeat submit finds nothing pending and creates nothing; a partly stale selection is rejected as a whole. Commits squashed into a converted anchor are approved with it.
+- **Weekly target** is an optional `weekly_hours_target` system setting. The week total is the time entries dated in that week.
+
+### What was built
+
+| File | Notes |
+| --- | --- |
+| `app/Casts/UtcDateTime.php` + data migration | UTC storage for commit timestamps |
+| `app/Services/WeeklyTimesheetService.php` | Week bounds, pending / dismissed lists, day → project grouping, suggestions, logged minutes, transactional convert |
+| `app/Http/Controllers/TimesheetController.php` + `resources/views/timesheet/index.blade.php` | Week navigation, select all, per-commit stage / summary / minutes, "one entry per day & project", convert / squash / dismiss, dismissed list with restore, target progress bar |
+| `desk:timesheet-reminder` + `PendingCommitsReminderMail` | Emails the user only when there are pending commits. Scheduled Fridays 16:00 system time |
+| `routes/console.php` | Scheduler heartbeat every 5 minutes, used by `desk:prelaunch-check` ("Scheduler ran in the last hour") |
+| `GET /api/bot/timesheet/pending` | Total, this week, oldest, per-project counts and a link |
+| `MarketingDemoSeeder` | Five pending demo commits in the current week |
+| `phpunit.xml` | `memory_limit=512M`: the suite had outgrown PHP's 128 MB CLI default (web requests aren't affected) |
+
+### Tests
+
+`tests/Feature/WeeklyTimesheetTest.php` (16):
+
+- [x] A commit at Sunday 23:30 SGT lands in that week, not the next, and is stored in UTC
+- [x] Only pending commits appear (not converted, squashed or dismissed)
+- [x] Bulk convert: one entry per commit or per group, durations in multiples of 15, one DB transaction, one failure rolls back the batch
+- [x] A double-clicked convert never creates duplicate entries
+- [x] Dismissed commits are hidden and can be restored
+- [x] Squashing from the week view queues `SummarizeSquashedCommits` (`Queue::fake`); mixed-project squash is rejected
+- [x] The reminder sends only when the pending count is above zero; it is scheduled; the bot endpoint returns the count (401 without a token)
+- [x] In archive mode the page is viewable and every action is blocked
+- [x] The UTC data migration converts and reverts correctly

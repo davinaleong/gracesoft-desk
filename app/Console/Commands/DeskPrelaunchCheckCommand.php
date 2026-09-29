@@ -8,6 +8,8 @@ use Database\Seeders\AdminUserSeeder;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 
 #[Signature('desk:prelaunch-check {--seed-admin : Seed or update the production admin before checks} {--strict : Fail on any warning-grade check}')]
@@ -53,6 +55,11 @@ class DeskPrelaunchCheckCommand extends Command
             $this->check(
                 'Company address is set for invoices',
                 filled(app(InvoiceSettings::class)->companyAddress()),
+                warning: true
+            ),
+            $this->check(
+                'Scheduler ran in the last hour (cron: schedule:run)',
+                $this->schedulerRanRecently(),
                 warning: true
             ),
             $this->check('Admin account exists', $this->adminUserExists()),
@@ -118,6 +125,13 @@ class DeskPrelaunchCheckCommand extends Command
     {
         $this->callSilent('db:seed', ['--class' => AdminUserSeeder::class, '--no-interaction' => true]);
         $this->info('Admin account has been seeded/updated.');
+    }
+
+    private function schedulerRanRecently(): bool
+    {
+        $lastRun = Cache::get('desk.scheduler.last_run');
+
+        return is_string($lastRun) && Carbon::parse($lastRun)->greaterThan(now()->subHour());
     }
 
     private function adminUserExists(): bool

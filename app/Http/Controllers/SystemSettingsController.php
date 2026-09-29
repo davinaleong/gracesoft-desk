@@ -27,6 +27,7 @@ class SystemSettingsController extends Controller
                 'gst_rate' => $settings->get('gst_rate', InvoiceSettings::DEFAULT_GST_RATE),
                 'payment_terms_days' => $settings->get('payment_terms_days', InvoiceSettings::DEFAULT_PAYMENT_TERMS_DAYS),
                 'invoice_footer' => $settings->get('invoice_footer', ''),
+                'weekly_hours_target' => $settings->get('weekly_hours_target', ''),
                 'archive_mode' => in_array(strtolower((string) $settings->get('archive_mode', '0')), ['1', 'true', 'yes', 'on'], true),
             ],
         ]);

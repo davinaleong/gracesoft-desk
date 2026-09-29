@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Client;
+use App\Models\CommitTimeEntry;
 use App\Models\Invoice;
 use App\Models\PaymentMethod;
 use App\Models\Project;
@@ -59,6 +60,7 @@ class MarketingDemoSeeder extends Seeder
         $this->seedClients($projectsByCode);
 
         $this->seedTimeEntries($projectsByCode, $stagesByName);
+        $this->seedPendingCommits($projectsByCode);
         $this->seedTransactions($projectsByCode, $categoriesBySlug, $methodsBySlug, $accountsByCode);
         $this->seedInvoices($accountsByCode);
         $this->syncAccountBalances();
@@ -277,6 +279,42 @@ class MarketingDemoSeeder extends Seeder
         }
 
         return $byCode;
+    }
+
+    /**
+     * A handful of this week's pending commits so the weekly timesheet has something to show.
+     *
+     * @param  array<string, Project>  $projectsByCode
+     */
+    private function seedPendingCommits(array $projectsByCode): void
+    {
+        CommitTimeEntry::query()->where('message', 'like', 'Demo Seed:%')->delete();
+
+        $monday = CarbonImmutable::now()->startOfWeek();
+        $commits = [
+            ['DEMO-HQX', 0, '09:40', 'feat: KPI tiles for executive dashboard'],
+            ['DEMO-HQX', 0, '14:05', 'fix: cash flow chart rounding'],
+            ['DEMO-HQX', 1, '10:20', 'test: cover finance cockpit filters'],
+            ['DEMO-CRM', 1, '16:45', 'feat: lead scoring webhook handler'],
+            ['DEMO-CRM', 2, '11:10', 'chore: tidy CRM sync logging'],
+        ];
+
+        foreach ($commits as $index => [$code, $dayOffset, $time, $message]) {
+            if (! isset($projectsByCode[$code])) {
+                continue;
+            }
+
+            CommitTimeEntry::query()->create([
+                'project_id' => $projectsByCode[$code]->id,
+                'sha' => sha1('demo-seed-commit-'.$index),
+                'branch' => 'main',
+                'author_name' => 'Demo Developer',
+                'committed_at' => $monday->addDays($dayOffset)->setTimeFromTimeString($time),
+                'message' => 'Demo Seed: '.$message,
+                'changed_files' => 3,
+                'status' => 'pending',
+            ]);
+        }
     }
 
     /**

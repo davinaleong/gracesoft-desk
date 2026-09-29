@@ -60,6 +60,13 @@
                                     required />
                                 <x-input-error :messages="$errors->get('default_hourly_rate')" class="mt-2" />
                             </div>
+
+                            <div>
+                                <x-input-label for="weekly_hours_target" :value="__('Weekly Hours Target (optional)')" />
+                                <x-text-input id="weekly_hours_target" name="weekly_hours_target" type="number" min="0" max="168" step="0.5"
+                                    class="mt-1 block w-full" :value="old('weekly_hours_target', $settings['weekly_hours_target'])" />
+                                <x-input-error :messages="$errors->get('weekly_hours_target')" class="mt-2" />
+                            </div>
                         </div>
 
                         <div class="border-t border-gray-200 pt-4 space-y-4">

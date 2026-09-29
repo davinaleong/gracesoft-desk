@@ -19,6 +19,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\TimeEntryController;
 use App\Http\Controllers\TimeEntryImportController;
+use App\Http\Controllers\TimesheetController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionImportController;
 use App\Http\Controllers\VendorController;
@@ -49,6 +50,12 @@ Route::middleware(['auth', 'password.changed', 'twofactor.configured', 'archive.
     Route::post('/clients/import/preview', [ClientImportController::class, 'preview'])->name('clients.import.preview');
     Route::post('/clients/import/commit', [ClientImportController::class, 'commit'])->name('clients.import.commit');
     Route::resource('clients', ClientController::class)->except('destroy');
+
+    Route::get('/timesheet', [TimesheetController::class, 'index'])->name('timesheet.index');
+    Route::post('/timesheet/convert', [TimesheetController::class, 'convert'])->name('timesheet.convert');
+    Route::post('/timesheet/squash', [TimesheetController::class, 'squash'])->name('timesheet.squash');
+    Route::post('/timesheet/dismiss', [TimesheetController::class, 'dismiss'])->name('timesheet.dismiss');
+    Route::post('/timesheet/restore', [TimesheetController::class, 'restore'])->name('timesheet.restore');
 
     Route::resource('invoices', InvoiceController::class);
     Route::post('/invoices/{invoice}/issue', [InvoiceController::class, 'issue'])->name('invoices.issue');
